@@ -22,11 +22,13 @@ interface CommodityData {
 
 interface Globe3DClientProps {
   markers: CommodityData[]
+  showCities?: boolean
 }
 
-export default function Globe3DClient({ markers }: Globe3DClientProps) {
+export default function Globe3DClient({ markers, showCities = true }: Globe3DClientProps) {
   const globeEl = useRef<HTMLDivElement>(null)
   const globeRef = useRef<any>(null)
+  const currentAltitudeRef = useRef<number>(2.5)
 
   useEffect(() => {
     if (!globeEl.current) return
@@ -131,26 +133,26 @@ export default function Globe3DClient({ markers }: Globe3DClientProps) {
         const mediumCities = allCities.filter((c: any) => c.population > 1000000) // 1M+
         const allMajor = allCities.filter((c: any) => c.population > 500000) // 500K+
 
-        // Update cities visibility based on zoom level
-        globe.onZoom((coords: any) => {
-          const altitude = coords.altitude
+        // Store city update function
+        const updateCityDisplay = (altitude: number) => {
+          // Check if cities should be shown at all
+          if (!showCities) {
+            globe.htmlElementsData([])
+            return
+          }
+
           let citiesToShow: any[] = []
 
           // Progressive city display based on zoom
           if (altitude < 0.5) {
-            // Very close zoom - show all major cities (500k+)
             citiesToShow = allMajor
           } else if (altitude < 0.8) {
-            // Close zoom - show medium cities (1M+)
             citiesToShow = mediumCities
           } else if (altitude < 1.2) {
-            // Medium zoom - show major cities (2M+)
             citiesToShow = majorCities
           } else if (altitude < 1.5) {
-            // Far zoom - only mega cities and capitals
             citiesToShow = megaCities
           } else {
-            // Very far - no cities
             citiesToShow = []
           }
 
@@ -183,7 +185,16 @@ export default function Globe3DClient({ markers }: Globe3DClientProps) {
           } else {
             globe.htmlElementsData([])
           }
+        }
+
+        // Update cities visibility based on zoom level
+        globe.onZoom((coords: any) => {
+          currentAltitudeRef.current = coords.altitude
+          updateCityDisplay(coords.altitude)
         })
+
+        // Store update function on globe for external access
+        globeRef.current.updateCityDisplay = updateCityDisplay
       })
 
     // Convert markers to globe points
@@ -263,6 +274,13 @@ export default function Globe3DClient({ markers }: Globe3DClientProps) {
       }
     }
   }, [markers])
+
+  // Handle showCities toggle
+  useEffect(() => {
+    if (globeRef.current && globeRef.current.updateCityDisplay) {
+      globeRef.current.updateCityDisplay(currentAltitudeRef.current)
+    }
+  }, [showCities])
 
   const getCommodityColor = (type: string) => {
     const colors: Record<string, string> = {

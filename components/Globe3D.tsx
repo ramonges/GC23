@@ -23,6 +23,7 @@ interface CommodityData {
 
 interface Globe3DProps {
   markers: CommodityData[]
+  showCities?: boolean
 }
 
 const Globe3D = dynamic(() => import('./Globe3DClient'), {

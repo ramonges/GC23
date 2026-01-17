@@ -57,6 +57,7 @@ export default function EarthMap() {
   const [showStorage, setShowStorage] = useState(false)
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
   const [showCargoes, setShowCargoes] = useState(false)
+  const [showCities, setShowCities] = useState(true) // Cities visible by default
   const [advancedFilters, setAdvancedFilters] = useState({
     apiRange: '',
     sulfurRange: '',
@@ -349,6 +350,19 @@ export default function EarthMap() {
             </label>
           </div>
 
+          {/* Cities Toggle */}
+          <div className="flex items-center">
+            <label className="flex items-center gap-2 text-white cursor-pointer hover:text-blue-400 transition-colors">
+              <input
+                type="checkbox"
+                checked={showCities}
+                onChange={(e) => setShowCities(e.target.checked)}
+                className="w-5 h-5 rounded border-gray-600 text-blue-500 focus:ring-blue-500"
+              />
+              <span className="font-semibold">Cities</span>
+            </label>
+          </div>
+
           {/* Advanced Filters Toggle */}
           <div className="flex items-center">
             <label className="flex items-center gap-2 text-white cursor-pointer hover:text-blue-400 transition-colors">
@@ -432,7 +446,7 @@ export default function EarthMap() {
 
       {/* 3D Globe */}
       <div className="flex-1 relative">
-        <Globe3D markers={markers} />
+        <Globe3D markers={markers} showCities={showCities} />
 
         {/* Results Counter */}
         <div className="absolute bottom-6 right-6 bg-black bg-opacity-90 border border-gray-600 rounded-xl px-6 py-3 z-10 shadow-2xl backdrop-blur-sm">
