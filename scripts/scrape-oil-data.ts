@@ -1661,6 +1661,741 @@ const majorOilFields = [
     api_gravity: "14-18",
     sulfur_content: "2.5%",
     type: "Heavy Oil"
+  },
+  // === ADDITIONAL IRAQ FIELDS ===
+  {
+    name: "Zubair Field",
+    country: "Iraq",
+    operator: "Eni/Kogas/Occidental",
+    latitude: 30.4,
+    longitude: 47.7,
+    production_bpd: 475000,
+    api_gravity: "30-34",
+    sulfur_content: "3.0%",
+    type: "Conventional"
+  },
+  {
+    name: "Badra Field",
+    country: "Iraq",
+    operator: "Gazprom Neft",
+    latitude: 32.6,
+    longitude: 46.0,
+    production_bpd: 170000,
+    api_gravity: "27",
+    sulfur_content: "3.5%",
+    type: "Conventional"
+  },
+  {
+    name: "Gharraf Field",
+    country: "Iraq",
+    operator: "Petronas",
+    latitude: 31.0,
+    longitude: 46.3,
+    production_bpd: 230000,
+    api_gravity: "31",
+    sulfur_content: "2.8%",
+    type: "Conventional"
+  },
+  // === LIBYA FIELDS ===
+  {
+    name: "Sharara Field",
+    country: "Libya",
+    operator: "NOC/Repsol",
+    latitude: 27.8,
+    longitude: 12.5,
+    production_bpd: 315000,
+    api_gravity: "44",
+    sulfur_content: "0.1%",
+    type: "Conventional"
+  },
+  {
+    name: "Waha Field",
+    country: "Libya",
+    operator: "NOC/ConocoPhillips",
+    latitude: 28.8,
+    longitude: 21.5,
+    production_bpd: 350000,
+    api_gravity: "42",
+    sulfur_content: "0.2%",
+    type: "Conventional"
+  },
+  {
+    name: "Sarir Field",
+    country: "Libya",
+    operator: "NOC/Agoco",
+    latitude: 27.5,
+    longitude: 22.5,
+    production_bpd: 200000,
+    api_gravity: "38",
+    sulfur_content: "0.4%",
+    type: "Conventional"
+  },
+  {
+    name: "Messla Field",
+    country: "Libya",
+    operator: "NOC/Agoco",
+    latitude: 28.2,
+    longitude: 22.0,
+    production_bpd: 240000,
+    api_gravity: "40",
+    sulfur_content: "0.3%",
+    type: "Conventional"
+  },
+  {
+    name: "El Feel Field",
+    country: "Libya",
+    operator: "NOC/Eni",
+    latitude: 28.5,
+    longitude: 13.2,
+    production_bpd: 90000,
+    api_gravity: "43",
+    sulfur_content: "0.1%",
+    type: "Conventional"
+  },
+  // === ADDITIONAL VENEZUELA FIELDS ===
+  {
+    name: "Lago de Maracaibo",
+    country: "Venezuela",
+    operator: "PDVSA",
+    latitude: 10.0,
+    longitude: -71.6,
+    production_bpd: 600000,
+    api_gravity: "22-26",
+    sulfur_content: "1.5%",
+    type: "Offshore"
+  },
+  {
+    name: "Furrial Field",
+    country: "Venezuela",
+    operator: "PDVSA",
+    latitude: 9.6,
+    longitude: -63.3,
+    production_bpd: 200000,
+    api_gravity: "24",
+    sulfur_content: "1.0%",
+    type: "Conventional"
+  },
+  {
+    name: "Hamaca Project",
+    country: "Venezuela",
+    operator: "PDVSA/Chevron",
+    latitude: 8.7,
+    longitude: -63.8,
+    production_bpd: 180000,
+    api_gravity: "9",
+    sulfur_content: "3.8%",
+    type: "Extra Heavy Oil"
+  },
+  // === ADDITIONAL ANGOLA FIELDS ===
+  {
+    name: "CLOV Field",
+    country: "Angola",
+    operator: "Total",
+    latitude: -8.5,
+    longitude: 13.2,
+    production_bpd: 160000,
+    api_gravity: "31",
+    sulfur_content: "0.4%",
+    type: "Deepwater"
+  },
+  {
+    name: "Kizomba Field",
+    country: "Angola",
+    operator: "ExxonMobil/BP",
+    latitude: -7.5,
+    longitude: 12.8,
+    production_bpd: 250000,
+    api_gravity: "28",
+    sulfur_content: "0.4%",
+    type: "Deepwater"
+  },
+  {
+    name: "Greater Plutonio",
+    country: "Angola",
+    operator: "BP",
+    latitude: -7.8,
+    longitude: 12.5,
+    production_bpd: 240000,
+    api_gravity: "27",
+    sulfur_content: "0.5%",
+    type: "Deepwater"
+  },
+  {
+    name: "Cabinda Field",
+    country: "Angola",
+    operator: "Chevron",
+    latitude: -5.5,
+    longitude: 12.2,
+    production_bpd: 300000,
+    api_gravity: "32",
+    sulfur_content: "0.2%",
+    type: "Offshore"
+  },
+  // === ADDITIONAL UK FIELDS ===
+  {
+    name: "Buzzard Field",
+    country: "United Kingdom",
+    operator: "Nexen/CNOOC",
+    latitude: 57.8,
+    longitude: 0.2,
+    production_bpd: 180000,
+    api_gravity: "33",
+    sulfur_content: "0.4%",
+    type: "Offshore"
+  },
+  {
+    name: "Schiehallion Field",
+    country: "United Kingdom",
+    operator: "BP",
+    latitude: 60.4,
+    longitude: -4.0,
+    production_bpd: 130000,
+    api_gravity: "25",
+    sulfur_content: "0.5%",
+    type: "Offshore"
+  },
+  {
+    name: "Clair Field",
+    country: "United Kingdom",
+    operator: "BP",
+    latitude: 60.8,
+    longitude: -2.2,
+    production_bpd: 120000,
+    api_gravity: "29",
+    sulfur_content: "0.6%",
+    type: "Offshore"
+  },
+  // === AZERBAIJAN FIELDS ===
+  {
+    name: "Azeri-Chirag-Gunashli",
+    country: "Azerbaijan",
+    operator: "BP",
+    latitude: 40.1,
+    longitude: 50.4,
+    production_bpd: 650000,
+    api_gravity: "34-35",
+    sulfur_content: "0.15%",
+    type: "Offshore"
+  },
+  {
+    name: "Shah Deniz",
+    country: "Azerbaijan",
+    operator: "BP",
+    latitude: 39.9,
+    longitude: 50.2,
+    production_bpd: 50000,
+    api_gravity: "50",
+    sulfur_content: "0.1%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Baku Oil Fields",
+    country: "Azerbaijan",
+    operator: "SOCAR",
+    latitude: 40.4,
+    longitude: 50.0,
+    production_bpd: 80000,
+    api_gravity: "32",
+    sulfur_content: "0.4%",
+    type: "Onshore"
+  },
+  // === OMAN FIELDS ===
+  {
+    name: "Fahud Field",
+    country: "Oman",
+    operator: "PDO",
+    latitude: 22.3,
+    longitude: 56.5,
+    production_bpd: 100000,
+    api_gravity: "34",
+    sulfur_content: "0.8%",
+    type: "Conventional"
+  },
+  {
+    name: "Yibal Field",
+    country: "Oman",
+    operator: "PDO",
+    latitude: 21.8,
+    longitude: 57.5,
+    production_bpd: 85000,
+    api_gravity: "33",
+    sulfur_content: "0.9%",
+    type: "Conventional"
+  },
+  {
+    name: "Mukhaizna Field",
+    country: "Oman",
+    operator: "Occidental",
+    latitude: 19.5,
+    longitude: 56.0,
+    production_bpd: 150000,
+    api_gravity: "15",
+    sulfur_content: "2.0%",
+    type: "Heavy Oil"
+  },
+  {
+    name: "Nimr Field",
+    country: "Oman",
+    operator: "PDO",
+    latitude: 20.2,
+    longitude: 56.8,
+    production_bpd: 90000,
+    api_gravity: "23",
+    sulfur_content: "1.2%",
+    type: "Conventional"
+  },
+  // === ADDITIONAL UAE FIELDS ===
+  {
+    name: "Umm Shaif Field",
+    country: "UAE",
+    operator: "ADNOC",
+    latitude: 25.6,
+    longitude: 53.0,
+    production_bpd: 275000,
+    api_gravity: "37",
+    sulfur_content: "1.1%",
+    type: "Offshore"
+  },
+  {
+    name: "Asab Field",
+    country: "UAE",
+    operator: "ADNOC",
+    latitude: 24.5,
+    longitude: 53.7,
+    production_bpd: 120000,
+    api_gravity: "32",
+    sulfur_content: "1.8%",
+    type: "Onshore"
+  },
+  {
+    name: "Shah Gas Field",
+    country: "UAE",
+    operator: "ADNOC",
+    latitude: 24.0,
+    longitude: 53.9,
+    production_bpd: 30000,
+    api_gravity: "48",
+    sulfur_content: "High H2S",
+    type: "Gas Condensate"
+  },
+  // === ADDITIONAL KUWAIT FIELDS ===
+  {
+    name: "Sabriya Field",
+    country: "Kuwait",
+    operator: "Kuwait Oil Company",
+    latitude: 29.5,
+    longitude: 48.0,
+    production_bpd: 180000,
+    api_gravity: "32",
+    sulfur_content: "2.6%",
+    type: "Conventional"
+  },
+  {
+    name: "Minagish Field",
+    country: "Kuwait",
+    operator: "Kuwait Oil Company",
+    latitude: 29.0,
+    longitude: 47.4,
+    production_bpd: 150000,
+    api_gravity: "31",
+    sulfur_content: "2.7%",
+    type: "Conventional"
+  },
+  // === ADDITIONAL KAZAKHSTAN FIELDS ===
+  {
+    name: "Karachaganak Field",
+    country: "Kazakhstan",
+    operator: "Shell/Eni",
+    latitude: 51.2,
+    longitude: 53.0,
+    production_bpd: 250000,
+    api_gravity: "46",
+    sulfur_content: "High H2S",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Uzen Field",
+    country: "Kazakhstan",
+    operator: "KazMunayGas",
+    latitude: 43.9,
+    longitude: 54.2,
+    production_bpd: 160000,
+    api_gravity: "30",
+    sulfur_content: "1.8%",
+    type: "Conventional"
+  },
+  {
+    name: "Zhanazhol Field",
+    country: "Kazakhstan",
+    operator: "KazMunayGas",
+    latitude: 45.5,
+    longitude: 52.0,
+    production_bpd: 100000,
+    api_gravity: "42",
+    sulfur_content: "High H2S",
+    type: "Conventional"
+  },
+  // === ADDITIONAL MEXICO FIELDS ===
+  {
+    name: "Ku-Maloob-Zaap",
+    country: "Mexico",
+    operator: "Pemex",
+    latitude: 19.4,
+    longitude: -92.5,
+    production_bpd: 650000,
+    api_gravity: "22-26",
+    sulfur_content: "3.3%",
+    type: "Offshore"
+  },
+  {
+    name: "Ayatsil Field",
+    country: "Mexico",
+    operator: "Pemex",
+    latitude: 18.8,
+    longitude: -92.7,
+    production_bpd: 80000,
+    api_gravity: "12",
+    sulfur_content: "5.5%",
+    type: "Offshore"
+  },
+  {
+    name: "Tsimin-Xux Field",
+    country: "Mexico",
+    operator: "Pemex",
+    latitude: 19.6,
+    longitude: -92.2,
+    production_bpd: 50000,
+    api_gravity: "22",
+    sulfur_content: "3.8%",
+    type: "Offshore"
+  },
+  // === MALAYSIA FIELDS ===
+  {
+    name: "Tapis Field",
+    country: "Malaysia",
+    operator: "Petronas",
+    latitude: 3.2,
+    longitude: 105.0,
+    production_bpd: 90000,
+    api_gravity: "46",
+    sulfur_content: "0.03%",
+    type: "Offshore"
+  },
+  {
+    name: "Dulang Field",
+    country: "Malaysia",
+    operator: "Petronas",
+    latitude: 3.5,
+    longitude: 105.2,
+    production_bpd: 70000,
+    api_gravity: "41",
+    sulfur_content: "0.1%",
+    type: "Offshore"
+  },
+  {
+    name: "Miri Field",
+    country: "Malaysia",
+    operator: "Petronas",
+    latitude: 4.4,
+    longitude: 114.0,
+    production_bpd: 50000,
+    api_gravity: "36",
+    sulfur_content: "0.1%",
+    type: "Onshore"
+  },
+  {
+    name: "Kikeh Field",
+    country: "Malaysia",
+    operator: "Murphy Oil",
+    latitude: 5.5,
+    longitude: 117.0,
+    production_bpd: 55000,
+    api_gravity: "33",
+    sulfur_content: "0.1%",
+    type: "Deepwater"
+  },
+  // === QATAR FIELDS ===
+  {
+    name: "Dukhan Field",
+    country: "Qatar",
+    operator: "Qatar Petroleum",
+    latitude: 25.4,
+    longitude: 50.8,
+    production_bpd: 335000,
+    api_gravity: "41",
+    sulfur_content: "1.3%",
+    type: "Onshore"
+  },
+  {
+    name: "Al-Shaheen Field",
+    country: "Qatar",
+    operator: "TotalEnergies",
+    latitude: 25.9,
+    longitude: 51.7,
+    production_bpd: 300000,
+    api_gravity: "40",
+    sulfur_content: "1.5%",
+    type: "Offshore"
+  },
+  {
+    name: "Idd El-Shargi Field",
+    country: "Qatar",
+    operator: "Qatar Petroleum",
+    latitude: 25.7,
+    longitude: 51.6,
+    production_bpd: 80000,
+    api_gravity: "38",
+    sulfur_content: "1.4%",
+    type: "Offshore"
+  },
+  // === EGYPT FIELDS ===
+  {
+    name: "October Field",
+    country: "Egypt",
+    operator: "Eni",
+    latitude: 31.5,
+    longitude: 30.5,
+    production_bpd: 80000,
+    api_gravity: "32",
+    sulfur_content: "1.8%",
+    type: "Onshore"
+  },
+  {
+    name: "Belayim Field",
+    country: "Egypt",
+    operator: "EGPC/Petrobel",
+    latitude: 28.4,
+    longitude: 33.2,
+    production_bpd: 120000,
+    api_gravity: "27-31",
+    sulfur_content: "2.1%",
+    type: "Offshore"
+  },
+  {
+    name: "Gulf of Suez Fields",
+    country: "Egypt",
+    operator: "EGPC/Various",
+    latitude: 28.0,
+    longitude: 33.5,
+    production_bpd: 250000,
+    api_gravity: "30-33",
+    sulfur_content: "1.5%",
+    type: "Offshore"
+  },
+  {
+    name: "Zohr Gas Field",
+    country: "Egypt",
+    operator: "Eni",
+    latitude: 31.8,
+    longitude: 33.0,
+    production_bpd: 40000,
+    api_gravity: "50",
+    sulfur_content: "0.1%",
+    type: "Gas Condensate"
+  },
+  // === ADDITIONAL ARGENTINA FIELDS ===
+  {
+    name: "Neuquen Basin",
+    country: "Argentina",
+    operator: "YPF/Various",
+    latitude: -38.0,
+    longitude: -70.0,
+    production_bpd: 180000,
+    api_gravity: "35-40",
+    sulfur_content: "0.4%",
+    type: "Conventional"
+  },
+  {
+    name: "Cerro Dragon",
+    country: "Argentina",
+    operator: "Pan American Energy",
+    latitude: -45.8,
+    longitude: -67.5,
+    production_bpd: 50000,
+    api_gravity: "42",
+    sulfur_content: "0.3%",
+    type: "Conventional"
+  },
+  // === ECUADOR FIELDS ===
+  {
+    name: "Ishpingo-Tambococha-Tiputini",
+    country: "Ecuador",
+    operator: "Petroecuador",
+    latitude: -0.7,
+    longitude: -75.5,
+    production_bpd: 60000,
+    api_gravity: "14-18",
+    sulfur_content: "1.5%",
+    type: "Heavy Oil"
+  },
+  {
+    name: "Sacha Field",
+    country: "Ecuador",
+    operator: "Petroecuador",
+    latitude: -0.3,
+    longitude: -76.8,
+    production_bpd: 80000,
+    api_gravity: "18-23",
+    sulfur_content: "1.2%",
+    type: "Conventional"
+  },
+  {
+    name: "Shushufindi Field",
+    country: "Ecuador",
+    operator: "Petroecuador",
+    latitude: -0.2,
+    longitude: -76.6,
+    production_bpd: 75000,
+    api_gravity: "20-24",
+    sulfur_content: "1.0%",
+    type: "Conventional"
+  },
+  // === VIETNAM FIELDS ===
+  {
+    name: "Bach Ho Field",
+    country: "Vietnam",
+    operator: "Vietsovpetro",
+    latitude: 9.5,
+    longitude: 107.3,
+    production_bpd: 85000,
+    api_gravity: "39",
+    sulfur_content: "0.04%",
+    type: "Offshore"
+  },
+  {
+    name: "Rong Field",
+    country: "Vietnam",
+    operator: "Petronas",
+    latitude: 9.8,
+    longitude: 107.5,
+    production_bpd: 50000,
+    api_gravity: "41",
+    sulfur_content: "0.03%",
+    type: "Offshore"
+  },
+  {
+    name: "Rang Dong Field",
+    country: "Vietnam",
+    operator: "Petrovietnam",
+    latitude: 9.2,
+    longitude: 107.0,
+    production_bpd: 40000,
+    api_gravity: "38",
+    sulfur_content: "0.05%",
+    type: "Offshore"
+  },
+  {
+    name: "Su Tu Den Field",
+    country: "Vietnam",
+    operator: "Petrovietnam",
+    latitude: 9.7,
+    longitude: 107.4,
+    production_bpd: 45000,
+    api_gravity: "40",
+    sulfur_content: "0.04%",
+    type: "Offshore"
+  },
+  // === ADDITIONAL IRAN FIELDS ===
+  {
+    name: "South Azadegan",
+    country: "Iran",
+    operator: "NIOC",
+    latitude: 31.3,
+    longitude: 48.2,
+    production_bpd: 150000,
+    api_gravity: "19",
+    sulfur_content: "3.7%",
+    type: "Conventional"
+  },
+  {
+    name: "Yadavaran Field",
+    country: "Iran",
+    operator: "NIOC/Sinopec",
+    latitude: 31.0,
+    longitude: 48.0,
+    production_bpd: 115000,
+    api_gravity: "17-20",
+    sulfur_content: "3.9%",
+    type: "Conventional"
+  },
+  {
+    name: "Karanj Field",
+    country: "Iran",
+    operator: "NIOC",
+    latitude: 30.8,
+    longitude: 49.2,
+    production_bpd: 200000,
+    api_gravity: "30",
+    sulfur_content: "1.5%",
+    type: "Conventional"
+  },
+  // === ADDITIONAL INDONESIA FIELDS ===
+  {
+    name: "Mahakam Field",
+    country: "Indonesia",
+    operator: "Total",
+    latitude: -0.5,
+    longitude: 117.5,
+    production_bpd: 120000,
+    api_gravity: "35",
+    sulfur_content: "0.1%",
+    type: "Offshore"
+  },
+  {
+    name: "Cepu Field",
+    country: "Indonesia",
+    operator: "ExxonMobil",
+    latitude: -7.2,
+    longitude: 111.6,
+    production_bpd: 170000,
+    api_gravity: "32",
+    sulfur_content: "0.1%",
+    type: "Onshore"
+  },
+  {
+    name: "Attaka Field",
+    country: "Indonesia",
+    operator: "Total",
+    latitude: -0.3,
+    longitude: 117.4,
+    production_bpd: 50000,
+    api_gravity: "48",
+    sulfur_content: "0.05%",
+    type: "Offshore"
+  },
+  // === ADDITIONAL INDIA FIELDS ===
+  {
+    name: "Rajasthan Block",
+    country: "India",
+    operator: "Cairn India/Vedanta",
+    latitude: 27.5,
+    longitude: 71.5,
+    production_bpd: 175000,
+    api_gravity: "32-36",
+    sulfur_content: "0.2%",
+    type: "Onshore"
+  },
+  {
+    name: "Mumbai Offshore",
+    country: "India",
+    operator: "ONGC",
+    latitude: 19.5,
+    longitude: 71.5,
+    production_bpd: 220000,
+    api_gravity: "38-41",
+    sulfur_content: "0.2%",
+    type: "Offshore"
+  },
+  {
+    name: "Assam Oil Fields",
+    country: "India",
+    operator: "Oil India Limited",
+    latitude: 27.0,
+    longitude: 95.0,
+    production_bpd: 80000,
+    api_gravity: "34-37",
+    sulfur_content: "0.3%",
+    type: "Onshore"
   }
 ]
 
