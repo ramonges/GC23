@@ -68,11 +68,12 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     setLoading(true)
 
     try {
-      // Create auth user
+      // Create auth user with email confirmation disabled
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
+          emailRedirectTo: undefined,
           data: {
             first_name: firstName,
             last_name: lastName,
