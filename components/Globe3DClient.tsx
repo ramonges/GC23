@@ -31,9 +31,9 @@ export default function Globe3DClient({ markers }: Globe3DClientProps) {
   useEffect(() => {
     if (!globeEl.current) return
 
-    // Initialize Globe
+    // Initialize Globe with high-resolution textures
     const globe = new Globe(globeEl.current)
-      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
+      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg') // Higher res day texture
       .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
       .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
       .showAtmosphere(true)
@@ -51,19 +51,19 @@ export default function Globe3DClient({ markers }: Globe3DClientProps) {
     // Point of view
     globe.pointOfView({ altitude: 2.5 })
 
-    // Load country boundaries and labels
-    fetch('https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson')
+    // Load country boundaries and labels (using 50m for better detail)
+    fetch('https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_admin_0_countries.geojson')
       .then(res => res.json())
       .then(countries => {
-        // Add country polygons
+        // Add country polygons with better detail
         globe
           .polygonsData(countries.features)
           .polygonCapColor(() => 'rgba(255, 255, 255, 0.05)')
           .polygonSideColor(() => 'rgba(255, 255, 255, 0.02)')
-          .polygonStrokeColor(() => '#444')
+          .polygonStrokeColor(() => '#555')
           .polygonAltitude(0.01)
 
-        // Add country labels
+        // Add country labels - positioned above surface
         const countryLabels = countries.features.map((country: any) => {
           const coordinates = country.properties.LABEL_X && country.properties.LABEL_Y
             ? [country.properties.LABEL_X, country.properties.LABEL_Y]
@@ -73,7 +73,8 @@ export default function Globe3DClient({ markers }: Globe3DClientProps) {
             lat: coordinates[1],
             lng: coordinates[0],
             name: country.properties.NAME,
-            size: 0.5,
+            size: 0.6, // Slightly larger for readability
+            altitude: 0.02, // Elevated above surface
           }
         })
 
@@ -83,9 +84,11 @@ export default function Globe3DClient({ markers }: Globe3DClientProps) {
           .labelLng((d: any) => d.lng)
           .labelText((d: any) => d.name)
           .labelSize((d: any) => d.size)
-          .labelDotRadius(0)
-          .labelColor(() => 'rgba(255, 255, 255, 0.7)')
-          .labelResolution(2)
+          .labelAltitude((d: any) => d.altitude) // Lift labels above surface
+          .labelDotRadius(0.08) // Tiny dot under label for better visibility
+          .labelDotOrientation('bottom') // Dot below the text
+          .labelColor(() => 'rgba(255, 255, 255, 0.75)') // Slightly more opaque
+          .labelResolution(3) // Higher resolution text
       })
 
     // Convert markers to globe points
