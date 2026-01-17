@@ -51,6 +51,43 @@ export default function Globe3DClient({ markers }: Globe3DClientProps) {
     // Point of view
     globe.pointOfView({ altitude: 2.5 })
 
+    // Load country boundaries and labels
+    fetch('https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson')
+      .then(res => res.json())
+      .then(countries => {
+        // Add country polygons
+        globe
+          .polygonsData(countries.features)
+          .polygonCapColor(() => 'rgba(255, 255, 255, 0.05)')
+          .polygonSideColor(() => 'rgba(255, 255, 255, 0.02)')
+          .polygonStrokeColor(() => '#444')
+          .polygonAltitude(0.01)
+
+        // Add country labels
+        const countryLabels = countries.features.map((country: any) => {
+          const coordinates = country.properties.LABEL_X && country.properties.LABEL_Y
+            ? [country.properties.LABEL_X, country.properties.LABEL_Y]
+            : getCountryCentroid(country)
+
+          return {
+            lat: coordinates[1],
+            lng: coordinates[0],
+            name: country.properties.NAME,
+            size: 0.5,
+          }
+        })
+
+        globe
+          .labelsData(countryLabels)
+          .labelLat((d: any) => d.lat)
+          .labelLng((d: any) => d.lng)
+          .labelText((d: any) => d.name)
+          .labelSize((d: any) => d.size)
+          .labelDotRadius(0)
+          .labelColor(() => 'rgba(255, 255, 255, 0.7)')
+          .labelResolution(2)
+      })
+
     // Convert markers to globe points
     const points = markers.map(marker => ({
       lat: marker.latitude,
@@ -138,6 +175,21 @@ export default function Globe3DClient({ markers }: Globe3DClientProps) {
       'Livestock': '#EC4899'
     }
     return colors[type] || '#FFFFFF'
+  }
+
+  const getCountryCentroid = (country: any) => {
+    // Simple centroid calculation for polygon/multipolygon
+    const coords = country.geometry.type === 'Polygon'
+      ? country.geometry.coordinates[0]
+      : country.geometry.coordinates[0][0]
+
+    if (!coords || coords.length === 0) return [0, 0]
+
+    const sum = coords.reduce((acc: number[], coord: number[]) => {
+      return [acc[0] + coord[0], acc[1] + coord[1]]
+    }, [0, 0])
+
+    return [sum[0] / coords.length, sum[1] / coords.length]
   }
 
   return (
