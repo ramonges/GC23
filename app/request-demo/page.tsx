@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, Calendar, Clock } from 'lucide-react'
+import { ArrowLeft, Calendar as CalendarIcon, Clock } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import Calendar from '@/components/Calendar'
 
 export default function RequestDemo() {
   const [formData, setFormData] = useState({
@@ -14,7 +15,7 @@ export default function RequestDemo() {
     email: '',
     message: '',
   })
-  const [selectedDate, setSelectedDate] = useState('')
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedTime, setSelectedTime] = useState('')
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
@@ -44,6 +45,9 @@ export default function RequestDemo() {
     }
 
     try {
+      // Format date as YYYY-MM-DD
+      const formattedDate = selectedDate.toISOString().split('T')[0]
+
       const { error: dbError } = await supabase
         .from('demo_requests')
         .insert([
@@ -54,7 +58,7 @@ export default function RequestDemo() {
             phone: formData.phone,
             email: formData.email,
             message: formData.message,
-            demo_date: selectedDate,
+            demo_date: formattedDate,
             demo_time: selectedTime,
           },
         ])
@@ -70,7 +74,7 @@ export default function RequestDemo() {
         email: '',
         message: '',
       })
-      setSelectedDate('')
+      setSelectedDate(null)
       setSelectedTime('')
     } catch (err: any) {
       setError(err.message || 'Failed to submit request')
@@ -87,14 +91,19 @@ export default function RequestDemo() {
   }
 
   // Get min date (today) and max date (3 months from now)
-  const today = new Date().toISOString().split('T')[0]
-  const maxDate = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-
-  // Check if selected date is a weekday
-  const isWeekday = (dateString: string) => {
-    const date = new Date(dateString)
-    const day = date.getDay()
-    return day !== 0 && day !== 6 // 0 = Sunday, 6 = Saturday
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const maxDate = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
+  
+  const formatDate = (date: Date | null) => {
+    if (!date) return ''
+    const options: Intl.DateTimeFormatOptions = { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    }
+    return date.toLocaleDateString('en-US', options)
   }
 
   return (
@@ -224,52 +233,81 @@ export default function RequestDemo() {
               {/* Calendar Section */}
               <div className="border-t border-gray-200 pt-8 mb-8">
                 <h3 className="text-3xl font-bold text-black mb-6 flex items-center gap-3">
-                  <Calendar className="text-accent" />
+                  <CalendarIcon className="text-accent" />
                   Schedule Your Demo
                 </h3>
 
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid lg:grid-cols-2 gap-8">
+                  {/* Calendar */}
                   <div>
-                    <label className="block text-black mb-2 font-semibold text-sm">Select Date *</label>
-                    <input
-                      type="date"
-                      value={selectedDate}
-                      onChange={(e) => {
-                        if (isWeekday(e.target.value)) {
-                          setSelectedDate(e.target.value)
-                          setError('')
-                        } else {
-                          setError('Please select a weekday (Monday-Friday)')
-                          setSelectedDate('')
-                        }
+                    <label className="block text-black mb-4 font-semibold">Select Date *</label>
+                    <Calendar
+                      selectedDate={selectedDate}
+                      onSelectDate={(date) => {
+                        setSelectedDate(date)
+                        setError('')
                       }}
-                      min={today}
-                      max={maxDate}
-                      className="w-full px-4 py-3 rounded-lg bg-gray-50 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
-                      required
+                      minDate={today}
+                      maxDate={maxDate}
+                      disableWeekends={true}
                     />
-                    <p className="text-sm text-gray-500 mt-2">Monday to Friday only</p>
                   </div>
 
-                  <div>
-                    <label className="block text-black mb-2 font-semibold text-sm flex items-center gap-2">
-                      <Clock size={18} className="text-accent" />
-                      Select Time Slot (30 min) *
-                    </label>
-                    <select
-                      value={selectedTime}
-                      onChange={(e) => setSelectedTime(e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg bg-gray-50 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
-                      required
-                    >
-                      <option value="">Choose a time</option>
-                      {timeSlots.map((slot) => (
-                        <option key={slot} value={slot}>
-                          {slot}
-                        </option>
-                      ))}
-                    </select>
-                    <p className="text-sm text-gray-500 mt-2">9:00 AM - 7:00 PM</p>
+                  {/* Time & Summary */}
+                  <div className="space-y-6">
+                    <div>
+                      <label className="block text-black mb-3 font-semibold flex items-center gap-2">
+                        <Clock size={18} className="text-accent" />
+                        Select Time Slot (30 min) *
+                      </label>
+                      <div className="grid grid-cols-2 gap-2 max-h-96 overflow-y-auto p-1">
+                        {timeSlots.map((slot) => (
+                          <button
+                            key={slot}
+                            type="button"
+                            onClick={() => setSelectedTime(slot)}
+                            className={`
+                              px-4 py-3 rounded-lg font-medium text-sm transition-all duration-200
+                              ${selectedTime === slot
+                                ? 'bg-black text-white'
+                                : 'bg-gray-50 text-black border border-gray-300 hover:bg-gray-100'
+                              }
+                            `}
+                          >
+                            {slot}
+                          </button>
+                        ))}
+                      </div>
+                      <p className="text-sm text-gray-500 mt-3">Available: 9:00 AM - 7:00 PM</p>
+                    </div>
+
+                    {/* Appointment Summary */}
+                    {(selectedDate || selectedTime) && (
+                      <div className="bg-accent bg-opacity-5 border-2 border-accent rounded-xl p-6 animate-fade-in">
+                        <h4 className="font-bold text-black mb-3 flex items-center gap-2">
+                          <CalendarIcon size={18} />
+                          Your Appointment
+                        </h4>
+                        <div className="space-y-2">
+                          {selectedDate && (
+                            <div className="flex items-start gap-2">
+                              <span className="text-gray-600 text-sm">Date:</span>
+                              <span className="font-semibold text-black text-sm">
+                                {formatDate(selectedDate)}
+                              </span>
+                            </div>
+                          )}
+                          {selectedTime && (
+                            <div className="flex items-start gap-2">
+                              <span className="text-gray-600 text-sm">Time:</span>
+                              <span className="font-semibold text-black text-sm">
+                                {selectedTime} (30 minutes)
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
