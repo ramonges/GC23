@@ -2396,6 +2396,782 @@ const majorOilFields = [
     api_gravity: "34-37",
     sulfur_content: "0.3%",
     type: "Onshore"
+  },
+  // ============================================
+  // NATURAL GAS FIELDS - GLOBAL COVERAGE
+  // ============================================
+  // === USA GAS FIELDS ===
+  {
+    name: "Marcellus Shale Gas",
+    country: "United States",
+    operator: "EQT/Chesapeake",
+    latitude: 40.5,
+    longitude: -79.0,
+    production_bpd: 80000,
+    api_gravity: "60",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Haynesville Gas",
+    country: "United States",
+    operator: "Chesapeake/BHP",
+    latitude: 32.0,
+    longitude: -93.8,
+    production_bpd: 45000,
+    api_gravity: "55",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Barnett Shale Gas",
+    country: "United States",
+    operator: "Various",
+    latitude: 32.8,
+    longitude: -97.5,
+    production_bpd: 35000,
+    api_gravity: "58",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Fayetteville Shale",
+    country: "United States",
+    operator: "Southwestern Energy",
+    latitude: 35.5,
+    longitude: -92.3,
+    production_bpd: 25000,
+    api_gravity: "57",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Woodford Shale",
+    country: "United States",
+    operator: "Devon Energy",
+    latitude: 35.2,
+    longitude: -96.8,
+    production_bpd: 30000,
+    api_gravity: "56",
+    sulfur_content: "0.02%",
+    type: "Gas Condensate"
+  },
+  // === RUSSIA GAS FIELDS ===
+  {
+    name: "Yamburg Field",
+    country: "Russia",
+    operator: "Gazprom",
+    latitude: 67.9,
+    longitude: 75.2,
+    production_bpd: 70000,
+    api_gravity: "55",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Bovanenkovo Field",
+    country: "Russia",
+    operator: "Gazprom",
+    latitude: 70.4,
+    longitude: 68.0,
+    production_bpd: 90000,
+    api_gravity: "58",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Zapolyarnoye Field",
+    country: "Russia",
+    operator: "Gazprom",
+    latitude: 66.9,
+    longitude: 79.5,
+    production_bpd: 65000,
+    api_gravity: "56",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Medvezhye Field",
+    country: "Russia",
+    operator: "Gazprom",
+    latitude: 65.9,
+    longitude: 73.5,
+    production_bpd: 45000,
+    api_gravity: "54",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Shtokman Field",
+    country: "Russia",
+    operator: "Gazprom",
+    latitude: 73.3,
+    longitude: 43.8,
+    production_bpd: 40000,
+    api_gravity: "52",
+    sulfur_content: "0.01%",
+    type: "Offshore Gas"
+  },
+  // === IRAN GAS FIELDS ===
+  {
+    name: "North Pars",
+    country: "Iran",
+    operator: "NIOC",
+    latitude: 27.0,
+    longitude: 52.2,
+    production_bpd: 60000,
+    api_gravity: "50",
+    sulfur_content: "0.02%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Kish Gas Field",
+    country: "Iran",
+    operator: "NIOC",
+    latitude: 26.5,
+    longitude: 53.9,
+    production_bpd: 35000,
+    api_gravity: "48",
+    sulfur_content: "0.02%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Tabnak Gas Field",
+    country: "Iran",
+    operator: "NIOC",
+    latitude: 28.5,
+    longitude: 52.5,
+    production_bpd: 30000,
+    api_gravity: "49",
+    sulfur_content: "0.03%",
+    type: "Gas Condensate"
+  },
+  // === QATAR GAS FIELDS ===
+  {
+    name: "North Field",
+    country: "Qatar",
+    operator: "Qatar Petroleum",
+    latitude: 26.0,
+    longitude: 51.3,
+    production_bpd: 120000,
+    api_gravity: "65",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Ras Laffan LNG",
+    country: "Qatar",
+    operator: "Qatar Petroleum",
+    latitude: 25.9,
+    longitude: 51.5,
+    production_bpd: 100000,
+    api_gravity: "63",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  // === AUSTRALIA GAS FIELDS ===
+  {
+    name: "Gorgon LNG",
+    country: "Australia",
+    operator: "Chevron",
+    latitude: -20.6,
+    longitude: 115.1,
+    production_bpd: 85000,
+    api_gravity: "60",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Wheatstone LNG",
+    country: "Australia",
+    operator: "Chevron",
+    latitude: -20.5,
+    longitude: 115.0,
+    production_bpd: 55000,
+    api_gravity: "58",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Ichthys LNG",
+    country: "Australia",
+    operator: "Inpex",
+    latitude: -12.4,
+    longitude: 130.9,
+    production_bpd: 70000,
+    api_gravity: "59",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Pluto LNG",
+    country: "Australia",
+    operator: "Woodside",
+    latitude: -20.6,
+    longitude: 116.7,
+    production_bpd: 60000,
+    api_gravity: "57",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Browse Basin",
+    country: "Australia",
+    operator: "Woodside",
+    latitude: -14.0,
+    longitude: 123.0,
+    production_bpd: 45000,
+    api_gravity: "56",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  // === CANADA GAS FIELDS ===
+  {
+    name: "Montney Formation",
+    country: "Canada",
+    operator: "Canadian Natural/Encana",
+    latitude: 56.5,
+    longitude: -120.5,
+    production_bpd: 65000,
+    api_gravity: "62",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Horn River Basin",
+    country: "Canada",
+    operator: "Various",
+    latitude: 58.5,
+    longitude: -122.0,
+    production_bpd: 35000,
+    api_gravity: "61",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Duvernay Formation",
+    country: "Canada",
+    operator: "Chevron/Encana",
+    latitude: 53.5,
+    longitude: -115.0,
+    production_bpd: 40000,
+    api_gravity: "60",
+    sulfur_content: "0.02%",
+    type: "Gas Condensate"
+  },
+  // === CHINA GAS FIELDS ===
+  {
+    name: "Sulige Gas Field",
+    country: "China",
+    operator: "PetroChina",
+    latitude: 38.5,
+    longitude: 108.0,
+    production_bpd: 55000,
+    api_gravity: "58",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Puguang Gas Field",
+    country: "China",
+    operator: "Sinopec",
+    latitude: 31.8,
+    longitude: 107.5,
+    production_bpd: 45000,
+    api_gravity: "56",
+    sulfur_content: "High H2S",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Sichuan Gas Fields",
+    country: "China",
+    operator: "PetroChina/Sinopec",
+    latitude: 30.5,
+    longitude: 104.5,
+    production_bpd: 60000,
+    api_gravity: "57",
+    sulfur_content: "0.02%",
+    type: "Gas Condensate"
+  },
+  // === NORWAY GAS FIELDS ===
+  {
+    name: "Ormen Lange",
+    country: "Norway",
+    operator: "Shell/Equinor",
+    latitude: 63.4,
+    longitude: 5.1,
+    production_bpd: 50000,
+    api_gravity: "62",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Snohvit LNG",
+    country: "Norway",
+    operator: "Equinor",
+    latitude: 71.3,
+    longitude: 21.3,
+    production_bpd: 35000,
+    api_gravity: "60",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Aasta Hansteen",
+    country: "Norway",
+    operator: "Equinor",
+    latitude: 66.8,
+    longitude: 8.1,
+    production_bpd: 40000,
+    api_gravity: "61",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  // === ALGERIA GAS FIELDS ===
+  {
+    name: "In Salah Gas",
+    country: "Algeria",
+    operator: "Sonatrach/BP",
+    latitude: 27.2,
+    longitude: 2.5,
+    production_bpd: 50000,
+    api_gravity: "58",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "In Amenas Gas",
+    country: "Algeria",
+    operator: "Sonatrach/BP",
+    latitude: 28.0,
+    longitude: 9.6,
+    production_bpd: 45000,
+    api_gravity: "57",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  // === TURKMENISTAN GAS FIELDS ===
+  {
+    name: "Galkynysh Field",
+    country: "Turkmenistan",
+    operator: "Turkmengas/CNPC",
+    latitude: 38.9,
+    longitude: 64.8,
+    production_bpd: 95000,
+    api_gravity: "62",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Dauletabad Field",
+    country: "Turkmenistan",
+    operator: "Turkmengas",
+    latitude: 39.5,
+    longitude: 63.5,
+    production_bpd: 60000,
+    api_gravity: "60",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Yoloten Field",
+    country: "Turkmenistan",
+    operator: "Turkmengas",
+    latitude: 38.8,
+    longitude: 64.9,
+    production_bpd: 55000,
+    api_gravity: "61",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  // === MALAYSIA GAS FIELDS ===
+  {
+    name: "Sarawak Gas",
+    country: "Malaysia",
+    operator: "Petronas",
+    latitude: 3.5,
+    longitude: 113.5,
+    production_bpd: 65000,
+    api_gravity: "60",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "MLNG Bintulu",
+    country: "Malaysia",
+    operator: "Petronas",
+    latitude: 3.2,
+    longitude: 113.0,
+    production_bpd: 70000,
+    api_gravity: "61",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  // === INDONESIA GAS FIELDS ===
+  {
+    name: "Tangguh LNG",
+    country: "Indonesia",
+    operator: "BP",
+    latitude: -2.0,
+    longitude: 134.0,
+    production_bpd: 75000,
+    api_gravity: "62",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Bontang LNG",
+    country: "Indonesia",
+    operator: "Total/Pertamina",
+    latitude: 0.1,
+    longitude: 117.5,
+    production_bpd: 80000,
+    api_gravity: "60",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Arun Gas Field",
+    country: "Indonesia",
+    operator: "ExxonMobil/Pertamina",
+    latitude: 5.2,
+    longitude: 97.2,
+    production_bpd: 30000,
+    api_gravity: "58",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  // === EGYPT GAS FIELDS ===
+  {
+    name: "Damietta LNG",
+    country: "Egypt",
+    operator: "Eni/EGPC",
+    latitude: 31.4,
+    longitude: 31.8,
+    production_bpd: 55000,
+    api_gravity: "59",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Idku LNG",
+    country: "Egypt",
+    operator: "Shell/EGPC",
+    latitude: 31.3,
+    longitude: 30.3,
+    production_bpd: 50000,
+    api_gravity: "58",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  // === NIGERIA GAS FIELDS ===
+  {
+    name: "Nigeria LNG Bonny",
+    country: "Nigeria",
+    operator: "Shell/Total/Eni",
+    latitude: 4.4,
+    longitude: 7.2,
+    production_bpd: 85000,
+    api_gravity: "61",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Bonga Northwest Gas",
+    country: "Nigeria",
+    operator: "Shell",
+    latitude: 4.5,
+    longitude: 3.3,
+    production_bpd: 35000,
+    api_gravity: "60",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  // === TRINIDAD & TOBAGO ===
+  {
+    name: "Atlantic LNG",
+    country: "Trinidad and Tobago",
+    operator: "BP/Shell",
+    latitude: 10.3,
+    longitude: -61.6,
+    production_bpd: 65000,
+    api_gravity: "62",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Dolphin Gas Field",
+    country: "Trinidad and Tobago",
+    operator: "BP",
+    latitude: 10.5,
+    longitude: -61.0,
+    production_bpd: 40000,
+    api_gravity: "60",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  // === PERU GAS FIELDS ===
+  {
+    name: "Camisea Gas Field",
+    country: "Peru",
+    operator: "Pluspetrol",
+    latitude: -12.2,
+    longitude: -72.8,
+    production_bpd: 75000,
+    api_gravity: "61",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Peru LNG",
+    country: "Peru",
+    operator: "Hunt Oil",
+    latitude: -13.4,
+    longitude: -76.2,
+    production_bpd: 50000,
+    api_gravity: "59",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  // === BOLIVIA GAS FIELDS ===
+  {
+    name: "San Alberto Field",
+    country: "Bolivia",
+    operator: "Petrobras",
+    latitude: -19.8,
+    longitude: -63.5,
+    production_bpd: 45000,
+    api_gravity: "58",
+    sulfur_content: "0.02%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "San Antonio Field",
+    country: "Bolivia",
+    operator: "Repsol",
+    latitude: -19.5,
+    longitude: -63.8,
+    production_bpd: 40000,
+    api_gravity: "57",
+    sulfur_content: "0.02%",
+    type: "Gas Condensate"
+  },
+  // === NETHERLANDS GAS FIELDS ===
+  {
+    name: "Groningen Field",
+    country: "Netherlands",
+    operator: "NAM/ExxonMobil/Shell",
+    latitude: 53.3,
+    longitude: 6.8,
+    production_bpd: 55000,
+    api_gravity: "60",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "K12-B Platform",
+    country: "Netherlands",
+    operator: "Gaz de France",
+    latitude: 53.0,
+    longitude: 3.6,
+    production_bpd: 25000,
+    api_gravity: "58",
+    sulfur_content: "0.01%",
+    type: "Offshore Gas"
+  },
+  // === PAKISTAN GAS FIELDS ===
+  {
+    name: "Sui Gas Field",
+    country: "Pakistan",
+    operator: "OGDC",
+    latitude: 28.6,
+    longitude: 69.2,
+    production_bpd: 50000,
+    api_gravity: "57",
+    sulfur_content: "0.02%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Mari Gas Field",
+    country: "Pakistan",
+    operator: "OGDC/ENI",
+    latitude: 27.6,
+    longitude: 68.8,
+    production_bpd: 45000,
+    api_gravity: "56",
+    sulfur_content: "0.02%",
+    type: "Gas Condensate"
+  },
+  // === ISRAEL GAS FIELDS ===
+  {
+    name: "Tamar Gas Field",
+    country: "Israel",
+    operator: "Noble Energy",
+    latitude: 32.6,
+    longitude: 34.0,
+    production_bpd: 60000,
+    api_gravity: "62",
+    sulfur_content: "0.01%",
+    type: "Offshore Gas"
+  },
+  {
+    name: "Leviathan Gas Field",
+    country: "Israel",
+    operator: "Noble Energy",
+    latitude: 33.1,
+    longitude: 34.2,
+    production_bpd: 75000,
+    api_gravity: "63",
+    sulfur_content: "0.01%",
+    type: "Offshore Gas"
+  },
+  // === MYANMAR GAS FIELDS ===
+  {
+    name: "Yadana Gas Field",
+    country: "Myanmar",
+    operator: "Total",
+    latitude: 12.0,
+    longitude: 97.5,
+    production_bpd: 55000,
+    api_gravity: "60",
+    sulfur_content: "0.01%",
+    type: "Offshore Gas"
+  },
+  {
+    name: "Yetagun Gas Field",
+    country: "Myanmar",
+    operator: "Petronas",
+    latitude: 11.5,
+    longitude: 97.2,
+    production_bpd: 35000,
+    api_gravity: "58",
+    sulfur_content: "0.01%",
+    type: "Offshore Gas"
+  },
+  // === PAPUA NEW GUINEA ===
+  {
+    name: "PNG LNG",
+    country: "Papua New Guinea",
+    operator: "ExxonMobil",
+    latitude: -7.5,
+    longitude: 145.5,
+    production_bpd: 70000,
+    api_gravity: "62",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Hides Gas Field",
+    country: "Papua New Guinea",
+    operator: "ExxonMobil",
+    latitude: -6.1,
+    longitude: 142.9,
+    production_bpd: 45000,
+    api_gravity: "60",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  // === THAILAND GAS FIELDS ===
+  {
+    name: "Bongkot Gas Field",
+    country: "Thailand",
+    operator: "Chevron/PTT",
+    latitude: 12.8,
+    longitude: 100.5,
+    production_bpd: 50000,
+    api_gravity: "59",
+    sulfur_content: "0.01%",
+    type: "Offshore Gas"
+  },
+  {
+    name: "Erawan Gas Field",
+    country: "Thailand",
+    operator: "Chevron",
+    latitude: 12.5,
+    longitude: 100.3,
+    production_bpd: 45000,
+    api_gravity: "58",
+    sulfur_content: "0.01%",
+    type: "Offshore Gas"
+  },
+  // === BANGLADESH GAS FIELDS ===
+  {
+    name: "Bibiyana Gas Field",
+    country: "Bangladesh",
+    operator: "Chevron",
+    latitude: 24.7,
+    longitude: 91.3,
+    production_bpd: 60000,
+    api_gravity: "59",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  {
+    name: "Jalalabad Gas Field",
+    country: "Bangladesh",
+    operator: "Chevron",
+    latitude: 24.5,
+    longitude: 91.5,
+    production_bpd: 40000,
+    api_gravity: "58",
+    sulfur_content: "0.01%",
+    type: "Gas Condensate"
+  },
+  // === ADDITIONAL EUROPEAN FIELDS ===
+  {
+    name: "Troll Gas Phase",
+    country: "Norway",
+    operator: "Equinor",
+    latitude: 60.6,
+    longitude: 3.7,
+    production_bpd: 55000,
+    api_gravity: "60",
+    sulfur_content: "0.01%",
+    type: "Offshore Gas"
+  },
+  {
+    name: "Romania Black Sea Gas",
+    country: "Romania",
+    operator: "OMV Petrom",
+    latitude: 44.2,
+    longitude: 29.5,
+    production_bpd: 35000,
+    api_gravity: "57",
+    sulfur_content: "0.02%",
+    type: "Offshore Gas"
+  },
+  {
+    name: "Tunisia Miskar Gas",
+    country: "Tunisia",
+    operator: "BG Group/Shell",
+    latitude: 34.8,
+    longitude: 11.5,
+    production_bpd: 30000,
+    api_gravity: "56",
+    sulfur_content: "0.01%",
+    type: "Offshore Gas"
+  },
+  {
+    name: "Denmark Tyra Field",
+    country: "Denmark",
+    operator: "Total",
+    latitude: 55.7,
+    longitude: 4.8,
+    production_bpd: 40000,
+    api_gravity: "58",
+    sulfur_content: "0.01%",
+    type: "Offshore Gas"
+  },
+  {
+    name: "UK Morecambe Bay",
+    country: "United Kingdom",
+    operator: "Centrica",
+    latitude: 54.0,
+    longitude: -3.5,
+    production_bpd: 35000,
+    api_gravity: "57",
+    sulfur_content: "0.01%",
+    type: "Offshore Gas"
   }
 ]
 
@@ -2403,13 +3179,33 @@ const majorOilFields = [
  * Transform scraped data to database format
  */
 function transformToDbFormat(field: typeof majorOilFields[0]): OilReserveData {
-  // Parse API gravity (take average if range given)
-  const apiGravity = field.api_gravity.includes('-') 
-    ? field.api_gravity.split('-').map(s => parseFloat(s)).reduce((a, b) => a + b) / 2
-    : parseFloat(field.api_gravity)
+  // Determine if it's a gas field based on type name
+  const isGasField = field.type.toLowerCase().includes('gas') || 
+                     field.type.toLowerCase().includes('lng') ||
+                     field.type.toLowerCase().includes('condensate')
+  
+  const commodityName = isGasField ? "Natural Gas" : "Crude Oil"
+  const locationType = isGasField ? 'gas_field' : 'oil_field'
 
-  // Parse sulfur content (extract number from percentage)
-  const sulfurContent = parseFloat(field.sulfur_content.replace('%', '').replace('High H2S', '5.0'))
+  // For oil fields: parse API gravity and sulfur content
+  // For gas fields: these values are not applicable (set to null or default)
+  let apiGravity: number | undefined
+  let sulfurContent: number | undefined
+
+  if (!isGasField) {
+    // Only process API gravity for oil fields
+    apiGravity = field.api_gravity.includes('-') 
+      ? field.api_gravity.split('-').map(s => parseFloat(s)).reduce((a, b) => a + b) / 2
+      : parseFloat(field.api_gravity)
+
+    // Parse sulfur content for oil
+    sulfurContent = parseFloat(field.sulfur_content.replace('%', '').replace('High H2S', '5.0'))
+  } else {
+    // For gas fields, API gravity doesn't apply
+    // We could store methane content or BTU value instead, but leaving undefined for now
+    apiGravity = undefined
+    sulfurContent = undefined
+  }
 
   return {
     title: field.name,
@@ -2418,15 +3214,15 @@ function transformToDbFormat(field: typeof majorOilFields[0]): OilReserveData {
     contact: `${field.operator.toLowerCase().replace(/\s+/g, '')}@contact.com`,
     latitude: field.latitude,
     longitude: field.longitude,
-    supply_volume: field.production_bpd * 365, // Convert to annual barrels
+    supply_volume: field.production_bpd * 365, // Convert to annual barrels (or BOE for gas)
     storage_volume: 0,
     long_term_contract: true,
     contract_with: "Various International Buyers",
     commodity_type: "Energy",
-    commodity_name: "Crude Oil",
+    commodity_name: commodityName,
     company: field.operator.split('/')[0], // Primary operator
     country: field.country,
-    location_type: 'oil_field',
+    location_type: locationType,
     api_gravity: apiGravity,
     sulfur_content: sulfurContent,
     operational_status: 'operational'
