@@ -55,6 +55,8 @@ export default function EarthMap() {
   const [selectedCommodity, setSelectedCommodity] = useState<string>('')
   const [selectedCompany, setSelectedCompany] = useState<string>('')
   const [showStorage, setShowStorage] = useState(false)
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
+  const [showCargoes, setShowCargoes] = useState(false)
   const [advancedFilters, setAdvancedFilters] = useState({
     apiRange: '',
     sulfurRange: '',
@@ -330,7 +332,33 @@ export default function EarthMap() {
                 onChange={(e) => setShowStorage(e.target.checked)}
                 className="w-5 h-5 rounded border-gray-600 text-blue-500 focus:ring-blue-500"
               />
-              <span className="font-semibold">Storage Facilities</span>
+              <span className="font-semibold">Storage</span>
+            </label>
+          </div>
+
+          {/* Cargoes */}
+          <div className="flex items-center">
+            <label className="flex items-center gap-2 text-white cursor-pointer hover:text-blue-400 transition-colors">
+              <input
+                type="checkbox"
+                checked={showCargoes}
+                onChange={(e) => setShowCargoes(e.target.checked)}
+                className="w-5 h-5 rounded border-gray-600 text-blue-500 focus:ring-blue-500"
+              />
+              <span className="font-semibold">Cargo Ships</span>
+            </label>
+          </div>
+
+          {/* Advanced Filters Toggle */}
+          <div className="flex items-center">
+            <label className="flex items-center gap-2 text-white cursor-pointer hover:text-blue-400 transition-colors">
+              <input
+                type="checkbox"
+                checked={showAdvancedFilters}
+                onChange={(e) => setShowAdvancedFilters(e.target.checked)}
+                className="w-5 h-5 rounded border-gray-600 text-blue-500 focus:ring-blue-500"
+              />
+              <span className="font-semibold">Advanced</span>
             </label>
           </div>
 
@@ -345,7 +373,7 @@ export default function EarthMap() {
         </div>
 
         {/* Advanced Filters */}
-        {(selectedCategory === 'Energy' || selectedCategory === 'Metals') && (
+        {showAdvancedFilters && (selectedCategory === 'Energy' || selectedCategory === 'Metals') && (
           <div className="mt-6 pt-4 border-t border-gray-700">
             <p className="text-white font-semibold mb-3 flex items-center gap-2">
               <Filter size={16} />

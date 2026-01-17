@@ -44,9 +44,9 @@ export default function Globe3DClient({ markers }: Globe3DClientProps) {
 
     globeRef.current = globe
 
-    // Set initial rotation
-    globe.controls().autoRotate = true
-    globe.controls().autoRotateSpeed = 0.5
+    // Set initial rotation - DISABLED auto-rotate, only manual control
+    globe.controls().autoRotate = false
+    globe.controls().enableZoom = true
 
     // Point of view
     globe.pointOfView({ altitude: 2.5 })
@@ -92,7 +92,7 @@ export default function Globe3DClient({ markers }: Globe3DClientProps) {
     const points = markers.map(marker => ({
       lat: marker.latitude,
       lng: marker.longitude,
-      size: 0.3,
+      size: 0.05, // Much smaller altitude
       color: getCommodityColor(marker.commodity_type),
       label: marker.title,
       data: marker
@@ -103,7 +103,7 @@ export default function Globe3DClient({ markers }: Globe3DClientProps) {
       .pointsData(points)
       .pointAltitude('size')
       .pointColor('color')
-      .pointRadius(0.4)
+      .pointRadius(0.15) // Smaller radius for subtle points
       .pointsMerge(false)
       .pointLabel((d: any) => `
         <div style="

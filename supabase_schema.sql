@@ -375,6 +375,72 @@ CREATE TRIGGER update_contracts_updated_at BEFORE UPDATE ON public.contracts FOR
 CREATE TRIGGER update_reserves_by_country_updated_at BEFORE UPDATE ON public.reserves_by_country FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- ============================================
+-- FREIGHT ROUTES TABLE
+-- ============================================
+CREATE TABLE IF NOT EXISTS public.freight_routes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  route_name TEXT NOT NULL,
+  origin_port TEXT NOT NULL,
+  origin_country TEXT NOT NULL,
+  origin_latitude DECIMAL(10, 8) NOT NULL,
+  origin_longitude DECIMAL(11, 8) NOT NULL,
+  destination_port TEXT NOT NULL,
+  destination_country TEXT NOT NULL,
+  destination_latitude DECIMAL(10, 8) NOT NULL,
+  destination_longitude DECIMAL(11, 8) NOT NULL,
+  commodity_type TEXT NOT NULL,
+  primary_commodities TEXT[],
+  distance_km DECIMAL(10, 2),
+  avg_duration_days INTEGER,
+  active BOOLEAN DEFAULT true,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE public.freight_routes ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Authenticated users can read freight routes" ON public.freight_routes
+  FOR SELECT USING (auth.role() = 'authenticated');
+
+CREATE INDEX idx_freight_routes_commodity ON public.freight_routes(commodity_type);
+CREATE INDEX idx_freight_routes_origin ON public.freight_routes(origin_country);
+CREATE INDEX idx_freight_routes_destination ON public.freight_routes(destination_country);
+
+-- ============================================
+-- CARGO SHIPMENTS TABLE
+-- ============================================
+CREATE TABLE IF NOT EXISTS public.cargo_shipments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  vessel_name TEXT NOT NULL,
+  imo_number TEXT,
+  mmsi TEXT,
+  vessel_type TEXT NOT NULL,
+  cargo_type TEXT,
+  commodity_name TEXT NOT NULL,
+  quantity_metric_tons DECIMAL(15, 2),
+  shipper_company TEXT,
+  receiver_company TEXT,
+  loading_port TEXT NOT NULL,
+  loading_date DATE,
+  discharge_port TEXT NOT NULL,
+  expected_discharge_date DATE,
+  current_latitude DECIMAL(10, 8),
+  current_longitude DECIMAL(11, 8),
+  current_speed_knots DECIMAL(5, 2),
+  shipment_status TEXT DEFAULT 'In Transit',
+  last_position_update TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE public.cargo_shipments ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Authenticated users can read cargo shipments" ON public.cargo_shipments
+  FOR SELECT USING (auth.role() = 'authenticated');
+
+CREATE INDEX idx_cargo_shipments_status ON public.cargo_shipments(shipment_status);
+CREATE INDEX idx_cargo_shipments_commodity ON public.cargo_shipments(commodity_name);
+CREATE INDEX idx_cargo_shipments_coordinates ON public.cargo_shipments(current_latitude, current_longitude);
+
+-- ============================================
 -- NOTES FOR SETTING UP IN SUPABASE:
 -- ============================================
 -- 1. Go to your Supabase project dashboard
