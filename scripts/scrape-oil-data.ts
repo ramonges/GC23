@@ -2405,7 +2405,7 @@ const majorOilFields = [
 function transformToDbFormat(field: typeof majorOilFields[0]): OilReserveData {
   // Parse API gravity (take average if range given)
   const apiGravity = field.api_gravity.includes('-') 
-    ? parseFloat(field.api_gravity.split('-').map(s => parseFloat(s)).reduce((a, b) => a + b) / 2)
+    ? field.api_gravity.split('-').map(s => parseFloat(s)).reduce((a, b) => a + b) / 2
     : parseFloat(field.api_gravity)
 
   // Parse sulfur content (extract number from percentage)
