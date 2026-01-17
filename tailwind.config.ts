@@ -9,10 +9,12 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        'dark-blue': '#0A1628',
-        'brand-blue': '#1E3A5F',
-        'brand-green': '#10B981',
-        'light-green': '#34D399',
+        'primary': '#000000',
+        'secondary': '#ffffff',
+        'accent': '#0066ff',
+        'gray-light': '#f5f5f5',
+        'gray-medium': '#e0e0e0',
+        'gray-dark': '#666666',
       },
     },
   },

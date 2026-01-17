@@ -3,10 +3,10 @@
 @tailwind utilities;
 
 :root {
-  --dark-blue: #0A1628;
-  --brand-blue: #1E3A5F;
-  --brand-green: #10B981;
-  --light-green: #34D399;
+  --primary: #000000;
+  --secondary: #ffffff;
+  --accent: #0066ff;
+  --gray-light: #f5f5f5;
 }
 
 body {
@@ -17,39 +17,60 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: #ffffff;
+  color: #000000;
 }
 
 /* Leaflet Map Styles */
 .leaflet-container {
   width: 100%;
   height: 100%;
-  background: #0A1628;
+  background: #f5f5f5;
 }
 
 .leaflet-popup-content-wrapper {
-  background: #1E3A5F;
-  color: white;
-  border-radius: 8px;
+  background: #ffffff;
+  color: #000000;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e0e0e0;
 }
 
 .leaflet-popup-tip {
-  background: #1E3A5F;
+  background: #ffffff;
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #0A1628;
+  background: #f5f5f5;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #10B981;
-  border-radius: 5px;
+  background: #666666;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #34D399;
+  background: #000000;
+}
+
+/* Modern Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
 }

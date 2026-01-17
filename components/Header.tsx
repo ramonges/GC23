@@ -9,10 +9,10 @@ export default function Header() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-40 bg-dark-blue bg-opacity-95 backdrop-blur-sm border-b border-brand-green">
+      <header className="fixed top-0 left-0 right-0 z-40 bg-white border-b border-gray-200 backdrop-blur-sm bg-opacity-95">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex-1">
-            <Link href="/" className="text-2xl font-bold text-brand-green hover:text-light-green transition-colors">
+            <Link href="/" className="text-2xl font-bold text-black hover:text-accent transition-colors">
               Commodities Earth
             </Link>
           </div>
@@ -21,7 +21,7 @@ export default function Header() {
             <nav>
               <Link
                 href="/#pricing"
-                className="text-xl font-semibold text-white hover:text-brand-green transition-colors"
+                className="text-lg font-medium text-black hover:text-accent transition-colors"
               >
                 Pricing
               </Link>
@@ -31,13 +31,13 @@ export default function Header() {
           <div className="flex-1 flex justify-end gap-4">
             <button
               onClick={() => setIsLoginOpen(true)}
-              className="px-6 py-2 text-white border-2 border-brand-green rounded-lg hover:bg-brand-green transition-colors font-semibold"
+              className="px-6 py-2.5 text-black border-2 border-black rounded-lg hover:bg-black hover:text-white transition-all duration-200 font-medium"
             >
               Log In
             </button>
             <Link
               href="/request-demo"
-              className="px-6 py-2 bg-brand-green text-white rounded-lg hover:bg-light-green transition-colors font-semibold"
+              className="px-6 py-2.5 bg-black text-white rounded-lg hover:bg-accent transition-all duration-200 font-medium"
             >
               Request a Demo
             </Link>

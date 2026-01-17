@@ -4,77 +4,89 @@ import Link from 'next/link'
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-dark-blue">
+    <div className="min-h-screen bg-white">
       <Header />
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
-        {/* Earth Background */}
-        <div className="absolute inset-0 flex items-center justify-end pr-20">
-          <div className="relative w-[800px] h-[800px]">
-            {/* Earth with Sunrise Effect */}
-            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-900 via-blue-600 to-transparent opacity-80"></div>
-            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-green-900 via-green-700 to-blue-900 opacity-60"></div>
-            
-            {/* Sun glow effect */}
-            <div className="absolute top-1/4 right-0 w-64 h-64 bg-yellow-400 rounded-full blur-3xl opacity-40"></div>
-            <div className="absolute top-1/3 right-10 w-48 h-48 bg-orange-400 rounded-full blur-2xl opacity-30"></div>
-            
-            {/* Earth sphere */}
-            <div className="absolute inset-8 rounded-full border-4 border-brand-green opacity-30"></div>
-            <div className="absolute inset-16 rounded-full border-2 border-light-green opacity-20"></div>
-          </div>
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 bg-gradient-to-br from-white via-gray-50 to-white">
+        {/* Decorative Background Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-20 right-20 w-96 h-96 bg-accent opacity-5 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-20 left-20 w-96 h-96 bg-black opacity-5 rounded-full blur-3xl"></div>
         </div>
 
         {/* Hero Content */}
-        <div className="relative z-10 text-center px-6 max-w-4xl">
-          <h1 className="text-6xl md:text-7xl font-bold text-white mb-6 leading-tight">
+        <div className="relative z-10 text-center px-6 max-w-6xl">
+          <h1 className="text-7xl md:text-8xl font-bold text-black mb-8 leading-tight">
             Commodities Platform for<br />
-            <span className="text-brand-green">Producers and Traders</span>
+            <span className="bg-gradient-to-r from-black to-accent bg-clip-text text-transparent">
+              Producers and Traders
+            </span>
           </h1>
-          <p className="text-2xl md:text-3xl text-gray-300 mb-12">
+          <p className="text-2xl md:text-3xl text-gray-600 mb-12 font-light">
             World Energy, Metals and Agriculture Producers Analytics
           </p>
+          <div className="flex gap-4 justify-center">
+            <Link
+              href="/request-demo"
+              className="px-10 py-4 bg-black text-white text-lg font-semibold rounded-lg hover:bg-accent transition-all duration-200 shadow-lg hover:shadow-xl"
+            >
+              Get Started
+            </Link>
+            <Link
+              href="/#pricing"
+              className="px-10 py-4 border-2 border-black text-black text-lg font-semibold rounded-lg hover:bg-black hover:text-white transition-all duration-200"
+            >
+              View Pricing
+            </Link>
+          </div>
         </div>
       </section>
 
       {/* Added Value Section */}
-      <section className="py-20 bg-brand-blue">
+      <section className="py-24 bg-white">
         <div className="container mx-auto px-6">
-          <h2 className="text-5xl font-bold text-white text-center mb-16">
+          <h2 className="text-5xl font-bold text-black text-center mb-4">
             What Do You Get Through Our Platform?
           </h2>
+          <p className="text-xl text-gray-600 text-center mb-16 font-light">
+            Comprehensive data and intelligence for commodities professionals
+          </p>
 
-          <div className="grid md:grid-cols-2 gap-8 max-w-6xl mx-auto">
-            <div className="bg-dark-blue p-8 rounded-lg border-2 border-brand-green">
-              <h3 className="text-2xl font-bold text-brand-green mb-4">📍 Mine & Reserve Locations</h3>
-              <p className="text-gray-300 text-lg">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
+            <div className="p-8 bg-white rounded-2xl border-2 border-gray-200 hover:border-black transition-all duration-200 hover:shadow-xl">
+              <div className="text-4xl mb-4">📍</div>
+              <h3 className="text-2xl font-bold text-black mb-4">Mine & Reserve Locations</h3>
+              <p className="text-gray-600 leading-relaxed">
                 Comprehensive data on mine locations for metals, shale/reserves for energy (oil/gas), 
-                including precise coordinates and reserve volumes by country and region.
+                including precise coordinates and reserve volumes.
               </p>
             </div>
 
-            <div className="bg-dark-blue p-8 rounded-lg border-2 border-brand-green">
-              <h3 className="text-2xl font-bold text-brand-green mb-4">🚢 Maritime Cargo Tracking</h3>
-              <p className="text-gray-300 text-lg">
+            <div className="p-8 bg-white rounded-2xl border-2 border-gray-200 hover:border-black transition-all duration-200 hover:shadow-xl">
+              <div className="text-4xl mb-4">🚢</div>
+              <h3 className="text-2xl font-bold text-black mb-4">Maritime Cargo Tracking</h3>
+              <p className="text-gray-600 leading-relaxed">
                 Real-time tracking of cargo boats (LNG carriers, tankers, bulk carriers) with detailed 
-                information on vessel sizes, routes, and cargo specifications.
+                information on vessel sizes and routes.
               </p>
             </div>
 
-            <div className="bg-dark-blue p-8 rounded-lg border-2 border-brand-green">
-              <h3 className="text-2xl font-bold text-brand-green mb-4">🏢 Producer Intelligence</h3>
-              <p className="text-gray-300 text-lg">
+            <div className="p-8 bg-white rounded-2xl border-2 border-gray-200 hover:border-black transition-all duration-200 hover:shadow-xl">
+              <div className="text-4xl mb-4">🏢</div>
+              <h3 className="text-2xl font-bold text-black mb-4">Producer Intelligence</h3>
+              <p className="text-gray-600 leading-relaxed">
                 Detailed producer database by commodity including company addresses, contact information, 
-                production volumes, and long-term contract relationships.
+                and long-term contract relationships.
               </p>
             </div>
 
-            <div className="bg-dark-blue p-8 rounded-lg border-2 border-brand-green">
-              <h3 className="text-2xl font-bold text-brand-green mb-4">📊 Storage & Reserves</h3>
-              <p className="text-gray-300 text-lg">
+            <div className="p-8 bg-white rounded-2xl border-2 border-gray-200 hover:border-black transition-all duration-200 hover:shadow-xl">
+              <div className="text-4xl mb-4">📊</div>
+              <h3 className="text-2xl font-bold text-black mb-4">Storage & Reserves</h3>
+              <p className="text-gray-600 leading-relaxed">
                 Global storage facility data across ports and cities, including capacity, ownership 
-                (merchant or independent), and current inventory levels by country.
+                and current inventory levels by country.
               </p>
             </div>
           </div>
@@ -82,32 +94,55 @@ export default function Home() {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-20 bg-dark-blue">
+      <section id="pricing" className="py-24 bg-gray-50">
         <div className="container mx-auto px-6 text-center">
-          <h2 className="text-5xl font-bold text-white mb-8">Pricing</h2>
+          <h2 className="text-5xl font-bold text-black mb-4">Simple, Transparent Pricing</h2>
+          <p className="text-xl text-gray-600 mb-12 font-light">
+            Professional-grade commodities intelligence
+          </p>
           
-          <div className="max-w-2xl mx-auto bg-brand-blue p-12 rounded-lg border-2 border-brand-green shadow-2xl">
-            <p className="text-3xl font-bold text-brand-green mb-8">
-              Access beginning at €599/month
+          <div className="max-w-2xl mx-auto bg-white p-12 rounded-2xl border-2 border-gray-200 shadow-xl">
+            <p className="text-6xl font-bold text-black mb-4">
+              €599<span className="text-2xl text-gray-600 font-normal">/month</span>
             </p>
             
-            <p className="text-xl text-gray-300 mb-8">
-              • 15-day free trial<br />
-              • Full platform access<br />
-              • Real-time data updates<br />
-              • Dedicated support
-            </p>
+            <div className="text-left space-y-3 mb-10 max-w-md mx-auto">
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 bg-black rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-sm">✓</span>
+                </div>
+                <p className="text-gray-700">15-day free trial</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 bg-black rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-sm">✓</span>
+                </div>
+                <p className="text-gray-700">Full platform access</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 bg-black rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-sm">✓</span>
+                </div>
+                <p className="text-gray-700">Real-time data updates</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 bg-black rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-sm">✓</span>
+                </div>
+                <p className="text-gray-700">Dedicated support</p>
+              </div>
+            </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/request-demo"
-                className="px-8 py-4 bg-brand-green text-white text-lg font-bold rounded-lg hover:bg-light-green transition-colors"
+                className="px-8 py-4 bg-black text-white text-lg font-bold rounded-lg hover:bg-accent transition-all duration-200 shadow-lg"
               >
                 Request a Demo
               </Link>
               <a
                 href="mailto:ram2315@columbia.edu"
-                className="px-8 py-4 border-2 border-brand-green text-white text-lg font-bold rounded-lg hover:bg-brand-green transition-colors"
+                className="px-8 py-4 border-2 border-black text-black text-lg font-bold rounded-lg hover:bg-black hover:text-white transition-all duration-200"
               >
                 Contact Us
               </a>
@@ -117,17 +152,17 @@ export default function Home() {
       </section>
 
       {/* Call to Action Section */}
-      <section className="py-20 bg-gradient-to-r from-brand-blue to-dark-blue">
+      <section className="py-24 bg-black text-white">
         <div className="container mx-auto px-6 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            You are a trader at a Merchant, Bank or Hedge Fund?
+          <h2 className="text-5xl md:text-6xl font-bold mb-6">
+            You are a trader at a Merchant,<br />Bank or Hedge Fund?
           </h2>
-          <p className="text-3xl text-brand-green font-bold mb-10">
+          <p className="text-3xl mb-10 text-gray-300 font-light">
             Access the best tech.
           </p>
           <Link
             href="/request-demo"
-            className="inline-block px-12 py-5 bg-brand-green text-white text-xl font-bold rounded-lg hover:bg-light-green transition-colors shadow-lg hover:shadow-xl"
+            className="inline-block px-12 py-5 bg-white text-black text-xl font-bold rounded-lg hover:bg-accent hover:text-white transition-all duration-200 shadow-lg hover:shadow-2xl"
           >
             Get Started Today
           </Link>

@@ -30,14 +30,17 @@ export default function Platform() {
 
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center bg-dark-blue">
-        <p className="text-white text-xl">Loading platform...</p>
+      <div className="h-screen flex items-center justify-center bg-white">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-gray-200 border-t-black rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-black text-xl font-medium">Loading platform...</p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="h-screen flex bg-dark-blue overflow-hidden">
+    <div className="h-screen flex bg-white overflow-hidden">
       <PlatformSidebar 
         currentPage={currentPage} 
         onNavigate={setCurrentPage}
@@ -45,8 +48,9 @@ export default function Platform() {
       />
 
       {/* Logo in top left */}
-      <div className="fixed top-4 left-20 z-30 pointer-events-none">
-        <h1 className="text-2xl font-bold text-brand-green">Commodities Earth</h1>
+      <div className="fixed top-6 left-20 z-30 pointer-events-none">
+        <h1 className="text-2xl font-bold text-black">Commodities Earth</h1>
+        <p className="text-xs text-gray-500 mt-0.5">Professional Platform</p>
       </div>
 
       {/* Main Content */}
@@ -54,28 +58,31 @@ export default function Platform() {
         {currentPage === 'earth-map' && <EarthMap />}
         
         {currentPage === 'options' && (
-          <div className="flex-1 flex items-center justify-center">
+          <div className="flex-1 flex items-center justify-center bg-gray-50">
             <div className="text-center">
-              <h2 className="text-4xl font-bold text-white mb-4">Commodities Options</h2>
-              <p className="text-gray-400 text-xl">Coming Soon</p>
+              <div className="text-6xl mb-6">📊</div>
+              <h2 className="text-5xl font-bold text-black mb-4">Commodities Options</h2>
+              <p className="text-gray-600 text-xl">Coming Soon</p>
             </div>
           </div>
         )}
         
         {currentPage === 'futures' && (
-          <div className="flex-1 flex items-center justify-center">
+          <div className="flex-1 flex items-center justify-center bg-gray-50">
             <div className="text-center">
-              <h2 className="text-4xl font-bold text-white mb-4">Commodities Futures</h2>
-              <p className="text-gray-400 text-xl">Coming Soon</p>
+              <div className="text-6xl mb-6">📈</div>
+              <h2 className="text-5xl font-bold text-black mb-4">Commodities Futures</h2>
+              <p className="text-gray-600 text-xl">Coming Soon</p>
             </div>
           </div>
         )}
         
         {currentPage === 'pricer' && (
-          <div className="flex-1 flex items-center justify-center">
+          <div className="flex-1 flex items-center justify-center bg-gray-50">
             <div className="text-center">
-              <h2 className="text-4xl font-bold text-white mb-4">Physical Trading Pricer</h2>
-              <p className="text-gray-400 text-xl">Coming Soon</p>
+              <div className="text-6xl mb-6">💰</div>
+              <h2 className="text-5xl font-bold text-black mb-4">Physical Trading Pricer</h2>
+              <p className="text-gray-600 text-xl">Coming Soon</p>
             </div>
           </div>
         )}

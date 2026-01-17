@@ -98,13 +98,13 @@ export default function RequestDemo() {
   }
 
   return (
-    <div className="min-h-screen bg-dark-blue">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-brand-blue border-b border-brand-green py-4">
+      <header className="bg-white border-b border-gray-200 py-5 shadow-sm">
         <div className="container mx-auto px-6">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-brand-green hover:text-light-green transition-colors"
+            className="inline-flex items-center gap-2 text-black hover:text-accent transition-colors"
           >
             <ArrowLeft size={20} />
             <span className="text-xl font-bold">Commodities Earth</span>
@@ -113,118 +113,124 @@ export default function RequestDemo() {
       </header>
 
       {/* Main Content */}
-      <div className="container mx-auto px-6 py-12">
+      <div className="container mx-auto px-6 py-16">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl font-bold text-white mb-4">Request a Demo</h1>
-          <p className="text-xl text-gray-300 mb-12">
+          <h1 className="text-6xl font-bold text-black mb-4">Request a Demo</h1>
+          <p className="text-xl text-gray-600 mb-12 font-light">
             Schedule a personalized demo of Commodities Earth platform
           </p>
 
           {success ? (
-            <div className="bg-brand-green bg-opacity-20 border-2 border-brand-green rounded-lg p-8 text-center">
-              <h2 className="text-3xl font-bold text-brand-green mb-4">Request Submitted!</h2>
-              <p className="text-xl text-white mb-6">
+            <div className="bg-green-50 border-2 border-green-500 rounded-2xl p-12 text-center shadow-xl">
+              <div className="text-6xl mb-6">✓</div>
+              <h2 className="text-4xl font-bold text-black mb-4">Request Submitted!</h2>
+              <p className="text-xl text-gray-700 mb-8">
                 Thank you for your interest. We'll contact you shortly to confirm your demo.
               </p>
               <Link
                 href="/"
-                className="inline-block px-8 py-3 bg-brand-green text-white font-bold rounded-lg hover:bg-light-green transition-colors"
+                className="inline-block px-10 py-4 bg-black text-white font-bold rounded-lg hover:bg-accent transition-all duration-200 shadow-lg"
               >
                 Back to Home
               </Link>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="bg-brand-blue rounded-lg p-8 border-2 border-brand-green">
+            <form onSubmit={handleSubmit} className="bg-white rounded-2xl p-10 border-2 border-gray-200 shadow-xl">
               {error && (
-                <div className="bg-red-500 bg-opacity-20 border border-red-500 text-red-200 px-4 py-3 rounded mb-6">
+                <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6">
                   {error}
                 </div>
               )}
 
               <div className="grid md:grid-cols-2 gap-6 mb-6">
                 <div>
-                  <label className="block text-white mb-2 font-medium">Company *</label>
+                  <label className="block text-black mb-2 font-semibold text-sm">Company *</label>
                   <input
                     type="text"
                     name="company"
                     value={formData.company}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg bg-dark-blue text-white border border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green"
+                    className="w-full px-4 py-3 rounded-lg bg-gray-50 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                    placeholder="Company name"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2 font-medium">Email *</label>
+                  <label className="block text-black mb-2 font-semibold text-sm">Email *</label>
                   <input
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg bg-dark-blue text-white border border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green"
+                    className="w-full px-4 py-3 rounded-lg bg-gray-50 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                    placeholder="your@email.com"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2 font-medium">First Name *</label>
+                  <label className="block text-black mb-2 font-semibold text-sm">First Name *</label>
                   <input
                     type="text"
                     name="firstName"
                     value={formData.firstName}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg bg-dark-blue text-white border border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green"
+                    className="w-full px-4 py-3 rounded-lg bg-gray-50 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                    placeholder="John"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-white mb-2 font-medium">Last Name *</label>
+                  <label className="block text-black mb-2 font-semibold text-sm">Last Name *</label>
                   <input
                     type="text"
                     name="lastName"
                     value={formData.lastName}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg bg-dark-blue text-white border border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green"
+                    className="w-full px-4 py-3 rounded-lg bg-gray-50 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                    placeholder="Doe"
                     required
                   />
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-white mb-2 font-medium">Phone Number *</label>
+                  <label className="block text-black mb-2 font-semibold text-sm">Phone Number *</label>
                   <input
                     type="tel"
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-lg bg-dark-blue text-white border border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green"
+                    className="w-full px-4 py-3 rounded-lg bg-gray-50 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                    placeholder="+1 (555) 000-0000"
                     required
                   />
                 </div>
 
                 <div className="md:col-span-2">
-                  <label className="block text-white mb-2 font-medium">Message</label>
+                  <label className="block text-black mb-2 font-semibold text-sm">Message</label>
                   <textarea
                     name="message"
                     value={formData.message}
                     onChange={handleChange}
                     rows={4}
-                    className="w-full px-4 py-3 rounded-lg bg-dark-blue text-white border border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green"
+                    className="w-full px-4 py-3 rounded-lg bg-gray-50 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
                     placeholder="Tell us about your needs..."
                   />
                 </div>
               </div>
 
               {/* Calendar Section */}
-              <div className="border-t border-brand-green pt-6 mb-6">
-                <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-                  <Calendar className="text-brand-green" />
+              <div className="border-t border-gray-200 pt-8 mb-8">
+                <h3 className="text-3xl font-bold text-black mb-6 flex items-center gap-3">
+                  <Calendar className="text-accent" />
                   Schedule Your Demo
                 </h3>
 
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-white mb-2 font-medium">Select Date *</label>
+                    <label className="block text-black mb-2 font-semibold text-sm">Select Date *</label>
                     <input
                       type="date"
                       value={selectedDate}
@@ -239,21 +245,21 @@ export default function RequestDemo() {
                       }}
                       min={today}
                       max={maxDate}
-                      className="w-full px-4 py-3 rounded-lg bg-dark-blue text-white border border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green"
+                      className="w-full px-4 py-3 rounded-lg bg-gray-50 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
                       required
                     />
-                    <p className="text-sm text-gray-400 mt-2">Monday to Friday only</p>
+                    <p className="text-sm text-gray-500 mt-2">Monday to Friday only</p>
                   </div>
 
                   <div>
-                    <label className="block text-white mb-2 font-medium flex items-center gap-2">
-                      <Clock size={18} className="text-brand-green" />
+                    <label className="block text-black mb-2 font-semibold text-sm flex items-center gap-2">
+                      <Clock size={18} className="text-accent" />
                       Select Time Slot (30 min) *
                     </label>
                     <select
                       value={selectedTime}
                       onChange={(e) => setSelectedTime(e.target.value)}
-                      className="w-full px-4 py-3 rounded-lg bg-dark-blue text-white border border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green"
+                      className="w-full px-4 py-3 rounded-lg bg-gray-50 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
                       required
                     >
                       <option value="">Choose a time</option>
@@ -263,7 +269,7 @@ export default function RequestDemo() {
                         </option>
                       ))}
                     </select>
-                    <p className="text-sm text-gray-400 mt-2">9:00 AM - 7:00 PM</p>
+                    <p className="text-sm text-gray-500 mt-2">9:00 AM - 7:00 PM</p>
                   </div>
                 </div>
               </div>
@@ -271,7 +277,7 @@ export default function RequestDemo() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-brand-green hover:bg-light-green text-white font-bold py-4 px-6 rounded-lg transition-colors text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-black hover:bg-accent text-white font-bold py-4 px-6 rounded-lg transition-all duration-200 text-lg disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
               >
                 {loading ? 'Submitting...' : 'Submit Demo Request'}
               </button>

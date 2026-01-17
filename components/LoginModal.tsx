@@ -52,7 +52,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
       if (error) throw error
 
-      // Redirect to platform
       window.location.href = '/platform'
     } catch (err: any) {
       setError(err.message || 'Failed to login')
@@ -68,7 +67,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     setLoading(true)
 
     try {
-      // Create auth user with email confirmation disabled
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -89,7 +87,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         throw new Error('User creation failed')
       }
 
-      // Create user profile
       const { error: profileError } = await supabase
         .from('users')
         .insert([
@@ -105,7 +102,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
       if (profileError) {
         console.error('Profile creation error:', profileError)
-        // Continue anyway as auth user was created
       }
 
       setSuccess('Account created successfully! You can now log in.')
@@ -121,46 +117,45 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 overflow-y-auto py-8">
-      <div className="relative bg-brand-blue rounded-lg shadow-2xl w-full max-w-md p-8 border-2 border-brand-green my-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm overflow-y-auto py-8">
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 border border-gray-200 my-8 animate-fade-in">
         <button
           onClick={() => {
             onClose()
             resetForm()
             setIsSignUp(false)
           }}
-          className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+          className="absolute top-6 right-6 text-gray-400 hover:text-black transition-colors"
         >
           <X size={24} />
         </button>
 
-        <h2 className="text-3xl font-bold text-white mb-2">
+        <h2 className="text-4xl font-bold text-black mb-2">
           {isSignUp ? 'Sign Up' : 'Log In'}
         </h2>
-        <p className="text-gray-300 mb-6">
+        <p className="text-gray-600 mb-8">
           {isSignUp
             ? 'Create your Commodities Earth account'
             : 'Access the Commodities Earth Platform'}
         </p>
 
         {error && (
-          <div className="bg-red-500 bg-opacity-20 border border-red-500 text-red-200 px-4 py-3 rounded mb-4">
+          <div className="bg-red-50 border border-red-300 text-red-700 px-4 py-3 rounded-lg mb-4">
             {error}
           </div>
         )}
 
         {success && (
-          <div className="bg-green-500 bg-opacity-20 border border-green-500 text-green-200 px-4 py-3 rounded mb-4">
+          <div className="bg-green-50 border border-green-300 text-green-700 px-4 py-3 rounded-lg mb-4">
             {success}
           </div>
         )}
 
         {isSignUp ? (
-          // Sign Up Form
-          <form onSubmit={handleSignUp}>
-            <div className="grid grid-cols-2 gap-4 mb-4">
+          <form onSubmit={handleSignUp} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="firstName" className="block text-white mb-2 font-medium">
+                <label htmlFor="firstName" className="block text-black mb-2 font-medium text-sm">
                   First Name *
                 </label>
                 <input
@@ -168,14 +163,14 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                   id="firstName"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg bg-dark-blue text-white border border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green"
-                  placeholder="First name"
+                  className="w-full px-4 py-3 rounded-lg bg-gray-50 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                  placeholder="John"
                   required
                 />
               </div>
 
               <div>
-                <label htmlFor="lastName" className="block text-white mb-2 font-medium">
+                <label htmlFor="lastName" className="block text-black mb-2 font-medium text-sm">
                   Last Name *
                 </label>
                 <input
@@ -183,15 +178,15 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                   id="lastName"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg bg-dark-blue text-white border border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green"
-                  placeholder="Last name"
+                  className="w-full px-4 py-3 rounded-lg bg-gray-50 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                  placeholder="Doe"
                   required
                 />
               </div>
             </div>
 
-            <div className="mb-4">
-              <label htmlFor="email" className="block text-white mb-2 font-medium">
+            <div>
+              <label htmlFor="email" className="block text-black mb-2 font-medium text-sm">
                 Email *
               </label>
               <input
@@ -199,14 +194,14 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-dark-blue text-white border border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green"
-                placeholder="Enter your email"
+                className="w-full px-4 py-3 rounded-lg bg-gray-50 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                placeholder="john@example.com"
                 required
               />
             </div>
 
-            <div className="mb-4">
-              <label htmlFor="password" className="block text-white mb-2 font-medium">
+            <div>
+              <label htmlFor="password" className="block text-black mb-2 font-medium text-sm">
                 Password *
               </label>
               <input
@@ -214,15 +209,15 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-dark-blue text-white border border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green"
-                placeholder="Create a password (min 6 characters)"
+                className="w-full px-4 py-3 rounded-lg bg-gray-50 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                placeholder="Min. 6 characters"
                 required
                 minLength={6}
               />
             </div>
 
-            <div className="mb-4">
-              <label htmlFor="phone" className="block text-white mb-2 font-medium">
+            <div>
+              <label htmlFor="phone" className="block text-black mb-2 font-medium text-sm">
                 Phone *
               </label>
               <input
@@ -230,14 +225,14 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 id="phone"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-dark-blue text-white border border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green"
-                placeholder="Phone number"
+                className="w-full px-4 py-3 rounded-lg bg-gray-50 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                placeholder="+1 (555) 000-0000"
                 required
               />
             </div>
 
-            <div className="mb-6">
-              <label htmlFor="company" className="block text-white mb-2 font-medium">
+            <div>
+              <label htmlFor="company" className="block text-black mb-2 font-medium text-sm">
                 Company *
               </label>
               <input
@@ -245,7 +240,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 id="company"
                 value={company}
                 onChange={(e) => setCompany(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-dark-blue text-white border border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green"
+                className="w-full px-4 py-3 rounded-lg bg-gray-50 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
                 placeholder="Company name"
                 required
               />
@@ -254,26 +249,26 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-brand-green hover:bg-light-green text-white font-bold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-4"
+              className="w-full bg-black hover:bg-accent text-white font-bold py-3.5 px-6 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-6"
             >
               {loading ? 'Creating account...' : 'Sign Up'}
             </button>
 
-            <div className="text-center">
+            <div className="text-center mt-4">
               <button
                 type="button"
                 onClick={toggleMode}
-                className="text-brand-green hover:text-light-green transition-colors"
+                className="text-gray-600 hover:text-black transition-colors"
               >
-                Already have an account? <span className="font-bold">Log In</span>
+                Already have an account?{' '}
+                <span className="font-bold text-black">Log In</span>
               </button>
             </div>
           </form>
         ) : (
-          // Login Form
-          <form onSubmit={handleLogin}>
-            <div className="mb-4">
-              <label htmlFor="email" className="block text-white mb-2 font-medium">
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label htmlFor="email" className="block text-black mb-2 font-medium text-sm">
                 Email
               </label>
               <input
@@ -281,14 +276,14 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-dark-blue text-white border border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green"
+                className="w-full px-4 py-3 rounded-lg bg-gray-50 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
                 placeholder="Enter your email"
                 required
               />
             </div>
 
-            <div className="mb-6">
-              <label htmlFor="password" className="block text-white mb-2 font-medium">
+            <div>
+              <label htmlFor="password" className="block text-black mb-2 font-medium text-sm">
                 Password
               </label>
               <input
@@ -296,7 +291,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg bg-dark-blue text-white border border-brand-green focus:outline-none focus:ring-2 focus:ring-brand-green"
+                className="w-full px-4 py-3 rounded-lg bg-gray-50 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
                 placeholder="Enter your password"
                 required
               />
@@ -305,17 +300,17 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-brand-green hover:bg-light-green text-white font-bold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-4"
+              className="w-full bg-black hover:bg-accent text-white font-bold py-3.5 px-6 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-6"
             >
               {loading ? 'Logging in...' : 'Log In'}
             </button>
 
-            <div className="text-center">
-              <p className="text-gray-300 mb-2">Don't have an account?</p>
+            <div className="text-center mt-4">
+              <p className="text-gray-600 mb-2">Don't have an account?</p>
               <button
                 type="button"
                 onClick={toggleMode}
-                className="text-brand-green hover:text-light-green transition-colors font-bold text-lg"
+                className="text-black hover:text-accent transition-colors font-bold text-lg"
               >
                 Sign Up
               </button>
