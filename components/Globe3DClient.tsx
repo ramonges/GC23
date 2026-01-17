@@ -91,6 +91,68 @@ export default function Globe3DClient({ markers }: Globe3DClientProps) {
           .labelResolution(3) // Higher resolution text
       })
 
+    // Load cities data for zoom-in detail
+    fetch('https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_populated_places_simple.geojson')
+      .then(res => res.json())
+      .then(cities => {
+        // Filter for major cities (population > 500k or capitals)
+        const majorCities = cities.features
+          .filter((city: any) => {
+            const pop = city.properties.pop_max || 0
+            const isCapital = city.properties.adm0cap === 1
+            return pop > 500000 || isCapital
+          })
+          .map((city: any) => ({
+            lat: city.geometry.coordinates[1],
+            lng: city.geometry.coordinates[0],
+            name: city.properties.name,
+            population: city.properties.pop_max,
+            isCapital: city.properties.adm0cap === 1,
+            size: 0.4,
+            altitude: 0.01
+          }))
+
+        // Store cities for conditional rendering
+        let currentAltitude = 2.5
+        
+        // Update cities visibility based on zoom level
+        globe.onZoom((coords: any) => {
+          currentAltitude = coords.altitude
+          
+          // Show cities when zoomed in (altitude < 2)
+          if (currentAltitude < 2) {
+            globe
+              .htmlElementsData(majorCities)
+              .htmlElement((d: any) => {
+                const el = document.createElement('div')
+                el.innerHTML = `
+                  <div style="
+                    color: rgba(255, 255, 255, 0.9);
+                    font-size: ${d.isCapital ? '11px' : '9px'};
+                    font-weight: ${d.isCapital ? 'bold' : 'normal'};
+                    text-shadow: 0 0 3px rgba(0,0,0,0.8), 0 0 6px rgba(0,0,0,0.6);
+                    pointer-events: none;
+                    white-space: nowrap;
+                    background: ${d.isCapital ? 'rgba(0, 102, 255, 0.2)' : 'rgba(0, 0, 0, 0.3)'};
+                    padding: 2px 5px;
+                    border-radius: 3px;
+                    border: ${d.isCapital ? '1px solid rgba(0, 102, 255, 0.5)' : 'none'};
+                  ">
+                    ${d.isCapital ? '★ ' : ''}${d.name}
+                  </div>
+                `
+                return el
+              })
+              .htmlLat((d: any) => d.lat)
+              .htmlLng((d: any) => d.lng)
+              .htmlAltitude((d: any) => d.altitude)
+          } else {
+            // Hide cities when zoomed out
+            globe.htmlElementsData([])
+          }
+        })
+      })
+
     // Convert markers to globe points
     const points = markers.map(marker => ({
       lat: marker.latitude,
