@@ -63,20 +63,39 @@ export default function Globe3DClient({ markers }: Globe3DClientProps) {
           .polygonStrokeColor(() => '#555')
           .polygonAltitude(0.01)
 
-        // Add country labels - positioned above surface
-        const countryLabels = countries.features.map((country: any) => {
-          const coordinates = country.properties.LABEL_X && country.properties.LABEL_Y
-            ? [country.properties.LABEL_X, country.properties.LABEL_Y]
-            : getCountryCentroid(country)
+        // Add country labels - sized based on country area
+        const countryLabels = countries.features
+          .map((country: any) => {
+            const coordinates = country.properties.LABEL_X && country.properties.LABEL_Y
+              ? [country.properties.LABEL_X, country.properties.LABEL_Y]
+              : getCountryCentroid(country)
 
-          return {
-            lat: coordinates[1],
-            lng: coordinates[0],
-            name: country.properties.NAME,
-            size: 0.6, // Slightly larger for readability
-            altitude: 0.02, // Elevated above surface
-          }
-        })
+            // Calculate country area (rough approximation from geometry)
+            const area = calculateCountryArea(country.geometry)
+            
+            // Scale label size based on country area
+            // Small countries: 0.2-0.4, Medium: 0.4-0.7, Large: 0.7-1.2
+            let labelSize = 0.3
+            if (area > 5000000) labelSize = 1.0      // Very large (Russia, Canada, USA, China, Brazil)
+            else if (area > 2000000) labelSize = 0.85 // Large (Australia, India, Argentina)
+            else if (area > 1000000) labelSize = 0.7  // Large-medium (Algeria, Saudi Arabia)
+            else if (area > 500000) labelSize = 0.6   // Medium-large (Libya, Iran, Mongolia)
+            else if (area > 200000) labelSize = 0.5   // Medium (France, Spain, Germany)
+            else if (area > 50000) labelSize = 0.4    // Small-medium (UK, Italy, Poland)
+            else if (area > 10000) labelSize = 0.3    // Small (Belgium, Netherlands)
+            else labelSize = 0.2                      // Very small (Luxembourg, Monaco)
+
+            return {
+              lat: coordinates[1],
+              lng: coordinates[0],
+              name: country.properties.NAME,
+              size: labelSize,
+              altitude: 0.02,
+              area: area
+            }
+          })
+          // Filter out very small countries/territories at far zoom for clarity
+          .filter((country: any) => country.area > 1000) // Hide micro-states when zoomed out
 
         globe
           .labelsData(countryLabels)
@@ -84,59 +103,74 @@ export default function Globe3DClient({ markers }: Globe3DClientProps) {
           .labelLng((d: any) => d.lng)
           .labelText((d: any) => d.name)
           .labelSize((d: any) => d.size)
-          .labelAltitude((d: any) => d.altitude) // Lift labels above surface
-          .labelDotRadius(0.08) // Tiny dot under label for better visibility
-          .labelDotOrientation('bottom') // Dot below the text
-          .labelColor(() => 'rgba(255, 255, 255, 0.75)') // Slightly more opaque
-          .labelResolution(3) // Higher resolution text
+          .labelAltitude((d: any) => d.altitude)
+          .labelDotRadius((d: any) => d.size * 0.1) // Dot size proportional to label
+          .labelDotOrientation('bottom')
+          .labelColor(() => 'rgba(255, 255, 255, 0.75)')
+          .labelResolution(3)
       })
 
     // Load cities data for zoom-in detail
     fetch('https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_populated_places_simple.geojson')
       .then(res => res.json())
       .then(cities => {
-        // Filter for major cities (population > 500k or capitals)
-        const majorCities = cities.features
-          .filter((city: any) => {
-            const pop = city.properties.pop_max || 0
-            const isCapital = city.properties.adm0cap === 1
-            return pop > 500000 || isCapital
-          })
-          .map((city: any) => ({
-            lat: city.geometry.coordinates[1],
-            lng: city.geometry.coordinates[0],
-            name: city.properties.name,
-            population: city.properties.pop_max,
-            isCapital: city.properties.adm0cap === 1,
-            size: 0.4,
-            altitude: 0.01
-          }))
+        // Categorize cities by size
+        const allCities = cities.features.map((city: any) => ({
+          lat: city.geometry.coordinates[1],
+          lng: city.geometry.coordinates[0],
+          name: city.properties.name,
+          population: city.properties.pop_max || 0,
+          isCapital: city.properties.adm0cap === 1,
+          size: 0.4,
+          altitude: 0.01
+        }))
 
-        // Store cities for conditional rendering
-        let currentAltitude = 2.5
-        
+        // Different city tiers
+        const megaCities = allCities.filter((c: any) => c.population > 5000000 || c.isCapital) // 10M+ or capitals
+        const majorCities = allCities.filter((c: any) => c.population > 2000000) // 2M+
+        const mediumCities = allCities.filter((c: any) => c.population > 1000000) // 1M+
+        const allMajor = allCities.filter((c: any) => c.population > 500000) // 500K+
+
         // Update cities visibility based on zoom level
         globe.onZoom((coords: any) => {
-          currentAltitude = coords.altitude
-          
-          // Show cities when zoomed in (altitude < 2)
-          if (currentAltitude < 2) {
+          const altitude = coords.altitude
+          let citiesToShow: any[] = []
+
+          // Progressive city display based on zoom
+          if (altitude < 0.5) {
+            // Very close zoom - show all major cities (500k+)
+            citiesToShow = allMajor
+          } else if (altitude < 0.8) {
+            // Close zoom - show medium cities (1M+)
+            citiesToShow = mediumCities
+          } else if (altitude < 1.2) {
+            // Medium zoom - show major cities (2M+)
+            citiesToShow = majorCities
+          } else if (altitude < 1.5) {
+            // Far zoom - only mega cities and capitals
+            citiesToShow = megaCities
+          } else {
+            // Very far - no cities
+            citiesToShow = []
+          }
+
+          if (citiesToShow.length > 0) {
             globe
-              .htmlElementsData(majorCities)
+              .htmlElementsData(citiesToShow)
               .htmlElement((d: any) => {
                 const el = document.createElement('div')
                 el.innerHTML = `
                   <div style="
                     color: rgba(255, 255, 255, 0.9);
-                    font-size: ${d.isCapital ? '11px' : '9px'};
+                    font-size: ${d.isCapital ? '10px' : '8px'};
                     font-weight: ${d.isCapital ? 'bold' : 'normal'};
-                    text-shadow: 0 0 3px rgba(0,0,0,0.8), 0 0 6px rgba(0,0,0,0.6);
+                    text-shadow: 0 0 3px rgba(0,0,0,0.9), 0 0 6px rgba(0,0,0,0.7);
                     pointer-events: none;
                     white-space: nowrap;
-                    background: ${d.isCapital ? 'rgba(0, 102, 255, 0.2)' : 'rgba(0, 0, 0, 0.3)'};
-                    padding: 2px 5px;
+                    background: ${d.isCapital ? 'rgba(0, 102, 255, 0.3)' : 'rgba(0, 0, 0, 0.4)'};
+                    padding: 2px 4px;
                     border-radius: 3px;
-                    border: ${d.isCapital ? '1px solid rgba(0, 102, 255, 0.5)' : 'none'};
+                    border: ${d.isCapital ? '1px solid rgba(0, 102, 255, 0.6)' : 'none'};
                   ">
                     ${d.isCapital ? '★ ' : ''}${d.name}
                   </div>
@@ -147,7 +181,6 @@ export default function Globe3DClient({ markers }: Globe3DClientProps) {
               .htmlLng((d: any) => d.lng)
               .htmlAltitude((d: any) => d.altitude)
           } else {
-            // Hide cities when zoomed out
             globe.htmlElementsData([])
           }
         })
@@ -255,6 +288,38 @@ export default function Globe3DClient({ markers }: Globe3DClientProps) {
     }, [0, 0])
 
     return [sum[0] / coords.length, sum[1] / coords.length]
+  }
+
+  const calculateCountryArea = (geometry: any) => {
+    // Rough area calculation based on bounding box
+    try {
+      let allCoords: number[][] = []
+      
+      if (geometry.type === 'Polygon') {
+        allCoords = geometry.coordinates[0]
+      } else if (geometry.type === 'MultiPolygon') {
+        allCoords = geometry.coordinates[0][0]
+      }
+
+      if (allCoords.length === 0) return 0
+
+      const lats = allCoords.map((c: number[]) => c[1])
+      const lngs = allCoords.map((c: number[]) => c[0])
+
+      const minLat = Math.min(...lats)
+      const maxLat = Math.max(...lats)
+      const minLng = Math.min(...lngs)
+      const maxLng = Math.max(...lngs)
+
+      // Approximate area in km² (very rough)
+      const latDiff = maxLat - minLat
+      const lngDiff = maxLng - minLng
+      const area = Math.abs(latDiff * lngDiff) * 12100 // Rough conversion to km²
+
+      return area
+    } catch (e) {
+      return 10000 // Default small size
+    }
   }
 
   return (
