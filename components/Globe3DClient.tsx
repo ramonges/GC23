@@ -32,8 +32,7 @@ export default function Globe3DClient({ markers }: Globe3DClientProps) {
     if (!globeEl.current) return
 
     // Initialize Globe
-    const globe = Globe()
-      (globeEl.current)
+    const globe = new Globe(globeEl.current)
       .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
       .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
       .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
