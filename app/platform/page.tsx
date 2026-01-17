@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import PlatformSidebar from '@/components/PlatformSidebar'
 import EarthMap from '@/components/EarthMap'
+import OptionsDashboard from '@/components/OptionsDashboard'
 import { supabase } from '@/lib/supabase'
 
 export default function Platform() {
@@ -73,15 +74,7 @@ export default function Platform() {
         <div className="flex-1 flex flex-col">
           {currentPage === 'earth-map' && <EarthMap />}
           
-          {currentPage === 'options' && (
-            <div className="flex-1 flex items-center justify-center bg-gray-50">
-              <div className="text-center">
-                <div className="text-6xl mb-6">📊</div>
-                <h2 className="text-5xl font-bold text-black mb-4">Commodities Options</h2>
-                <p className="text-gray-600 text-xl">Coming Soon</p>
-              </div>
-            </div>
-          )}
+          {currentPage === 'options' && <OptionsDashboard />}
           
           {currentPage === 'futures' && (
             <div className="flex-1 flex items-center justify-center bg-gray-50">
