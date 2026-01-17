@@ -106,6 +106,14 @@ ALTER TABLE public.commodity_locations ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Authenticated users can read commodity locations" ON public.commodity_locations
   FOR SELECT USING (auth.role() = 'authenticated');
 
+-- Allow service role to insert commodity locations (for data scraping)
+CREATE POLICY "Service role can insert commodity locations" ON public.commodity_locations
+  FOR INSERT WITH CHECK (true);
+
+-- Authenticated users can insert commodity locations
+CREATE POLICY "Authenticated users can insert commodity locations" ON public.commodity_locations
+  FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
 -- Create indexes for better query performance
 CREATE INDEX idx_commodity_locations_type ON public.commodity_locations(commodity_type);
 CREATE INDEX idx_commodity_locations_name ON public.commodity_locations(commodity_name);
