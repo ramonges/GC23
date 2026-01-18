@@ -194,19 +194,20 @@ const shippingRoutes: ShippingRoute[] = [
       { lat: 9.0, lng: -79.5 }, // Panama Canal (Pacific side)
       { lat: 9.0, lng: -79.5 }, // Panama Canal
       { lat: 9.5, lng: -79.5 }, // Panama Canal (Atlantic side)
-      { lat: 10.0, lng: -79.0 }, // Caribbean Sea (off Panama)
-      { lat: 12.0, lng: -78.0 }, // Caribbean Sea (off Colombia)
-      { lat: 15.0, lng: -75.0 }, // Caribbean Sea (off Jamaica)
-      { lat: 18.0, lng: -72.0 }, // Caribbean Sea (off Haiti/Dominican Republic)
-      { lat: 22.0, lng: -70.0 }, // North Atlantic (off Bahamas)
-      { lat: 25.0, lng: -72.0 }, // North Atlantic (off Bahamas)
-      { lat: 30.0, lng: -73.0 }, // North Atlantic (off US East Coast)
-      { lat: 35.0, lng: -73.5 }, // North Atlantic (off US East Coast)
-      { lat: 40.0, lng: -73.5 }, // North Atlantic (off New York)
-      { lat: 40.7, lng: -73.8 }, // New York approach
+      { lat: 10.0, lng: -79.0 }, // Caribbean Sea (off Panama - at sea)
+      { lat: 12.0, lng: -78.0 }, // Caribbean Sea (off Colombia - at sea)
+      { lat: 15.0, lng: -75.0 }, // Caribbean Sea (off Jamaica - at sea)
+      { lat: 18.0, lng: -72.0 }, // Caribbean Sea (off Haiti/Dominican Republic - at sea)
+      { lat: 20.0, lng: -70.0 }, // Atlantic (off Dominican Republic - at sea)
+      { lat: 22.0, lng: -70.0 }, // Atlantic (off Bahamas - at sea)
+      { lat: 25.0, lng: -70.5 }, // Atlantic (off Bahamas - at sea)
+      { lat: 30.0, lng: -72.0 }, // Atlantic (off US East Coast - at sea)
+      { lat: 35.0, lng: -73.0 }, // Atlantic (off US East Coast - at sea)
+      { lat: 40.0, lng: -73.5 }, // Atlantic (off US East Coast - at sea)
+      { lat: 40.7, lng: -73.8 }, // New York approach (at sea)
     ]
   },
-  // C5: Asia ↔ Middle East (via Indian Ocean)
+  // C5: Asia ↔ Middle East (via Indian Ocean, around Arabian Peninsula)
   { 
     id: 'C5', 
     name: 'Asia ↔ Middle East', 
@@ -225,9 +226,14 @@ const shippingRoutes: ShippingRoute[] = [
       { lat: 8.0, lng: 77.0 }, // Indian Ocean
       { lat: 10.0, lng: 73.0 }, // Indian Ocean
       { lat: 12.0, lng: 68.0 }, // Indian Ocean
-      { lat: 15.0, lng: 63.0 }, // Arabian Sea
-      { lat: 18.0, lng: 58.0 }, // Arabian Sea
-      { lat: 22.0, lng: 56.0 }, // Arabian Sea
+      { lat: 15.0, lng: 63.0 }, // Arabian Sea (off India)
+      { lat: 18.0, lng: 60.0 }, // Arabian Sea (off Pakistan)
+      { lat: 20.0, lng: 58.0 }, // Arabian Sea (off Oman)
+      { lat: 22.0, lng: 58.0 }, // Gulf of Oman (off Oman)
+      { lat: 24.0, lng: 57.0 }, // Gulf of Oman (off UAE)
+      { lat: 24.5, lng: 56.0 }, // Persian Gulf (off UAE)
+      { lat: 25.0, lng: 55.0 }, // Persian Gulf (off UAE)
+      { lat: 25.2, lng: 55.2 }, // Dubai approach
     ]
   },
   // C6: Asia ↔ Indian Subcontinent
@@ -482,7 +488,7 @@ const shippingRoutes: ShippingRoute[] = [
       { lat: 19.0, lng: 72.8 }, // Mumbai approach
     ]
   },
-  // C14: North America ↔ South America (East Coast - along Atlantic)
+  // C14: North America ↔ South America (East Coast - along Atlantic, staying off coast)
   { 
     id: 'C14', 
     name: 'North America ↔ South America (East)', 
@@ -490,34 +496,34 @@ const shippingRoutes: ShippingRoute[] = [
     endLat: -23.5, endLng: -46.6, 
     color: '#34D399',
     waypoints: [
-      { lat: 40.5, lng: -73.5 }, // North Atlantic (off New York)
-      { lat: 39.0, lng: -72.0 }, // North Atlantic (off US East Coast)
-      { lat: 37.0, lng: -71.0 }, // North Atlantic (off US East Coast)
-      { lat: 35.0, lng: -70.0 }, // North Atlantic (off US East Coast)
-      { lat: 32.0, lng: -70.0 }, // North Atlantic (off US East Coast)
-      { lat: 30.0, lng: -70.0 }, // North Atlantic (off US East Coast)
-      { lat: 27.0, lng: -70.0 }, // North Atlantic (off Florida)
-      { lat: 25.0, lng: -70.0 }, // North Atlantic (off Florida)
-      { lat: 22.0, lng: -68.0 }, // Caribbean Sea (off Bahamas)
-      { lat: 20.0, lng: -68.0 }, // Caribbean Sea (off Dominican Republic)
-      { lat: 18.0, lng: -66.0 }, // Caribbean Sea (off Puerto Rico)
-      { lat: 15.0, lng: -65.0 }, // Caribbean Sea (off Venezuela)
-      { lat: 12.0, lng: -63.0 }, // Caribbean Sea (off Venezuela)
-      { lat: 10.0, lng: -62.0 }, // Caribbean Sea (off Venezuela)
-      { lat: 8.0, lng: -60.0 }, // Caribbean Sea (off Venezuela)
-      { lat: 5.0, lng: -58.0 }, // Atlantic (off Guyana)
-      { lat: 2.0, lng: -56.0 }, // Atlantic (off Suriname)
-      { lat: 0.0, lng: -54.0 }, // Atlantic (off French Guiana)
-      { lat: -2.0, lng: -52.0 }, // Atlantic (off Brazil - north coast)
-      { lat: -5.0, lng: -50.0 }, // Atlantic (off Brazil - north coast)
-      { lat: -8.0, lng: -48.0 }, // Atlantic (off Brazil - northeast coast)
-      { lat: -10.0, lng: -46.0 }, // Atlantic (off Brazil - northeast coast)
-      { lat: -12.0, lng: -45.0 }, // Atlantic (off Brazil - northeast coast)
-      { lat: -15.0, lng: -46.0 }, // Atlantic (off Brazil - east coast)
-      { lat: -18.0, lng: -46.5 }, // Atlantic (off Brazil - east coast)
-      { lat: -20.0, lng: -46.5 }, // Atlantic (off Brazil - east coast)
-      { lat: -22.0, lng: -46.5 }, // Atlantic (off Brazil - east coast)
-      { lat: -23.0, lng: -46.5 }, // São Paulo approach
+      { lat: 40.5, lng: -73.5 }, // North Atlantic (off New York - at sea)
+      { lat: 39.0, lng: -72.5 }, // North Atlantic (off US East Coast - at sea)
+      { lat: 37.0, lng: -71.5 }, // North Atlantic (off US East Coast - at sea)
+      { lat: 35.0, lng: -70.5 }, // North Atlantic (off US East Coast - at sea)
+      { lat: 32.0, lng: -70.5 }, // North Atlantic (off US East Coast - at sea)
+      { lat: 30.0, lng: -70.5 }, // North Atlantic (off US East Coast - at sea)
+      { lat: 27.0, lng: -70.5 }, // North Atlantic (off Florida - at sea)
+      { lat: 25.0, lng: -70.5 }, // North Atlantic (off Florida - at sea)
+      { lat: 22.0, lng: -69.0 }, // Caribbean Sea (off Bahamas - at sea)
+      { lat: 20.0, lng: -68.5 }, // Caribbean Sea (off Dominican Republic - at sea)
+      { lat: 18.0, lng: -66.5 }, // Caribbean Sea (off Puerto Rico - at sea)
+      { lat: 15.0, lng: -65.5 }, // Caribbean Sea (off Venezuela - at sea)
+      { lat: 12.0, lng: -63.5 }, // Caribbean Sea (off Venezuela - at sea)
+      { lat: 10.0, lng: -62.5 }, // Caribbean Sea (off Venezuela - at sea)
+      { lat: 8.0, lng: -60.5 }, // Caribbean Sea (off Venezuela - at sea)
+      { lat: 5.0, lng: -58.5 }, // Atlantic (off Guyana - at sea)
+      { lat: 2.0, lng: -56.5 }, // Atlantic (off Suriname - at sea)
+      { lat: 0.0, lng: -54.5 }, // Atlantic (off French Guiana - at sea)
+      { lat: -2.0, lng: -52.5 }, // Atlantic (off Brazil - north coast - at sea)
+      { lat: -5.0, lng: -50.5 }, // Atlantic (off Brazil - north coast - at sea)
+      { lat: -8.0, lng: -48.5 }, // Atlantic (off Brazil - northeast coast - at sea)
+      { lat: -10.0, lng: -46.5 }, // Atlantic (off Brazil - northeast coast - at sea)
+      { lat: -12.0, lng: -45.5 }, // Atlantic (off Brazil - northeast coast - at sea)
+      { lat: -15.0, lng: -46.5 }, // Atlantic (off Brazil - east coast - at sea)
+      { lat: -18.0, lng: -46.8 }, // Atlantic (off Brazil - east coast - at sea)
+      { lat: -20.0, lng: -46.8 }, // Atlantic (off Brazil - east coast - at sea)
+      { lat: -22.0, lng: -46.8 }, // Atlantic (off Brazil - east coast - at sea)
+      { lat: -23.0, lng: -46.7 }, // São Paulo approach (at sea)
     ]
   },
   // C15: North America ↔ South America (West Coast)
@@ -634,39 +640,39 @@ const shippingRoutes: ShippingRoute[] = [
     endLat: -33.9, endLng: 18.4, 
     color: '#FBBF24',
     waypoints: [
-      { lat: 25.0, lng: 55.0 }, // Persian Gulf (off UAE)
-      { lat: 24.5, lng: 54.5 }, // Persian Gulf (off UAE)
-      { lat: 24.0, lng: 54.0 }, // Persian Gulf (off UAE)
-      { lat: 23.5, lng: 53.5 }, // Persian Gulf (off UAE)
-      { lat: 23.0, lng: 53.0 }, // Persian Gulf (off UAE)
-      { lat: 22.5, lng: 52.5 }, // Persian Gulf exit (off UAE)
-      { lat: 24.0, lng: 57.0 }, // Gulf of Oman (off UAE/Oman)
-      { lat: 22.0, lng: 58.0 }, // Gulf of Oman (off Oman)
-      { lat: 20.0, lng: 58.0 }, // Gulf of Oman (off Oman)
-      { lat: 18.0, lng: 57.0 }, // Arabian Sea (off Oman)
-      { lat: 16.0, lng: 56.0 }, // Arabian Sea (off Oman)
-      { lat: 14.0, lng: 55.0 }, // Arabian Sea (off Yemen)
-      { lat: 12.0, lng: 54.0 }, // Arabian Sea (off Yemen)
-      { lat: 10.0, lng: 52.0 }, // Arabian Sea (off Somalia)
-      { lat: 8.0, lng: 50.0 }, // Arabian Sea (off Somalia)
-      { lat: 6.0, lng: 48.0 }, // Indian Ocean (off Somalia)
-      { lat: 4.0, lng: 46.0 }, // Indian Ocean (off Somalia)
-      { lat: 2.0, lng: 44.0 }, // Indian Ocean (off Somalia)
-      { lat: 0.0, lng: 42.0 }, // Indian Ocean (off Kenya)
-      { lat: -2.0, lng: 40.0 }, // Indian Ocean (off Kenya - Mombasa area)
-      { lat: -4.0, lng: 39.0 }, // Indian Ocean (off Tanzania - Dar es Salaam area)
-      { lat: -6.0, lng: 39.5 }, // Indian Ocean (off Tanzania)
-      { lat: -8.0, lng: 39.0 }, // Indian Ocean (off Tanzania)
-      { lat: -10.0, lng: 40.0 }, // Indian Ocean (off Mozambique)
-      { lat: -12.0, lng: 40.5 }, // Indian Ocean (off Mozambique)
-      { lat: -15.0, lng: 40.0 }, // Indian Ocean (off Mozambique - Maputo area)
-      { lat: -18.0, lng: 38.0 }, // Indian Ocean (off Mozambique)
-      { lat: -20.0, lng: 35.0 }, // Indian Ocean (off Mozambique)
-      { lat: -25.0, lng: 32.0 }, // Indian Ocean (off South Africa - Durban area)
-      { lat: -28.0, lng: 30.0 }, // Indian Ocean (off South Africa)
-      { lat: -30.0, lng: 25.0 }, // Indian Ocean (off South Africa)
-      { lat: -32.0, lng: 20.0 }, // Indian Ocean (off South Africa)
-      { lat: -33.0, lng: 18.5 }, // Cape Town approach
+      { lat: 25.0, lng: 55.0 }, // Persian Gulf (off UAE - at sea)
+      { lat: 24.5, lng: 54.5 }, // Persian Gulf (off UAE - at sea)
+      { lat: 24.0, lng: 54.0 }, // Persian Gulf (off UAE - at sea)
+      { lat: 23.5, lng: 53.5 }, // Persian Gulf (off UAE - at sea)
+      { lat: 23.0, lng: 53.0 }, // Persian Gulf (off UAE - at sea)
+      { lat: 22.5, lng: 52.5 }, // Persian Gulf exit (off UAE - at sea)
+      { lat: 24.0, lng: 57.0 }, // Gulf of Oman (off UAE/Oman - at sea)
+      { lat: 22.0, lng: 58.0 }, // Gulf of Oman (off Oman - at sea)
+      { lat: 20.0, lng: 58.0 }, // Gulf of Oman (off Oman - at sea)
+      { lat: 18.0, lng: 57.0 }, // Arabian Sea (off Oman - at sea)
+      { lat: 16.0, lng: 56.0 }, // Arabian Sea (off Oman - at sea)
+      { lat: 14.0, lng: 55.0 }, // Arabian Sea (off Yemen - at sea)
+      { lat: 12.0, lng: 54.0 }, // Arabian Sea (off Yemen - at sea)
+      { lat: 10.0, lng: 52.0 }, // Arabian Sea (off Somalia - at sea)
+      { lat: 8.0, lng: 50.0 }, // Arabian Sea (off Somalia - at sea)
+      { lat: 6.0, lng: 48.0 }, // Indian Ocean (off Somalia - at sea)
+      { lat: 4.0, lng: 46.0 }, // Indian Ocean (off Somalia - at sea)
+      { lat: 2.0, lng: 44.0 }, // Indian Ocean (off Somalia - at sea)
+      { lat: 0.0, lng: 42.0 }, // Indian Ocean (off Kenya - at sea)
+      { lat: -2.0, lng: 40.0 }, // Indian Ocean (off Kenya - Mombasa area - at sea)
+      { lat: -4.0, lng: 39.5 }, // Indian Ocean (off Tanzania - Dar es Salaam area - at sea)
+      { lat: -6.0, lng: 39.5 }, // Indian Ocean (off Tanzania - at sea)
+      { lat: -8.0, lng: 39.5 }, // Indian Ocean (off Tanzania - at sea)
+      { lat: -10.0, lng: 40.0 }, // Indian Ocean (off Mozambique - at sea)
+      { lat: -12.0, lng: 40.5 }, // Indian Ocean (off Mozambique - at sea)
+      { lat: -15.0, lng: 40.5 }, // Indian Ocean (off Mozambique - Maputo area - at sea)
+      { lat: -18.0, lng: 38.5 }, // Indian Ocean (off Mozambique - at sea)
+      { lat: -20.0, lng: 35.5 }, // Indian Ocean (off Mozambique - at sea)
+      { lat: -25.0, lng: 32.5 }, // Indian Ocean (off South Africa - Durban area - at sea)
+      { lat: -28.0, lng: 30.5 }, // Indian Ocean (off South Africa - at sea)
+      { lat: -30.0, lng: 25.5 }, // Indian Ocean (off South Africa - at sea)
+      { lat: -32.0, lng: 20.5 }, // Indian Ocean (off South Africa - at sea)
+      { lat: -33.0, lng: 18.5 }, // Cape Town approach (at sea)
     ]
   },
   // C19: Intra-Europe (North Sea / Baltic routes - maritime only)
