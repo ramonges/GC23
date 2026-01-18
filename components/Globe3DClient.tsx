@@ -31,13 +31,28 @@ interface ShippingRoute {
   waypoints?: Array<{ lat: number; lng: number }>
 }
 
+interface RefineryData {
+  id: string
+  name: string
+  operator?: string
+  country: string
+  city?: string
+  address?: string
+  latitude: number
+  longitude: number
+  capacity_bpd: number
+  crude_types_accepted: string[]
+  operational_status?: string
+}
+
 interface Globe3DClientProps {
   markers: CommodityData[]
   showCities?: boolean
   routes?: ShippingRoute[]
+  refineries?: RefineryData[]
 }
 
-export default function Globe3DClient({ markers, showCities = true, routes = [] }: Globe3DClientProps) {
+export default function Globe3DClient({ markers, showCities = true, routes = [], refineries = [] }: Globe3DClientProps) {
   const globeEl = useRef<HTMLDivElement>(null)
   const globeRef = useRef<any>(null)
   const currentAltitudeRef = useRef<number>(2.5)
@@ -216,15 +231,43 @@ export default function Globe3DClient({ markers, showCities = true, routes = [] 
       size: 0.05, // Much smaller altitude
       color: getCommodityColor(marker.commodity_type),
       label: marker.title,
-      data: marker
+      data: marker,
+      type: 'commodity'
     }))
+
+    // Convert refineries to globe points with different styling
+    const refineryPoints = refineries.map(refinery => {
+      // Determine color based on crude types accepted
+      let color = '#6B7280' // Default gray
+      if (refinery.crude_types_accepted.includes('extra_heavy')) {
+        color = '#EF4444' // Red for extra heavy
+      } else if (refinery.crude_types_accepted.includes('medium')) {
+        color = '#F59E0B' // Orange for medium
+      } else if (refinery.crude_types_accepted.includes('light')) {
+        color = '#10B981' // Green for light only
+      }
+
+      return {
+        lat: refinery.latitude,
+        lng: refinery.longitude,
+        size: 0.08, // Slightly larger than commodity markers
+        color: color,
+        label: refinery.name,
+        data: refinery,
+        type: 'refinery',
+        capacity: refinery.capacity_bpd
+      }
+    })
+
+    // Combine all points
+    const allPoints = [...points, ...refineryPoints]
 
     // Add points
     globe
-      .pointsData(points)
+      .pointsData(allPoints)
       .pointAltitude('size')
       .pointColor('color')
-      .pointRadius(0.15) // Smaller radius for subtle points
+      .pointRadius((d: any) => d.type === 'refinery' ? 0.25 : 0.15) // Larger radius for refineries
       .pointsMerge(false)
       .pointLabel((d: any) => `
         <div style="
@@ -237,28 +280,48 @@ export default function Globe3DClient({ markers, showCities = true, routes = [] 
           box-shadow: 0 10px 40px rgba(0,0,0,0.5);
         ">
           <div style="font-size: 18px; font-weight: bold; margin-bottom: 10px; color: ${d.color};">
-            ${d.data.title}
+            ${d.type === 'refinery' ? d.data.name : d.data.title}
           </div>
-          <div style="font-size: 14px; margin-bottom: 8px;">
-            <strong>Owner:</strong> ${d.data.owner}
-          </div>
-          <div style="font-size: 14px; margin-bottom: 8px;">
-            <strong>Type:</strong> ${d.data.commodity_type} - ${d.data.commodity_name}
-          </div>
-          <div style="font-size: 14px; margin-bottom: 8px;">
-            <strong>Location:</strong> ${d.data.address}
-          </div>
-          ${d.data.supply_volume > 0 ? `
+          ${d.type === 'refinery' ? `
             <div style="font-size: 14px; margin-bottom: 8px;">
-              <strong>Supply:</strong> ${d.data.supply_volume.toLocaleString()} metric tonnes
+              <strong>Operator:</strong> ${d.data.operator || 'N/A'}
             </div>
-          ` : ''}
-          ${d.data.long_term_contract ? `
-            <div style="font-size: 14px; color: #10B981;">
-              ✓ Long-term Contract
+            <div style="font-size: 14px; margin-bottom: 8px;">
+              <strong>Location:</strong> ${d.data.city || ''}${d.data.city && d.data.country ? ', ' : ''}${d.data.country}
+            </div>
+            <div style="font-size: 14px; margin-bottom: 8px;">
+              <strong>Capacity:</strong> ${d.capacity.toLocaleString()} bpd
+            </div>
+            <div style="font-size: 14px; margin-bottom: 8px;">
+              <strong>Crude Types:</strong> ${d.data.crude_types_accepted.map((t: string) => {
+                if (t === 'light') return 'Light';
+                if (t === 'medium') return 'Medium';
+                if (t === 'extra_heavy') return 'Extra Heavy';
+                return t;
+              }).join(', ')}
+            </div>
+          ` : `
+            <div style="font-size: 14px; margin-bottom: 8px;">
+              <strong>Owner:</strong> ${d.data.owner}
+            </div>
+            <div style="font-size: 14px; margin-bottom: 8px;">
+              <strong>Type:</strong> ${d.data.commodity_type} - ${d.data.commodity_name}
+            </div>
+            <div style="font-size: 14px; margin-bottom: 8px;">
+              <strong>Location:</strong> ${d.data.address}
+            </div>
+            ${d.data.supply_volume > 0 ? `
+              <div style="font-size: 14px; margin-bottom: 8px;">
+                <strong>Supply:</strong> ${d.data.supply_volume.toLocaleString()} metric tonnes
+              </div>
+            ` : ''}
+            ${d.data.long_term_contract ? `
+              <div style="font-size: 14px; color: #10B981;">
+                ✓ Long-term Contract
               ${d.data.contract_with ? ` with ${d.data.contract_with}` : ''}
-            </div>
-          ` : ''}
+              </div>
+            ` : ''}
+          `}
         </div>
       `)
       .onPointClick((point: any) => {
@@ -336,7 +399,7 @@ export default function Globe3DClient({ markers, showCities = true, routes = [] 
         globeRef.current._destructor()
       }
     }
-  }, [markers, routes])
+  }, [markers, routes, refineries])
 
   // Handle showCities toggle
   useEffect(() => {

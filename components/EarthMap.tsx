@@ -37,6 +37,20 @@ interface CommodityData {
   concentration_level?: string
 }
 
+interface RefineryData {
+  id: string
+  name: string
+  operator?: string
+  country: string
+  city?: string
+  address?: string
+  latitude: number
+  longitude: number
+  capacity_bpd: number
+  crude_types_accepted: string[] // ['light', 'medium', 'extra_heavy']
+  operational_status?: string
+}
+
 const commodityCategories = {
   Energy: ['Crude Oil', 'Natural Gas', 'LNG', 'Gas Condensate', 'Uranium', 'Coal'],
   Metals: ['Gold', 'Silver', 'Copper', 'Steel', 'Lithium', 'Iron Ore', 'Platinum', 'Silicon', 'Titanium'],
@@ -852,6 +866,9 @@ export default function EarthMap() {
     concentrationLevel: '',
   })
   const [markers, setMarkers] = useState<CommodityData[]>([])
+  const [refineries, setRefineries] = useState<RefineryData[]>([])
+  const [showRefineries, setShowRefineries] = useState(false)
+  const [refineryFilter, setRefineryFilter] = useState<Set<string>>(new Set(['light', 'medium', 'extra_heavy']))
 
   const fetchData = useCallback(async (ignoreCompanyAndStorage = false) => {
     try {
@@ -891,6 +908,35 @@ export default function EarthMap() {
       fetchData(true) // Ignore company and storage filters for auto-load
     }
   }, [selectedCategory, selectedCommodity, fetchData])
+
+  const fetchRefineries = useCallback(async () => {
+    try {
+      let query = supabase.from('refineries').select('*')
+      
+      // Filter by crude types if any are selected
+      if (refineryFilter.size > 0 && refineryFilter.size < 3) {
+        // If not all types selected, filter by crude_types_accepted array
+        query = query.contains('crude_types_accepted', Array.from(refineryFilter))
+      }
+
+      const { data, error } = await query
+
+      if (error) throw error
+
+      setRefineries(data || [])
+    } catch (err) {
+      console.error('Error fetching refineries:', err)
+    }
+  }, [refineryFilter])
+
+  // Fetch refineries when filter changes
+  useEffect(() => {
+    if (showRefineries) {
+      fetchRefineries()
+    } else {
+      setRefineries([])
+    }
+  }, [showRefineries, refineryFilter, fetchRefineries])
 
   const handleSearch = async () => {
     await fetchData(false) // Apply all filters including company and storage
@@ -1098,6 +1144,50 @@ export default function EarthMap() {
           </div>
         )}
 
+        {/* Refineries Section - Only show when checkbox is selected */}
+        {showRefineries && (
+          <div className="mt-6 pt-4 border-t border-gray-700">
+            <p className="text-white font-semibold mb-3 flex items-center gap-2">
+              <Filter size={16} />
+              Refinery Crude Types
+            </p>
+            <div className="space-y-2">
+              {[
+                { id: 'light', label: 'Light Crude', color: '#10B981' },
+                { id: 'medium', label: 'Medium Crude', color: '#F59E0B' },
+                { id: 'extra_heavy', label: 'Extra Heavy Crude', color: '#EF4444' },
+              ].map((type) => (
+                <label
+                  key={type.id}
+                  className="flex items-center gap-2.5 text-white cursor-pointer hover:text-blue-400 transition-colors group"
+                >
+                  <input
+                    type="checkbox"
+                    checked={refineryFilter.has(type.id)}
+                    onChange={(e) => {
+                      const newSet = new Set(refineryFilter)
+                      if (e.target.checked) {
+                        newSet.add(type.id)
+                      } else {
+                        newSet.delete(type.id)
+                      }
+                      setRefineryFilter(newSet)
+                    }}
+                    className="w-5 h-5 rounded-md border-2 border-gray-500 bg-gray-800 text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 focus:border-blue-500 transition-all duration-200 cursor-pointer checked:bg-blue-500 checked:border-blue-500 hover:border-blue-400"
+                  />
+                  <span className="font-medium flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full" style={{ backgroundColor: type.color }}></span>
+                    {type.label}
+                  </span>
+                </label>
+              ))}
+            </div>
+            <p className="text-gray-400 text-xs mt-3">
+              Showing {refineries.length} refiner{refineries.length !== 1 ? 'ies' : 'y'}
+            </p>
+          </div>
+        )}
+
         {/* Shipping Routes Section - Only show when checkbox is selected */}
         {showShippingRoutes && (
           <div className="mt-6 pt-4 border-t border-gray-700">
@@ -1162,6 +1252,7 @@ export default function EarthMap() {
           markers={markers} 
           showCities={showCities} 
           routes={shippingRoutes.filter(r => enabledRoutes.has(r.id))}
+          refineries={showRefineries ? refineries : []}
         />
 
         {/* Results Counter */}

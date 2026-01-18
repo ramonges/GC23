@@ -32,10 +32,25 @@ interface ShippingRoute {
   waypoints?: Array<{ lat: number; lng: number }>
 }
 
+interface RefineryData {
+  id: string
+  name: string
+  operator?: string
+  country: string
+  city?: string
+  address?: string
+  latitude: number
+  longitude: number
+  capacity_bpd: number
+  crude_types_accepted: string[]
+  operational_status?: string
+}
+
 interface Globe3DProps {
   markers: CommodityData[]
   showCities?: boolean
   routes?: ShippingRoute[]
+  refineries?: RefineryData[]
 }
 
 const Globe3DClient = dynamic(() => import('./Globe3DClient'), {
@@ -50,6 +65,6 @@ const Globe3DClient = dynamic(() => import('./Globe3DClient'), {
   ),
 })
 
-export default function Globe3D({ markers, showCities, routes }: Globe3DProps) {
-  return <Globe3DClient markers={markers} showCities={showCities} routes={routes} />
+export default function Globe3D({ markers, showCities, routes, refineries = [] }: Globe3DProps) {
+  return <Globe3DClient markers={markers} showCities={showCities} routes={routes} refineries={refineries} />
 }

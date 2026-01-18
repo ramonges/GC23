@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "scrape:oil": "tsx scripts/scrape-oil-data.ts"
+    "scrape:oil": "tsx scripts/scrape-oil-data.ts",
+    "import:refineries": "tsx scripts/import-refineries.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.3",
