@@ -473,7 +473,7 @@ const shippingRoutes: ShippingRoute[] = [
       { lat: 25.2, lng: 55.2 }, // Dubai approach
     ]
   },
-  // C13: Europe ↔ Indian Subcontinent (via Suez, around Arabian Peninsula)
+  // C13: Europe ↔ Indian Subcontinent (via Suez, around Spain, around Arabian Peninsula)
   { 
     id: 'C13', 
     name: 'Europe ↔ Indian Subcontinent', 
@@ -481,18 +481,28 @@ const shippingRoutes: ShippingRoute[] = [
     endLat: 19.1, endLng: 72.9, 
     color: '#22D3EE',
     waypoints: [
-      { lat: 51.0, lng: 0.0 }, // English Channel
-      { lat: 50.0, lng: 2.0 }, // English Channel
-      { lat: 48.0, lng: 5.0 }, // North Sea (off Netherlands)
-      { lat: 45.0, lng: 8.0 }, // Mediterranean (off France/Italy)
-      { lat: 42.0, lng: 12.0 }, // Mediterranean (off Italy)
-      { lat: 40.0, lng: 15.0 }, // Mediterranean (off Italy)
-      { lat: 38.0, lng: 18.0 }, // Mediterranean (south of Italy)
-      { lat: 36.0, lng: 20.0 }, // Mediterranean (south of Italy)
-      { lat: 35.0, lng: 22.0 }, // Eastern Mediterranean (off Greece)
-      { lat: 35.0, lng: 25.0 }, // Eastern Mediterranean (off Cyprus)
-      { lat: 33.0, lng: 27.0 }, // Eastern Mediterranean (off Egypt)
-      { lat: 31.0, lng: 29.0 }, // Eastern Mediterranean (off Egypt)
+      { lat: 51.0, lng: 0.0 }, // English Channel (off UK - at sea)
+      { lat: 50.0, lng: -2.0 }, // English Channel (off UK - at sea)
+      { lat: 49.0, lng: -5.0 }, // Celtic Sea (off UK/Ireland - at sea)
+      { lat: 48.0, lng: -8.0 }, // Bay of Biscay (off France - at sea)
+      { lat: 45.0, lng: -10.0 }, // Atlantic (off France - at sea)
+      { lat: 42.0, lng: -10.0 }, // Atlantic (off Spain - at sea)
+      { lat: 40.0, lng: -9.0 }, // Atlantic (off Spain - at sea)
+      { lat: 38.0, lng: -8.0 }, // Atlantic (off Portugal - at sea)
+      { lat: 36.0, lng: -7.0 }, // Atlantic (off Portugal - at sea)
+      { lat: 36.0, lng: -6.0 }, // Strait of Gibraltar approach (off Spain - at sea)
+      { lat: 35.9, lng: -5.3 }, // Strait of Gibraltar
+      { lat: 36.0, lng: -4.0 }, // Mediterranean (off Spain - at sea)
+      { lat: 37.0, lng: -1.0 }, // Mediterranean (off Spain - at sea)
+      { lat: 38.0, lng: 2.0 }, // Mediterranean (off Spain - at sea)
+      { lat: 39.0, lng: 5.0 }, // Mediterranean (off Spain - at sea)
+      { lat: 38.0, lng: 10.0 }, // Mediterranean (off Italy - at sea)
+      { lat: 38.0, lng: 15.0 }, // Mediterranean (south of Italy - at sea)
+      { lat: 36.0, lng: 18.0 }, // Mediterranean (south of Italy - at sea)
+      { lat: 35.0, lng: 22.0 }, // Eastern Mediterranean (off Greece - at sea)
+      { lat: 35.0, lng: 25.0 }, // Eastern Mediterranean (off Cyprus - at sea)
+      { lat: 33.0, lng: 27.0 }, // Eastern Mediterranean (off Egypt - at sea)
+      { lat: 31.0, lng: 29.0 }, // Eastern Mediterranean (off Egypt - at sea)
       { lat: 29.9, lng: 32.5 }, // Suez Canal
       { lat: 28.0, lng: 34.0 }, // Red Sea (off Egypt)
       { lat: 26.0, lng: 36.0 }, // Red Sea (off Saudi Arabia - west coast)
