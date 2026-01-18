@@ -669,7 +669,7 @@ const shippingRoutes: ShippingRoute[] = [
       { lat: -33.0, lng: 18.5 }, // Cape Town approach
     ]
   },
-  // C19: Intra-Europe (North Sea / Baltic routes)
+  // C19: Intra-Europe (North Sea / Baltic routes - maritime only)
   { 
     id: 'C19', 
     name: 'Intra-Europe', 
@@ -677,13 +677,20 @@ const shippingRoutes: ShippingRoute[] = [
     endLat: 52.5, endLng: 13.4, 
     color: '#4ADE80',
     waypoints: [
-      { lat: 51.0, lng: 2.0 }, // English Channel (off UK)
-      { lat: 51.5, lng: 4.0 }, // North Sea (off UK/Netherlands)
-      { lat: 52.0, lng: 6.0 }, // North Sea (off Netherlands)
-      { lat: 52.5, lng: 8.0 }, // North Sea (off Germany)
-      { lat: 53.0, lng: 10.0 }, // North Sea / Baltic approach (off Germany)
-      { lat: 53.5, lng: 12.0 }, // Baltic Sea (off Germany)
-      { lat: 53.0, lng: 13.0 }, // Baltic Sea (off Germany)
+      { lat: 51.0, lng: 1.0 }, // English Channel (off UK)
+      { lat: 51.0, lng: 2.0 }, // English Channel (off UK/France)
+      { lat: 51.5, lng: 3.0 }, // North Sea (off UK/Belgium)
+      { lat: 52.0, lng: 4.0 }, // North Sea (off Netherlands)
+      { lat: 52.5, lng: 5.0 }, // North Sea (off Netherlands)
+      { lat: 53.0, lng: 6.0 }, // North Sea (off Germany)
+      { lat: 53.5, lng: 7.0 }, // North Sea (off Germany)
+      { lat: 54.0, lng: 8.0 }, // North Sea (off Germany)
+      { lat: 54.5, lng: 9.0 }, // North Sea (off Germany)
+      { lat: 54.5, lng: 10.0 }, // North Sea / Baltic approach (off Germany)
+      { lat: 54.5, lng: 11.0 }, // Baltic Sea (off Germany)
+      { lat: 54.0, lng: 12.0 }, // Baltic Sea (off Germany)
+      { lat: 53.5, lng: 13.0 }, // Baltic Sea (off Germany)
+      { lat: 53.0, lng: 13.5 }, // Baltic Sea (off Germany/Poland)
     ]
   },
   // C20: Intra-Americas (Caribbean routes)
