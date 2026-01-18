@@ -28,6 +28,7 @@ interface ShippingRoute {
   endLat: number
   endLng: number
   color: string
+  waypoints?: Array<{ lat: number; lng: number }>
 }
 
 interface Globe3DClientProps {
@@ -269,16 +270,42 @@ export default function Globe3DClient({ markers, showCities = true, routes = [] 
         }, 1000)
       })
 
-    // Convert routes to arcs
-    const arcs = routes.map(route => ({
-      startLat: route.startLat,
-      startLng: route.startLng,
-      endLat: route.endLat,
-      endLng: route.endLng,
-      color: route.color,
-      name: route.name,
-      id: route.id
-    }))
+    // Convert routes to arcs with waypoints for maritime paths
+    const arcs: any[] = []
+    routes.forEach(route => {
+      if (route.waypoints && route.waypoints.length > 0) {
+        // Create arcs connecting waypoints sequentially
+        const points = [
+          { lat: route.startLat, lng: route.startLng },
+          ...route.waypoints,
+          { lat: route.endLat, lng: route.endLng }
+        ]
+        
+        // Create arcs between consecutive points
+        for (let i = 0; i < points.length - 1; i++) {
+          arcs.push({
+            startLat: points[i].lat,
+            startLng: points[i].lng,
+            endLat: points[i + 1].lat,
+            endLng: points[i + 1].lng,
+            color: route.color,
+            name: route.name,
+            id: route.id
+          })
+        }
+      } else {
+        // Fallback to direct route if no waypoints
+        arcs.push({
+          startLat: route.startLat,
+          startLng: route.startLng,
+          endLat: route.endLat,
+          endLng: route.endLng,
+          color: route.color,
+          name: route.name,
+          id: route.id
+        })
+      }
+    })
 
     // Add arcs for shipping routes
     globe

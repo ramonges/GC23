@@ -29,6 +29,7 @@ interface ShippingRoute {
   endLat: number
   endLng: number
   color: string
+  waypoints?: Array<{ lat: number; lng: number }>
 }
 
 interface Globe3DProps {

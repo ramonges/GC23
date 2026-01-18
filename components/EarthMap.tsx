@@ -58,29 +58,281 @@ interface ShippingRoute {
   endLat: number
   endLng: number
   color: string
+  waypoints?: Array<{ lat: number; lng: number }> // Maritime waypoints to follow sea routes
 }
 
 const shippingRoutes: ShippingRoute[] = [
-  { id: 'C1', name: 'Asia ↔ Europe (Far East to North Europe / Med)', startLat: 35.7, startLng: 139.8, endLat: 51.5, endLng: -0.1, color: '#3B82F6' },
-  { id: 'C2', name: 'Asia ↔ Mediterranean', startLat: 35.7, startLng: 139.8, endLat: 41.0, endLng: 28.9, color: '#8B5CF6' },
-  { id: 'C3', name: 'Asia ↔ North America West Coast', startLat: 35.7, startLng: 139.8, endLat: 37.8, endLng: -122.4, color: '#10B981' },
-  { id: 'C4', name: 'Asia ↔ North America East Coast', startLat: 35.7, startLng: 139.8, endLat: 40.7, endLng: -74.0, color: '#F59E0B' },
-  { id: 'C5', name: 'Asia ↔ Middle East', startLat: 35.7, startLng: 139.8, endLat: 25.2, endLng: 55.3, color: '#EF4444' },
-  { id: 'C6', name: 'Asia ↔ Indian Subcontinent', startLat: 35.7, startLng: 139.8, endLat: 19.1, endLng: 72.9, color: '#EC4899' },
-  { id: 'C7', name: 'Asia ↔ Africa', startLat: 35.7, startLng: 139.8, endLat: -33.9, endLng: 18.4, color: '#14B8A6' },
-  { id: 'C8', name: 'Intra-Asia', startLat: 22.3, startLng: 114.2, endLat: 1.3, endLng: 103.8, color: '#06B6D4' },
-  { id: 'C9', name: 'Australia ↔ China / East Asia', startLat: -33.9, startLng: 151.2, endLat: 31.2, endLng: 121.5, color: '#84CC16' },
-  { id: 'C10', name: 'Europe ↔ North America', startLat: 51.5, startLng: -0.1, endLat: 40.7, endLng: -74.0, color: '#6366F1' },
-  { id: 'C11', name: 'Europe ↔ Africa', startLat: 51.5, startLng: -0.1, endLat: -33.9, endLng: 18.4, color: '#A855F7' },
-  { id: 'C12', name: 'Europe ↔ Middle East', startLat: 51.5, startLng: -0.1, endLat: 25.2, endLng: 55.3, color: '#F97316' },
-  { id: 'C13', name: 'Europe ↔ Indian Subcontinent', startLat: 51.5, startLng: -0.1, endLat: 19.1, endLng: 72.9, color: '#22D3EE' },
-  { id: 'C14', name: 'North America ↔ South America (East)', startLat: 40.7, startLng: -74.0, endLat: -23.5, endLng: -46.6, color: '#34D399' },
-  { id: 'C15', name: 'North America ↔ South America (West)', startLat: 37.8, startLng: -122.4, endLat: -12.0, endLng: -77.0, color: '#60A5FA' },
-  { id: 'C16', name: 'Asia ↔ South America (West)', startLat: 35.7, startLng: 139.8, endLat: -12.0, endLng: -77.0, color: '#FB7185' },
-  { id: 'C17', name: 'Asia ↔ South America (East)', startLat: 35.7, startLng: 139.8, endLat: -23.5, endLng: -46.6, color: '#A78BFA' },
-  { id: 'C18', name: 'Middle East ↔ Africa', startLat: 25.2, startLng: 55.3, endLat: -33.9, endLng: 18.4, color: '#FBBF24' },
-  { id: 'C19', name: 'Intra-Europe', startLat: 51.5, startLng: -0.1, endLat: 52.5, endLng: 13.4, color: '#4ADE80' },
-  { id: 'C20', name: 'Intra-Americas', startLat: 40.7, startLng: -74.0, endLat: 19.4, endLng: -99.1, color: '#818CF8' },
+  // C1: Asia ↔ Europe (via Suez Canal and Mediterranean)
+  { 
+    id: 'C1', 
+    name: 'Asia ↔ Europe (Far East to North Europe / Med)', 
+    startLat: 35.7, startLng: 139.8, 
+    endLat: 51.5, endLng: -0.1, 
+    color: '#3B82F6',
+    waypoints: [
+      { lat: 30.0, lng: 120.0 }, // South China Sea
+      { lat: 1.3, lng: 103.8 }, // Singapore Strait
+      { lat: 6.0, lng: 80.0 }, // Indian Ocean
+      { lat: 12.0, lng: 45.0 }, // Gulf of Aden
+      { lat: 29.9, lng: 32.5 }, // Suez Canal
+      { lat: 35.0, lng: 25.0 }, // Mediterranean
+      { lat: 40.0, lng: 15.0 }, // Central Mediterranean
+      { lat: 48.0, lng: 0.0 }, // English Channel approach
+    ]
+  },
+  // C2: Asia ↔ Mediterranean (via Suez)
+  { 
+    id: 'C2', 
+    name: 'Asia ↔ Mediterranean', 
+    startLat: 35.7, startLng: 139.8, 
+    endLat: 41.0, endLng: 28.9, 
+    color: '#8B5CF6',
+    waypoints: [
+      { lat: 1.3, lng: 103.8 }, // Singapore Strait
+      { lat: 6.0, lng: 80.0 }, // Indian Ocean
+      { lat: 12.0, lng: 45.0 }, // Gulf of Aden
+      { lat: 29.9, lng: 32.5 }, // Suez Canal
+      { lat: 35.0, lng: 25.0 }, // Eastern Mediterranean
+    ]
+  },
+  // C3: Asia ↔ North America West Coast (Transpacific)
+  { 
+    id: 'C3', 
+    name: 'Asia ↔ North America West Coast', 
+    startLat: 35.7, startLng: 139.8, 
+    endLat: 37.8, endLng: -122.4, 
+    color: '#10B981',
+    waypoints: [
+      { lat: 30.0, lng: 130.0 }, // East China Sea
+      { lat: 35.0, lng: 140.0 }, // Pacific Ocean (northern route)
+      { lat: 40.0, lng: -150.0 }, // Mid-Pacific
+      { lat: 45.0, lng: -130.0 }, // North Pacific
+    ]
+  },
+  // C4: Asia ↔ North America East Coast (via Panama Canal)
+  { 
+    id: 'C4', 
+    name: 'Asia ↔ North America East Coast', 
+    startLat: 35.7, startLng: 139.8, 
+    endLat: 40.7, endLng: -74.0, 
+    color: '#F59E0B',
+    waypoints: [
+      { lat: 1.3, lng: 103.8 }, // Singapore Strait
+      { lat: 0.0, lng: 100.0 }, // Indian Ocean
+      { lat: -10.0, lng: -80.0 }, // Pacific approach to Panama
+      { lat: 9.0, lng: -79.5 }, // Panama Canal
+      { lat: 15.0, lng: -75.0 }, // Caribbean Sea
+      { lat: 25.0, lng: -70.0 }, // North Atlantic
+    ]
+  },
+  // C5: Asia ↔ Middle East (via Indian Ocean)
+  { 
+    id: 'C5', 
+    name: 'Asia ↔ Middle East', 
+    startLat: 35.7, startLng: 139.8, 
+    endLat: 25.2, endLng: 55.3, 
+    color: '#EF4444',
+    waypoints: [
+      { lat: 1.3, lng: 103.8 }, // Singapore Strait
+      { lat: 6.0, lng: 80.0 }, // Bay of Bengal
+      { lat: 8.0, lng: 77.0 }, // Indian Ocean
+      { lat: 15.0, lng: 60.0 }, // Arabian Sea
+    ]
+  },
+  // C6: Asia ↔ Indian Subcontinent
+  { 
+    id: 'C6', 
+    name: 'Asia ↔ Indian Subcontinent', 
+    startLat: 35.7, startLng: 139.8, 
+    endLat: 19.1, endLng: 72.9, 
+    color: '#EC4899',
+    waypoints: [
+      { lat: 1.3, lng: 103.8 }, // Singapore Strait
+      { lat: 6.0, lng: 80.0 }, // Bay of Bengal
+      { lat: 10.0, lng: 77.0 }, // Indian Ocean
+    ]
+  },
+  // C7: Asia ↔ Africa (via Indian Ocean, around Cape)
+  { 
+    id: 'C7', 
+    name: 'Asia ↔ Africa', 
+    startLat: 35.7, startLng: 139.8, 
+    endLat: -33.9, endLng: 18.4, 
+    color: '#14B8A6',
+    waypoints: [
+      { lat: 1.3, lng: 103.8 }, // Singapore Strait
+      { lat: 0.0, lng: 80.0 }, // Indian Ocean
+      { lat: -10.0, lng: 60.0 }, // Central Indian Ocean
+      { lat: -35.0, lng: 20.0 }, // Cape of Good Hope
+    ]
+  },
+  // C8: Intra-Asia (South China Sea routes)
+  { 
+    id: 'C8', 
+    name: 'Intra-Asia', 
+    startLat: 22.3, startLng: 114.2, 
+    endLat: 1.3, endLng: 103.8, 
+    color: '#06B6D4',
+    waypoints: [
+      { lat: 15.0, lng: 110.0 }, // South China Sea
+    ]
+  },
+  // C9: Australia ↔ China / East Asia
+  { 
+    id: 'C9', 
+    name: 'Australia ↔ China / East Asia', 
+    startLat: -33.9, startLng: 151.2, 
+    endLat: 31.2, endLng: 121.5, 
+    color: '#84CC16',
+    waypoints: [
+      { lat: -10.0, lng: 130.0 }, // Arafura Sea
+      { lat: 5.0, lng: 120.0 }, // Celebes Sea
+      { lat: 20.0, lng: 120.0 }, // South China Sea
+    ]
+  },
+  // C10: Europe ↔ North America (Transatlantic)
+  { 
+    id: 'C10', 
+    name: 'Europe ↔ North America', 
+    startLat: 51.5, startLng: -0.1, 
+    endLat: 40.7, endLng: -74.0, 
+    color: '#6366F1',
+    waypoints: [
+      { lat: 50.0, lng: -10.0 }, // North Atlantic (northern route)
+      { lat: 45.0, lng: -30.0 }, // Mid-Atlantic
+      { lat: 42.0, lng: -50.0 }, // Western Atlantic
+    ]
+  },
+  // C11: Europe ↔ Africa (via Mediterranean and Atlantic)
+  { 
+    id: 'C11', 
+    name: 'Europe ↔ Africa', 
+    startLat: 51.5, startLng: -0.1, 
+    endLat: -33.9, endLng: 18.4, 
+    color: '#A855F7',
+    waypoints: [
+      { lat: 35.0, lng: -5.0 }, // Strait of Gibraltar
+      { lat: 20.0, lng: -20.0 }, // North Atlantic
+      { lat: 0.0, lng: -15.0 }, // Central Atlantic
+      { lat: -20.0, lng: 5.0 }, // South Atlantic
+    ]
+  },
+  // C12: Europe ↔ Middle East (via Mediterranean)
+  { 
+    id: 'C12', 
+    name: 'Europe ↔ Middle East', 
+    startLat: 51.5, startLng: -0.1, 
+    endLat: 25.2, endLng: 55.3, 
+    color: '#F97316',
+    waypoints: [
+      { lat: 35.0, lng: 25.0 }, // Mediterranean
+      { lat: 30.0, lng: 32.0 }, // Suez Canal
+      { lat: 25.0, lng: 50.0 }, // Red Sea / Arabian Sea
+    ]
+  },
+  // C13: Europe ↔ Indian Subcontinent (via Suez)
+  { 
+    id: 'C13', 
+    name: 'Europe ↔ Indian Subcontinent', 
+    startLat: 51.5, startLng: -0.1, 
+    endLat: 19.1, endLng: 72.9, 
+    color: '#22D3EE',
+    waypoints: [
+      { lat: 35.0, lng: 25.0 }, // Mediterranean
+      { lat: 29.9, lng: 32.5 }, // Suez Canal
+      { lat: 15.0, lng: 60.0 }, // Arabian Sea
+      { lat: 12.0, lng: 75.0 }, // Indian Ocean
+    ]
+  },
+  // C14: North America ↔ South America (East Coast)
+  { 
+    id: 'C14', 
+    name: 'North America ↔ South America (East)', 
+    startLat: 40.7, startLng: -74.0, 
+    endLat: -23.5, endLng: -46.6, 
+    color: '#34D399',
+    waypoints: [
+      { lat: 25.0, lng: -70.0 }, // North Atlantic
+      { lat: 10.0, lng: -60.0 }, // Caribbean Sea
+      { lat: -5.0, lng: -50.0 }, // South Atlantic
+    ]
+  },
+  // C15: North America ↔ South America (West Coast)
+  { 
+    id: 'C15', 
+    name: 'North America ↔ South America (West)', 
+    startLat: 37.8, startLng: -122.4, 
+    endLat: -12.0, endLng: -77.0, 
+    color: '#60A5FA',
+    waypoints: [
+      { lat: 20.0, lng: -110.0 }, // Eastern Pacific
+      { lat: 5.0, lng: -100.0 }, // Central Pacific
+      { lat: -5.0, lng: -85.0 }, // South Pacific
+    ]
+  },
+  // C16: Asia ↔ South America (West Coast) - via Pacific
+  { 
+    id: 'C16', 
+    name: 'Asia ↔ South America (West)', 
+    startLat: 35.7, startLng: 139.8, 
+    endLat: -12.0, endLng: -77.0, 
+    color: '#FB7185',
+    waypoints: [
+      { lat: 20.0, lng: 140.0 }, // Western Pacific
+      { lat: 0.0, lng: -150.0 }, // Central Pacific
+      { lat: -10.0, lng: -100.0 }, // Eastern Pacific
+    ]
+  },
+  // C17: Asia ↔ South America (East Coast) - via Cape of Good Hope or Panama
+  { 
+    id: 'C17', 
+    name: 'Asia ↔ South America (East)', 
+    startLat: 35.7, startLng: 139.8, 
+    endLat: -23.5, endLng: -46.6, 
+    color: '#A78BFA',
+    waypoints: [
+      { lat: 1.3, lng: 103.8 }, // Singapore Strait
+      { lat: 0.0, lng: 80.0 }, // Indian Ocean
+      { lat: -35.0, lng: 20.0 }, // Cape of Good Hope
+      { lat: -20.0, lng: -10.0 }, // South Atlantic
+    ]
+  },
+  // C18: Middle East ↔ Africa
+  { 
+    id: 'C18', 
+    name: 'Middle East ↔ Africa', 
+    startLat: 25.2, startLng: 55.3, 
+    endLat: -33.9, endLng: 18.4, 
+    color: '#FBBF24',
+    waypoints: [
+      { lat: 15.0, lng: 50.0 }, // Arabian Sea
+      { lat: 0.0, lng: 45.0 }, // Indian Ocean
+      { lat: -15.0, lng: 30.0 }, // Western Indian Ocean
+    ]
+  },
+  // C19: Intra-Europe (North Sea / Baltic routes)
+  { 
+    id: 'C19', 
+    name: 'Intra-Europe', 
+    startLat: 51.5, startLng: -0.1, 
+    endLat: 52.5, endLng: 13.4, 
+    color: '#4ADE80',
+    waypoints: [
+      { lat: 52.0, lng: 4.0 }, // North Sea
+    ]
+  },
+  // C20: Intra-Americas (Caribbean routes)
+  { 
+    id: 'C20', 
+    name: 'Intra-Americas', 
+    startLat: 40.7, startLng: -74.0, 
+    endLat: 19.4, endLng: -99.1, 
+    color: '#818CF8',
+    waypoints: [
+      { lat: 25.0, lng: -80.0 }, // Florida Straits
+      { lat: 22.0, lng: -85.0 }, // Gulf of Mexico / Caribbean
+    ]
+  },
 ]
 
 export default function EarthMap() {
