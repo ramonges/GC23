@@ -626,7 +626,7 @@ const shippingRoutes: ShippingRoute[] = [
       { lat: -23.0, lng: -46.5 }, // São Paulo approach
     ]
   },
-  // C18: Middle East ↔ Africa
+  // C18: Middle East ↔ Africa (Golfe Persique → Mer d'Arabie → Océan Indien → Afrique)
   { 
     id: 'C18', 
     name: 'Middle East ↔ Africa', 
@@ -634,22 +634,39 @@ const shippingRoutes: ShippingRoute[] = [
     endLat: -33.9, endLng: 18.4, 
     color: '#FBBF24',
     waypoints: [
-      { lat: 24.0, lng: 54.0 }, // Arabian Sea
-      { lat: 22.0, lng: 52.0 }, // Arabian Sea
-      { lat: 20.0, lng: 50.0 }, // Arabian Sea
-      { lat: 18.0, lng: 48.0 }, // Arabian Sea
-      { lat: 15.0, lng: 45.0 }, // Arabian Sea
-      { lat: 12.0, lng: 42.0 }, // Indian Ocean
-      { lat: 8.0, lng: 40.0 }, // Indian Ocean
-      { lat: 5.0, lng: 38.0 }, // Indian Ocean
-      { lat: 0.0, lng: 35.0 }, // Indian Ocean
-      { lat: -5.0, lng: 32.0 }, // Indian Ocean
-      { lat: -10.0, lng: 30.0 }, // Western Indian Ocean
-      { lat: -15.0, lng: 28.0 }, // Western Indian Ocean
-      { lat: -20.0, lng: 25.0 }, // Western Indian Ocean
-      { lat: -25.0, lng: 22.0 }, // Western Indian Ocean
-      { lat: -30.0, lng: 20.0 }, // Western Indian Ocean
-      { lat: -32.0, lng: 19.0 }, // Cape Town approach
+      { lat: 25.0, lng: 55.0 }, // Persian Gulf (off UAE)
+      { lat: 24.5, lng: 54.5 }, // Persian Gulf (off UAE)
+      { lat: 24.0, lng: 54.0 }, // Persian Gulf (off UAE)
+      { lat: 23.5, lng: 53.5 }, // Persian Gulf (off UAE)
+      { lat: 23.0, lng: 53.0 }, // Persian Gulf (off UAE)
+      { lat: 22.5, lng: 52.5 }, // Persian Gulf exit (off UAE)
+      { lat: 24.0, lng: 57.0 }, // Gulf of Oman (off UAE/Oman)
+      { lat: 22.0, lng: 58.0 }, // Gulf of Oman (off Oman)
+      { lat: 20.0, lng: 58.0 }, // Gulf of Oman (off Oman)
+      { lat: 18.0, lng: 57.0 }, // Arabian Sea (off Oman)
+      { lat: 16.0, lng: 56.0 }, // Arabian Sea (off Oman)
+      { lat: 14.0, lng: 55.0 }, // Arabian Sea (off Yemen)
+      { lat: 12.0, lng: 54.0 }, // Arabian Sea (off Yemen)
+      { lat: 10.0, lng: 52.0 }, // Arabian Sea (off Somalia)
+      { lat: 8.0, lng: 50.0 }, // Arabian Sea (off Somalia)
+      { lat: 6.0, lng: 48.0 }, // Indian Ocean (off Somalia)
+      { lat: 4.0, lng: 46.0 }, // Indian Ocean (off Somalia)
+      { lat: 2.0, lng: 44.0 }, // Indian Ocean (off Somalia)
+      { lat: 0.0, lng: 42.0 }, // Indian Ocean (off Kenya)
+      { lat: -2.0, lng: 40.0 }, // Indian Ocean (off Kenya - Mombasa area)
+      { lat: -4.0, lng: 39.0 }, // Indian Ocean (off Tanzania - Dar es Salaam area)
+      { lat: -6.0, lng: 39.5 }, // Indian Ocean (off Tanzania)
+      { lat: -8.0, lng: 39.0 }, // Indian Ocean (off Tanzania)
+      { lat: -10.0, lng: 40.0 }, // Indian Ocean (off Mozambique)
+      { lat: -12.0, lng: 40.5 }, // Indian Ocean (off Mozambique)
+      { lat: -15.0, lng: 40.0 }, // Indian Ocean (off Mozambique - Maputo area)
+      { lat: -18.0, lng: 38.0 }, // Indian Ocean (off Mozambique)
+      { lat: -20.0, lng: 35.0 }, // Indian Ocean (off Mozambique)
+      { lat: -25.0, lng: 32.0 }, // Indian Ocean (off South Africa - Durban area)
+      { lat: -28.0, lng: 30.0 }, // Indian Ocean (off South Africa)
+      { lat: -30.0, lng: 25.0 }, // Indian Ocean (off South Africa)
+      { lat: -32.0, lng: 20.0 }, // Indian Ocean (off South Africa)
+      { lat: -33.0, lng: 18.5 }, // Cape Town approach
     ]
   },
   // C19: Intra-Europe (North Sea / Baltic routes)
