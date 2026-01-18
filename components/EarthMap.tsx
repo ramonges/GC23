@@ -396,7 +396,7 @@ const shippingRoutes: ShippingRoute[] = [
       { lat: -33.5, lng: 18.2 }, // Cape Town
     ]
   },
-  // C12: Europe ↔ Middle East (via Mediterranean)
+  // C12: Europe ↔ Middle East (via Mediterranean, around Arabian Peninsula)
   { 
     id: 'C12', 
     name: 'Europe ↔ Middle East', 
@@ -418,10 +418,24 @@ const shippingRoutes: ShippingRoute[] = [
       { lat: 31.0, lng: 29.0 }, // Eastern Mediterranean (off Egypt)
       { lat: 29.9, lng: 32.5 }, // Suez Canal
       { lat: 28.0, lng: 34.0 }, // Red Sea (off Egypt)
-      { lat: 26.0, lng: 38.0 }, // Red Sea (off Saudi Arabia)
-      { lat: 25.5, lng: 42.0 }, // Red Sea (off Saudi Arabia)
-      { lat: 25.0, lng: 48.0 }, // Arabian Sea (off UAE)
-      { lat: 25.2, lng: 53.0 }, // Arabian Sea (off UAE)
+      { lat: 26.0, lng: 36.0 }, // Red Sea (off Saudi Arabia - west coast)
+      { lat: 24.0, lng: 38.0 }, // Red Sea (off Saudi Arabia - west coast)
+      { lat: 22.0, lng: 39.0 }, // Red Sea (off Saudi Arabia - west coast)
+      { lat: 20.0, lng: 40.0 }, // Red Sea (off Saudi Arabia - west coast)
+      { lat: 18.0, lng: 41.0 }, // Red Sea (off Saudi Arabia - west coast)
+      { lat: 16.0, lng: 42.0 }, // Red Sea (off Yemen - west coast)
+      { lat: 14.0, lng: 43.0 }, // Red Sea (off Yemen - west coast)
+      { lat: 13.0, lng: 44.0 }, // Bab-el-Mandeb Strait (off Yemen)
+      { lat: 12.0, lng: 45.0 }, // Gulf of Aden (off Yemen)
+      { lat: 14.0, lng: 50.0 }, // Arabian Sea (off Yemen - south coast)
+      { lat: 16.0, lng: 52.0 }, // Arabian Sea (off Oman - south coast)
+      { lat: 18.0, lng: 54.0 }, // Arabian Sea (off Oman - south coast)
+      { lat: 20.0, lng: 56.0 }, // Arabian Sea (off Oman - east coast)
+      { lat: 22.0, lng: 58.0 }, // Gulf of Oman (off Oman - east coast)
+      { lat: 24.0, lng: 57.0 }, // Gulf of Oman (off UAE - east coast)
+      { lat: 24.5, lng: 56.0 }, // Persian Gulf (off UAE)
+      { lat: 25.0, lng: 55.0 }, // Persian Gulf (off UAE)
+      { lat: 25.2, lng: 55.2 }, // Dubai approach
     ]
   },
   // C13: Europe ↔ Indian Subcontinent (via Suez)
