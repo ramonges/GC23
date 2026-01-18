@@ -16,11 +16,26 @@ export default function Home() {
         <div className="absolute inset-0 overflow-hidden">
           {/* Earth sphere positioned on right side */}
           <div className="absolute right-[-20%] top-1/2 -translate-y-1/2 w-[1000px] h-[1000px]">
-            {/* Earth base - dark side */}
-            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-gray-900 via-blue-900 to-black"></div>
+            {/* Real Earth image - spherical effect */}
+            <div 
+              className="absolute inset-0 rounded-full overflow-hidden"
+              style={{
+                backgroundImage: 'url(https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                filter: 'brightness(0.95) contrast(1.05)',
+                boxShadow: 'inset -100px -100px 200px rgba(0, 0, 0, 0.5), inset 100px 100px 200px rgba(255, 255, 255, 0.1)',
+              }}
+            >
+              {/* Overlay for better blending with sunrise */}
+              <div className="absolute inset-0 bg-gradient-to-bl from-transparent via-transparent to-black/20 rounded-full"></div>
+            </div>
             
-            {/* Earth - lit side with continents */}
-            <div className="absolute inset-0 rounded-full bg-gradient-to-bl from-blue-400 via-green-600 to-blue-900 opacity-60"></div>
+            {/* Additional Earth glow for realism */}
+            <div className="absolute inset-0 rounded-full bg-gradient-to-br from-blue-400/10 via-transparent to-transparent"></div>
+            
+            {/* Sphere shadow for depth */}
+            <div className="absolute inset-0 rounded-full bg-gradient-radial from-transparent via-transparent to-black/20"></div>
             
             {/* Earth atmosphere glow */}
             <div className="absolute inset-[-10px] rounded-full bg-gradient-to-br from-blue-300 via-transparent to-transparent opacity-20 blur-2xl"></div>
