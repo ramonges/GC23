@@ -62,7 +62,7 @@ interface ShippingRoute {
 }
 
 const shippingRoutes: ShippingRoute[] = [
-  // C1: Asia ↔ Europe (via Suez Canal and Mediterranean)
+  // C1: Asia ↔ Europe (via Suez Canal, around Spain through Gibraltar)
   { 
     id: 'C1', 
     name: 'Asia ↔ Europe (Far East to North Europe / Med)', 
@@ -89,12 +89,21 @@ const shippingRoutes: ShippingRoute[] = [
       { lat: 29.9, lng: 32.5 }, // Suez Canal
       { lat: 32.0, lng: 30.0 }, // Eastern Mediterranean
       { lat: 35.0, lng: 25.0 }, // Eastern Mediterranean
-      { lat: 38.0, lng: 20.0 }, // Central Mediterranean
-      { lat: 40.0, lng: 15.0 }, // Central Mediterranean
-      { lat: 42.0, lng: 10.0 }, // Western Mediterranean
-      { lat: 45.0, lng: 5.0 }, // Western Mediterranean
-      { lat: 48.0, lng: 0.0 }, // English Channel approach
-      { lat: 50.0, lng: -2.0 }, // English Channel
+      { lat: 37.0, lng: 20.0 }, // Central Mediterranean (south of Italy)
+      { lat: 38.0, lng: 15.0 }, // Central Mediterranean
+      { lat: 37.0, lng: 10.0 }, // Western Mediterranean (south of France)
+      { lat: 36.0, lng: 5.0 }, // Western Mediterranean (off Algeria)
+      { lat: 36.0, lng: 0.0 }, // Western Mediterranean (off Algeria)
+      { lat: 36.0, lng: -3.0 }, // Strait of Gibraltar approach
+      { lat: 35.9, lng: -5.3 }, // Strait of Gibraltar
+      { lat: 36.0, lng: -8.0 }, // Atlantic (off Portugal)
+      { lat: 38.0, lng: -10.0 }, // Atlantic (off Portugal)
+      { lat: 40.0, lng: -10.0 }, // Atlantic (off Spain)
+      { lat: 42.0, lng: -10.0 }, // Atlantic (off Spain)
+      { lat: 45.0, lng: -8.0 }, // Atlantic (off France)
+      { lat: 48.0, lng: -5.0 }, // Atlantic (off France)
+      { lat: 50.0, lng: -2.0 }, // English Channel approach
+      { lat: 50.5, lng: -1.0 }, // English Channel
     ]
   },
   // C2: Asia ↔ Mediterranean (via Suez)
@@ -121,8 +130,9 @@ const shippingRoutes: ShippingRoute[] = [
       { lat: 25.0, lng: 35.0 }, // Red Sea
       { lat: 29.9, lng: 32.5 }, // Suez Canal
       { lat: 32.0, lng: 30.0 }, // Eastern Mediterranean
-      { lat: 35.0, lng: 27.0 }, // Eastern Mediterranean
-      { lat: 38.0, lng: 28.0 }, // Eastern Mediterranean
+      { lat: 35.0, lng: 27.0 }, // Eastern Mediterranean (off Turkey)
+      { lat: 38.0, lng: 28.0 }, // Eastern Mediterranean (off Turkey)
+      { lat: 40.0, lng: 28.5 }, // Eastern Mediterranean (off Turkey)
     ]
   },
   // C3: Asia ↔ North America West Coast (Transpacific)
@@ -271,13 +281,17 @@ const shippingRoutes: ShippingRoute[] = [
     endLat: 1.3, endLng: 103.8, 
     color: '#06B6D4',
     waypoints: [
-      { lat: 20.0, lng: 113.0 }, // South China Sea
-      { lat: 18.0, lng: 112.0 }, // South China Sea
-      { lat: 15.0, lng: 110.0 }, // South China Sea
-      { lat: 12.0, lng: 109.0 }, // South China Sea
-      { lat: 8.0, lng: 107.0 }, // South China Sea
-      { lat: 5.0, lng: 105.0 }, // Gulf of Thailand
-      { lat: 3.0, lng: 104.0 }, // Malacca Strait approach
+      { lat: 22.0, lng: 114.0 }, // South China Sea (off Hong Kong)
+      { lat: 20.0, lng: 113.0 }, // South China Sea (off China)
+      { lat: 18.0, lng: 112.0 }, // South China Sea (off China/Vietnam)
+      { lat: 15.0, lng: 110.0 }, // South China Sea (off Vietnam)
+      { lat: 12.0, lng: 109.0 }, // South China Sea (off Vietnam)
+      { lat: 10.0, lng: 108.0 }, // South China Sea (off Vietnam)
+      { lat: 8.0, lng: 107.0 }, // South China Sea (off Vietnam)
+      { lat: 6.0, lng: 106.0 }, // Gulf of Thailand (off Vietnam)
+      { lat: 5.0, lng: 105.0 }, // Gulf of Thailand (off Thailand)
+      { lat: 3.0, lng: 104.0 }, // Gulf of Thailand (off Malaysia)
+      { lat: 2.0, lng: 103.5 }, // Malacca Strait approach (off Malaysia)
     ]
   },
   // C9: Australia ↔ China / East Asia
@@ -288,19 +302,27 @@ const shippingRoutes: ShippingRoute[] = [
     endLat: 31.2, endLng: 121.5, 
     color: '#84CC16',
     waypoints: [
-      { lat: -30.0, lng: 152.0 }, // Tasman Sea
-      { lat: -25.0, lng: 155.0 }, // Coral Sea
-      { lat: -20.0, lng: 150.0 }, // Coral Sea
-      { lat: -15.0, lng: 145.0 }, // Coral Sea
-      { lat: -10.0, lng: 135.0 }, // Arafura Sea
-      { lat: -5.0, lng: 130.0 }, // Arafura Sea
-      { lat: 0.0, lng: 125.0 }, // Banda Sea
-      { lat: 5.0, lng: 120.0 }, // Celebes Sea
-      { lat: 8.0, lng: 118.0 }, // Sulu Sea
-      { lat: 12.0, lng: 118.0 }, // South China Sea
-      { lat: 18.0, lng: 118.0 }, // South China Sea
-      { lat: 25.0, lng: 120.0 }, // East China Sea
-      { lat: 28.0, lng: 121.0 }, // East China Sea
+      { lat: -33.0, lng: 151.5 }, // Tasman Sea (off Sydney)
+      { lat: -30.0, lng: 153.0 }, // Tasman Sea
+      { lat: -25.0, lng: 155.0 }, // Coral Sea (off Australia)
+      { lat: -20.0, lng: 152.0 }, // Coral Sea (off Australia)
+      { lat: -15.0, lng: 147.0 }, // Coral Sea (off Australia)
+      { lat: -12.0, lng: 142.0 }, // Arafura Sea (off Australia)
+      { lat: -10.0, lng: 137.0 }, // Arafura Sea (off Australia)
+      { lat: -8.0, lng: 132.0 }, // Arafura Sea (off Indonesia)
+      { lat: -5.0, lng: 130.0 }, // Arafura Sea (off Indonesia)
+      { lat: -2.0, lng: 127.0 }, // Banda Sea (off Indonesia)
+      { lat: 0.0, lng: 125.0 }, // Banda Sea (off Indonesia)
+      { lat: 3.0, lng: 122.0 }, // Celebes Sea (off Indonesia)
+      { lat: 5.0, lng: 120.0 }, // Celebes Sea (off Philippines)
+      { lat: 8.0, lng: 118.0 }, // Sulu Sea (off Philippines)
+      { lat: 10.0, lng: 117.0 }, // South China Sea (off Philippines)
+      { lat: 15.0, lng: 116.0 }, // South China Sea (off Philippines)
+      { lat: 18.0, lng: 118.0 }, // South China Sea (off Taiwan)
+      { lat: 22.0, lng: 119.0 }, // South China Sea (off Taiwan)
+      { lat: 25.0, lng: 120.0 }, // East China Sea (off Taiwan)
+      { lat: 28.0, lng: 121.0 }, // East China Sea (off China)
+      { lat: 30.0, lng: 121.5 }, // East China Sea (off China)
     ]
   },
   // C10: Europe ↔ North America (Transatlantic)
@@ -312,8 +334,8 @@ const shippingRoutes: ShippingRoute[] = [
     color: '#6366F1',
     waypoints: [
       { lat: 51.0, lng: -2.0 }, // English Channel
-      { lat: 51.0, lng: -5.0 }, // Celtic Sea
-      { lat: 50.0, lng: -10.0 }, // North Atlantic (northern route)
+      { lat: 51.0, lng: -5.0 }, // Celtic Sea (off UK/Ireland)
+      { lat: 50.0, lng: -10.0 }, // North Atlantic (off Ireland)
       { lat: 49.0, lng: -15.0 }, // North Atlantic
       { lat: 48.0, lng: -20.0 }, // North Atlantic
       { lat: 47.0, lng: -25.0 }, // North Atlantic
@@ -326,9 +348,10 @@ const shippingRoutes: ShippingRoute[] = [
       { lat: 41.0, lng: -60.0 }, // Western Atlantic
       { lat: 40.8, lng: -65.0 }, // Western Atlantic
       { lat: 40.7, lng: -70.0 }, // Western Atlantic approach
+      { lat: 40.7, lng: -73.0 }, // New York approach
     ]
   },
-  // C11: Europe ↔ Africa (via Mediterranean and Atlantic)
+  // C11: Europe ↔ Africa (via Atlantic, around Africa)
   { 
     id: 'C11', 
     name: 'Europe ↔ Africa', 
@@ -336,26 +359,32 @@ const shippingRoutes: ShippingRoute[] = [
     endLat: -33.9, endLng: 18.4, 
     color: '#A855F7',
     waypoints: [
-      { lat: 50.0, lng: -2.0 }, // English Channel
-      { lat: 48.0, lng: -5.0 }, // Bay of Biscay
-      { lat: 45.0, lng: -8.0 }, // Atlantic
-      { lat: 40.0, lng: -10.0 }, // Atlantic
-      { lat: 36.0, lng: -6.0 }, // Strait of Gibraltar approach
-      { lat: 35.0, lng: -5.0 }, // Strait of Gibraltar
-      { lat: 30.0, lng: -10.0 }, // North Atlantic
-      { lat: 25.0, lng: -15.0 }, // North Atlantic
-      { lat: 20.0, lng: -18.0 }, // North Atlantic
-      { lat: 15.0, lng: -18.0 }, // Central Atlantic
-      { lat: 10.0, lng: -16.0 }, // Central Atlantic
-      { lat: 5.0, lng: -15.0 }, // Central Atlantic
-      { lat: 0.0, lng: -12.0 }, // Central Atlantic
-      { lat: -5.0, lng: -8.0 }, // South Atlantic
-      { lat: -10.0, lng: -5.0 }, // South Atlantic
-      { lat: -15.0, lng: 0.0 }, // South Atlantic
-      { lat: -20.0, lng: 5.0 }, // South Atlantic
-      { lat: -25.0, lng: 10.0 }, // South Atlantic
-      { lat: -30.0, lng: 15.0 }, // South Atlantic
+      { lat: 51.0, lng: -2.0 }, // English Channel
+      { lat: 50.0, lng: -5.0 }, // Celtic Sea
+      { lat: 48.0, lng: -8.0 }, // Bay of Biscay (off France)
+      { lat: 45.0, lng: -10.0 }, // Atlantic (off Portugal)
+      { lat: 42.0, lng: -10.0 }, // Atlantic (off Spain)
+      { lat: 38.0, lng: -9.0 }, // Atlantic (off Portugal)
+      { lat: 36.0, lng: -7.0 }, // Atlantic (off Portugal)
+      { lat: 35.0, lng: -6.0 }, // Strait of Gibraltar approach
+      { lat: 35.9, lng: -5.3 }, // Strait of Gibraltar
+      { lat: 35.0, lng: -4.0 }, // Mediterranean (off Morocco)
+      { lat: 32.0, lng: -5.0 }, // Atlantic (off Morocco)
+      { lat: 28.0, lng: -10.0 }, // Atlantic (off Western Sahara)
+      { lat: 25.0, lng: -15.0 }, // Atlantic (off Mauritania)
+      { lat: 20.0, lng: -18.0 }, // Atlantic (off Senegal)
+      { lat: 15.0, lng: -18.0 }, // Atlantic (off Guinea)
+      { lat: 10.0, lng: -16.0 }, // Atlantic (off Sierra Leone)
+      { lat: 5.0, lng: -15.0 }, // Atlantic (off Liberia)
+      { lat: 0.0, lng: -12.0 }, // Atlantic (off Equatorial Guinea)
+      { lat: -5.0, lng: -8.0 }, // Atlantic (off Gabon)
+      { lat: -10.0, lng: -5.0 }, // Atlantic (off Angola)
+      { lat: -15.0, lng: 0.0 }, // Atlantic (off Angola)
+      { lat: -20.0, lng: 5.0 }, // Atlantic (off Namibia)
+      { lat: -25.0, lng: 10.0 }, // Atlantic (off Namibia)
+      { lat: -30.0, lng: 15.0 }, // Atlantic (off South Africa)
       { lat: -32.0, lng: 17.0 }, // Cape Town approach
+      { lat: -33.5, lng: 18.2 }, // Cape Town
     ]
   },
   // C12: Europe ↔ Middle East (via Mediterranean)
@@ -366,20 +395,24 @@ const shippingRoutes: ShippingRoute[] = [
     endLat: 25.2, endLng: 55.3, 
     color: '#F97316',
     waypoints: [
-      { lat: 50.0, lng: 0.0 }, // English Channel
-      { lat: 48.0, lng: 5.0 }, // North Sea
-      { lat: 45.0, lng: 10.0 }, // Central Europe
-      { lat: 42.0, lng: 15.0 }, // Adriatic Sea
-      { lat: 38.0, lng: 20.0 }, // Central Mediterranean
-      { lat: 35.0, lng: 25.0 }, // Eastern Mediterranean
-      { lat: 32.0, lng: 28.0 }, // Eastern Mediterranean
-      { lat: 30.0, lng: 30.0 }, // Suez Canal approach
+      { lat: 51.0, lng: 0.0 }, // English Channel
+      { lat: 50.0, lng: 2.0 }, // English Channel
+      { lat: 48.0, lng: 5.0 }, // North Sea (off Netherlands)
+      { lat: 45.0, lng: 8.0 }, // Mediterranean (off France/Italy)
+      { lat: 42.0, lng: 12.0 }, // Mediterranean (off Italy)
+      { lat: 40.0, lng: 15.0 }, // Mediterranean (off Italy)
+      { lat: 38.0, lng: 18.0 }, // Mediterranean (south of Italy)
+      { lat: 36.0, lng: 20.0 }, // Mediterranean (south of Italy)
+      { lat: 35.0, lng: 22.0 }, // Eastern Mediterranean (off Greece)
+      { lat: 35.0, lng: 25.0 }, // Eastern Mediterranean (off Cyprus)
+      { lat: 33.0, lng: 27.0 }, // Eastern Mediterranean (off Egypt)
+      { lat: 31.0, lng: 29.0 }, // Eastern Mediterranean (off Egypt)
       { lat: 29.9, lng: 32.5 }, // Suez Canal
-      { lat: 28.0, lng: 35.0 }, // Red Sea
-      { lat: 26.0, lng: 40.0 }, // Red Sea
-      { lat: 25.5, lng: 45.0 }, // Red Sea
-      { lat: 25.0, lng: 50.0 }, // Arabian Sea
-      { lat: 25.2, lng: 53.0 }, // Arabian Sea
+      { lat: 28.0, lng: 34.0 }, // Red Sea (off Egypt)
+      { lat: 26.0, lng: 38.0 }, // Red Sea (off Saudi Arabia)
+      { lat: 25.5, lng: 42.0 }, // Red Sea (off Saudi Arabia)
+      { lat: 25.0, lng: 48.0 }, // Arabian Sea (off UAE)
+      { lat: 25.2, lng: 53.0 }, // Arabian Sea (off UAE)
     ]
   },
   // C13: Europe ↔ Indian Subcontinent (via Suez)
@@ -390,22 +423,31 @@ const shippingRoutes: ShippingRoute[] = [
     endLat: 19.1, endLng: 72.9, 
     color: '#22D3EE',
     waypoints: [
-      { lat: 48.0, lng: 5.0 }, // North Sea
-      { lat: 42.0, lng: 15.0 }, // Adriatic Sea
-      { lat: 38.0, lng: 20.0 }, // Central Mediterranean
-      { lat: 35.0, lng: 25.0 }, // Eastern Mediterranean
-      { lat: 32.0, lng: 28.0 }, // Eastern Mediterranean
+      { lat: 51.0, lng: 0.0 }, // English Channel
+      { lat: 50.0, lng: 2.0 }, // English Channel
+      { lat: 48.0, lng: 5.0 }, // North Sea (off Netherlands)
+      { lat: 45.0, lng: 8.0 }, // Mediterranean (off France/Italy)
+      { lat: 42.0, lng: 12.0 }, // Mediterranean (off Italy)
+      { lat: 40.0, lng: 15.0 }, // Mediterranean (off Italy)
+      { lat: 38.0, lng: 18.0 }, // Mediterranean (south of Italy)
+      { lat: 36.0, lng: 20.0 }, // Mediterranean (south of Italy)
+      { lat: 35.0, lng: 22.0 }, // Eastern Mediterranean (off Greece)
+      { lat: 35.0, lng: 25.0 }, // Eastern Mediterranean (off Cyprus)
+      { lat: 33.0, lng: 27.0 }, // Eastern Mediterranean (off Egypt)
+      { lat: 31.0, lng: 29.0 }, // Eastern Mediterranean (off Egypt)
       { lat: 29.9, lng: 32.5 }, // Suez Canal
-      { lat: 28.0, lng: 35.0 }, // Red Sea
-      { lat: 25.0, lng: 40.0 }, // Red Sea
-      { lat: 22.0, lng: 45.0 }, // Red Sea
-      { lat: 20.0, lng: 50.0 }, // Arabian Sea
-      { lat: 18.0, lng: 55.0 }, // Arabian Sea
-      { lat: 16.0, lng: 60.0 }, // Arabian Sea
-      { lat: 15.0, lng: 65.0 }, // Arabian Sea
-      { lat: 14.0, lng: 70.0 }, // Arabian Sea
-      { lat: 12.0, lng: 72.0 }, // Indian Ocean
-      { lat: 19.5, lng: 72.8 }, // Mumbai approach
+      { lat: 28.0, lng: 34.0 }, // Red Sea (off Egypt)
+      { lat: 26.0, lng: 38.0 }, // Red Sea (off Saudi Arabia)
+      { lat: 24.0, lng: 42.0 }, // Red Sea (off Saudi Arabia)
+      { lat: 22.0, lng: 46.0 }, // Red Sea (off Yemen)
+      { lat: 20.0, lng: 50.0 }, // Arabian Sea (off Oman)
+      { lat: 18.0, lng: 55.0 }, // Arabian Sea (off Oman)
+      { lat: 16.0, lng: 60.0 }, // Arabian Sea (off Pakistan)
+      { lat: 15.0, lng: 65.0 }, // Arabian Sea (off Pakistan)
+      { lat: 14.0, lng: 70.0 }, // Arabian Sea (off India)
+      { lat: 16.0, lng: 72.0 }, // Arabian Sea (off India)
+      { lat: 18.0, lng: 72.5 }, // Arabian Sea (off India)
+      { lat: 19.0, lng: 72.8 }, // Mumbai approach
     ]
   },
   // C14: North America ↔ South America (East Coast)
@@ -545,12 +587,13 @@ const shippingRoutes: ShippingRoute[] = [
     endLat: 52.5, endLng: 13.4, 
     color: '#4ADE80',
     waypoints: [
-      { lat: 51.0, lng: 2.0 }, // English Channel
-      { lat: 51.5, lng: 4.0 }, // North Sea
-      { lat: 52.0, lng: 6.0 }, // North Sea
-      { lat: 52.5, lng: 8.0 }, // North Sea
-      { lat: 53.0, lng: 10.0 }, // North Sea / Baltic approach
-      { lat: 53.5, lng: 12.0 }, // Baltic Sea
+      { lat: 51.0, lng: 2.0 }, // English Channel (off UK)
+      { lat: 51.5, lng: 4.0 }, // North Sea (off UK/Netherlands)
+      { lat: 52.0, lng: 6.0 }, // North Sea (off Netherlands)
+      { lat: 52.5, lng: 8.0 }, // North Sea (off Germany)
+      { lat: 53.0, lng: 10.0 }, // North Sea / Baltic approach (off Germany)
+      { lat: 53.5, lng: 12.0 }, // Baltic Sea (off Germany)
+      { lat: 53.0, lng: 13.0 }, // Baltic Sea (off Germany)
     ]
   },
   // C20: Intra-Americas (Caribbean routes)
