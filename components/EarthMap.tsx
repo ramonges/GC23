@@ -603,7 +603,7 @@ const shippingRoutes: ShippingRoute[] = [
       { lat: -11.5, lng: -80.0 }, // Lima approach
     ]
   },
-  // C17: Asia ↔ South America (East Coast) - via Pacific → Panama Canal → Atlantic
+  // C17: Asia ↔ South America (East Coast) - via Pacific → Panama Canal → Atlantic (along South America coast)
   { 
     id: 'C17', 
     name: 'Asia ↔ South America (East)', 
@@ -639,24 +639,39 @@ const shippingRoutes: ShippingRoute[] = [
       { lat: 9.0, lng: -79.5 }, // Panama Canal (Pacific side)
       { lat: 9.0, lng: -79.5 }, // Panama Canal
       { lat: 9.5, lng: -79.5 }, // Panama Canal (Atlantic side)
+      // After Panama - stay at sea along South America Atlantic coast
       { lat: 10.0, lng: -79.0 }, // Caribbean Sea (off Panama - at sea)
-      { lat: 12.0, lng: -78.0 }, // Caribbean Sea (off Colombia - at sea)
-      { lat: 15.0, lng: -75.0 }, // Caribbean Sea (off Jamaica - at sea)
-      { lat: 18.0, lng: -72.0 }, // Caribbean Sea (off Haiti/Dominican Republic - at sea)
-      { lat: 20.0, lng: -70.0 }, // Atlantic (off Dominican Republic - at sea)
-      { lat: 15.0, lng: -65.5 }, // Atlantic (off Venezuela - at sea)
+      { lat: 11.0, lng: -75.0 }, // Caribbean Sea (off Colombia - at sea)
+      { lat: 12.0, lng: -72.0 }, // Caribbean Sea (off Colombia - at sea)
+      { lat: 12.0, lng: -70.0 }, // Caribbean Sea (off Colombia/Venezuela - at sea)
+      { lat: 12.0, lng: -68.0 }, // Caribbean Sea (off Venezuela - at sea)
+      { lat: 12.0, lng: -66.0 }, // Caribbean Sea (off Venezuela - at sea)
+      { lat: 11.0, lng: -64.0 }, // Caribbean Sea (off Venezuela - at sea)
       { lat: 10.0, lng: -62.5 }, // Atlantic (off Venezuela - at sea)
+      { lat: 8.0, lng: -61.0 }, // Atlantic (off Venezuela - at sea)
+      { lat: 6.0, lng: -59.5 }, // Atlantic (off Venezuela/Guyana - at sea)
       { lat: 5.0, lng: -58.5 }, // Atlantic (off Guyana - at sea)
+      { lat: 3.0, lng: -57.5 }, // Atlantic (off Guyana - at sea)
       { lat: 2.0, lng: -56.5 }, // Atlantic (off Suriname - at sea)
+      { lat: 1.0, lng: -55.5 }, // Atlantic (off Suriname - at sea)
       { lat: 0.0, lng: -54.5 }, // Atlantic (off French Guiana - at sea)
+      { lat: -1.0, lng: -53.5 }, // Atlantic (off French Guiana/Brazil - at sea)
       { lat: -2.0, lng: -52.5 }, // Atlantic (off Brazil - north coast - at sea)
+      { lat: -3.0, lng: -51.5 }, // Atlantic (off Brazil - north coast - at sea)
       { lat: -5.0, lng: -50.5 }, // Atlantic (off Brazil - north coast - at sea)
+      { lat: -6.0, lng: -49.5 }, // Atlantic (off Brazil - north coast - at sea)
       { lat: -8.0, lng: -48.5 }, // Atlantic (off Brazil - northeast coast - at sea)
+      { lat: -9.0, lng: -47.5 }, // Atlantic (off Brazil - northeast coast - at sea)
       { lat: -10.0, lng: -46.5 }, // Atlantic (off Brazil - northeast coast - at sea)
+      { lat: -11.0, lng: -46.0 }, // Atlantic (off Brazil - northeast coast - at sea)
       { lat: -12.0, lng: -45.5 }, // Atlantic (off Brazil - northeast coast - at sea)
+      { lat: -13.0, lng: -46.0 }, // Atlantic (off Brazil - east coast - at sea)
       { lat: -15.0, lng: -46.5 }, // Atlantic (off Brazil - east coast - at sea)
+      { lat: -16.0, lng: -46.5 }, // Atlantic (off Brazil - east coast - at sea)
       { lat: -18.0, lng: -46.8 }, // Atlantic (off Brazil - east coast - at sea)
+      { lat: -19.0, lng: -46.8 }, // Atlantic (off Brazil - east coast - at sea)
       { lat: -20.0, lng: -46.8 }, // Atlantic (off Brazil - east coast - at sea)
+      { lat: -21.0, lng: -46.8 }, // Atlantic (off Brazil - east coast - at sea)
       { lat: -22.0, lng: -46.8 }, // Atlantic (off Brazil - east coast - at sea)
       { lat: -23.0, lng: -46.7 }, // São Paulo approach (at sea)
     ]
