@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import PlatformSidebar from '@/components/PlatformSidebar'
+import PlatformSidebarDev from '@/components/PlatformSidebarDev'
 import EarthMap from '@/components/EarthMap'
 import OptionsDashboard from '@/components/OptionsDashboard'
 
@@ -34,7 +34,7 @@ export default function PlatformDev() {
 
       {/* Main Layout with Sidebar */}
       <div className="flex flex-1 pt-[73px]">
-        <PlatformSidebar 
+        <PlatformSidebarDev 
           currentPage={currentPage} 
           onNavigate={setCurrentPage}
           userEmail={userEmail}
