@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Search, Filter } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import dynamic from 'next/dynamic'
@@ -63,171 +63,9 @@ export default function EarthMap() {
     sulfurRange: '',
     concentrationLevel: '',
   })
-  // Sample demo data to show immediately
-  const [markers, setMarkers] = useState<CommodityData[]>([
-    {
-      id: 'demo-1',
-      title: 'Ghawar Oil Field',
-      owner: 'Saudi Aramco',
-      address: 'Al-Ahsa, Saudi Arabia',
-      contact: 'contact@aramco.com',
-      long_term_contract: true,
-      contract_with: 'Various International',
-      supply_volume: 3800000,
-      storage_volume: 0,
-      latitude: 25.5,
-      longitude: 49.5,
-      commodity_type: 'Energy',
-      commodity_name: 'Crude Oil',
-      company: 'Saudi Aramco'
-    },
-    {
-      id: 'demo-2',
-      title: 'Permian Basin',
-      owner: 'Chevron',
-      address: 'Texas, USA',
-      contact: 'permian@chevron.com',
-      long_term_contract: true,
-      contract_with: 'US Refineries',
-      supply_volume: 2500000,
-      storage_volume: 0,
-      latitude: 31.8,
-      longitude: -102.3,
-      commodity_type: 'Energy',
-      commodity_name: 'Crude Oil',
-      company: 'Chevron'
-    },
-    {
-      id: 'demo-3',
-      title: 'Escondida Copper Mine',
-      owner: 'BHP',
-      address: 'Atacama Desert, Chile',
-      contact: 'escondida@bhp.com',
-      long_term_contract: true,
-      contract_with: 'Chinese Smelters',
-      supply_volume: 1200000,
-      storage_volume: 50000,
-      latitude: -24.25,
-      longitude: -69.08,
-      commodity_type: 'Metals',
-      commodity_name: 'Copper',
-      company: 'BHP'
-    },
-    {
-      id: 'demo-4',
-      title: 'Grasberg Mine',
-      owner: 'Freeport-McMoRan',
-      address: 'Papua, Indonesia',
-      contact: 'grasberg@fcx.com',
-      long_term_contract: true,
-      contract_with: 'Global Markets',
-      supply_volume: 800000,
-      storage_volume: 30000,
-      latitude: -4.05,
-      longitude: 137.12,
-      commodity_type: 'Metals',
-      commodity_name: 'Gold',
-      company: 'Freeport-McMoRan'
-    },
-    {
-      id: 'demo-5',
-      title: 'North Sea Oil Field',
-      owner: 'BP',
-      address: 'North Sea, UK',
-      contact: 'northsea@bp.com',
-      long_term_contract: true,
-      contract_with: 'European Refineries',
-      supply_volume: 1500000,
-      storage_volume: 0,
-      latitude: 57.5,
-      longitude: 1.5,
-      commodity_type: 'Energy',
-      commodity_name: 'Crude Oil',
-      company: 'BP'
-    },
-    {
-      id: 'demo-6',
-      title: 'Mato Grosso Soybean Farm',
-      owner: 'Cargill',
-      address: 'Mato Grosso, Brazil',
-      contact: 'brazil@cargill.com',
-      long_term_contract: true,
-      contract_with: 'Asian Markets',
-      supply_volume: 500000,
-      storage_volume: 100000,
-      latitude: -12.5,
-      longitude: -55.5,
-      commodity_type: 'Agricultural',
-      commodity_name: 'Soybeans',
-      company: 'Cargill'
-    },
-    {
-      id: 'demo-7',
-      title: 'Yamal LNG Terminal',
-      owner: 'Total',
-      address: 'Yamal Peninsula, Russia',
-      contact: 'yamal@total.com',
-      long_term_contract: true,
-      contract_with: 'Asian LNG Buyers',
-      supply_volume: 16500000,
-      storage_volume: 0,
-      latitude: 70.3,
-      longitude: 68.8,
-      commodity_type: 'Energy',
-      commodity_name: 'Natural Gas',
-      company: 'Total'
-    },
-    {
-      id: 'demo-8',
-      title: 'Pilbara Iron Ore Mine',
-      owner: 'Rio Tinto',
-      address: 'Western Australia',
-      contact: 'pilbara@riotinto.com',
-      long_term_contract: true,
-      contract_with: 'Chinese Steel Mills',
-      supply_volume: 5000000,
-      storage_volume: 200000,
-      latitude: -22.5,
-      longitude: 117.5,
-      commodity_type: 'Metals',
-      commodity_name: 'Iron Ore',
-      company: 'Rio Tinto'
-    },
-    {
-      id: 'demo-9',
-      title: 'Greenbushes Lithium Mine',
-      owner: 'Albemarle',
-      address: 'Western Australia',
-      contact: 'greenbushes@albemarle.com',
-      long_term_contract: true,
-      contract_with: 'Battery Manufacturers',
-      supply_volume: 180000,
-      storage_volume: 10000,
-      latitude: -33.85,
-      longitude: 116.05,
-      commodity_type: 'Metals',
-      commodity_name: 'Lithium',
-      company: 'Albemarle'
-    },
-    {
-      id: 'demo-10',
-      title: 'Tengiz Oil Field',
-      owner: 'Chevron',
-      address: 'Atyrau Region, Kazakhstan',
-      contact: 'tengiz@chevron.com',
-      long_term_contract: true,
-      contract_with: 'European Markets',
-      supply_volume: 900000,
-      storage_volume: 0,
-      latitude: 45.3,
-      longitude: 54.4,
-      commodity_type: 'Energy',
-      commodity_name: 'Crude Oil',
-      company: 'Chevron'
-    }
-  ])
+  const [markers, setMarkers] = useState<CommodityData[]>([])
 
-  const handleSearch = async () => {
+  const fetchData = useCallback(async (ignoreCompanyAndStorage = false) => {
     try {
       let query = supabase.from('commodity_locations').select('*')
 
@@ -237,11 +75,14 @@ export default function EarthMap() {
       if (selectedCommodity) {
         query = query.eq('commodity_name', selectedCommodity)
       }
-      if (selectedCompany) {
-        query = query.eq('company', selectedCompany)
-      }
-      if (showStorage) {
-        query = query.eq('is_storage', true)
+      // Only apply company and storage filters if not ignoring them (i.e., manual search)
+      if (!ignoreCompanyAndStorage) {
+        if (selectedCompany) {
+          query = query.eq('company', selectedCompany)
+        }
+        if (showStorage) {
+          query = query.eq('is_storage', true)
+        }
       }
 
       const { data, error } = await query
@@ -252,6 +93,19 @@ export default function EarthMap() {
     } catch (err) {
       console.error('Error fetching data:', err)
     }
+  }, [selectedCategory, selectedCommodity, selectedCompany, showStorage])
+
+  // Automatically load all data when component mounts and when filters are set to "All"
+  useEffect(() => {
+    // Only auto-fetch when both category and commodity are empty (meaning "All")
+    // When both are "All", show ALL points regardless of company/storage filters
+    if (!selectedCategory && !selectedCommodity) {
+      fetchData(true) // Ignore company and storage filters for auto-load
+    }
+  }, [selectedCategory, selectedCommodity, fetchData])
+
+  const handleSearch = async () => {
+    await fetchData(false) // Apply all filters including company and storage
   }
 
   return (
