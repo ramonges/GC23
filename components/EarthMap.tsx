@@ -157,7 +157,7 @@ const shippingRoutes: ShippingRoute[] = [
       { lat: 38.0, lng: -125.0 }, // North Pacific approach
     ]
   },
-  // C4: Asia ↔ North America East Coast (via Panama Canal)
+  // C4: Asia ↔ North America East Coast (via Panama Canal - Pacifique → Panama → Atlantique)
   { 
     id: 'C4', 
     name: 'Asia ↔ North America East Coast', 
@@ -165,36 +165,45 @@ const shippingRoutes: ShippingRoute[] = [
     endLat: 40.7, endLng: -74.0, 
     color: '#F59E0B',
     waypoints: [
-      { lat: 25.0, lng: 125.0 }, // East China Sea
-      { lat: 15.0, lng: 115.0 }, // South China Sea
-      { lat: 5.0, lng: 108.0 }, // Java Sea
-      { lat: 1.3, lng: 103.8 }, // Singapore Strait
-      { lat: 0.0, lng: 100.0 }, // Malacca Strait
-      { lat: -2.0, lng: 95.0 }, // Indian Ocean
-      { lat: -5.0, lng: 90.0 }, // Indian Ocean
-      { lat: -8.0, lng: 85.0 }, // Indian Ocean
-      { lat: -10.0, lng: 80.0 }, // Indian Ocean
-      { lat: -12.0, lng: 75.0 }, // Indian Ocean
-      { lat: -15.0, lng: 70.0 }, // Indian Ocean
-      { lat: -20.0, lng: 60.0 }, // Indian Ocean
-      { lat: -25.0, lng: 50.0 }, // Indian Ocean
-      { lat: -30.0, lng: 40.0 }, // Indian Ocean
-      { lat: -35.0, lng: 30.0 }, // Indian Ocean
-      { lat: -40.0, lng: 20.0 }, // South Atlantic
-      { lat: -35.0, lng: 10.0 }, // South Atlantic
-      { lat: -25.0, lng: 0.0 }, // South Atlantic
-      { lat: -15.0, lng: -20.0 }, // South Atlantic
-      { lat: -5.0, lng: -40.0 }, // South Atlantic
-      { lat: 0.0, lng: -60.0 }, // South Atlantic
-      { lat: 5.0, lng: -70.0 }, // Caribbean Sea approach
+      { lat: 33.0, lng: 130.0 }, // East China Sea (off Japan)
+      { lat: 30.0, lng: 125.0 }, // East China Sea (off China/Korea)
+      { lat: 25.0, lng: 120.0 }, // East China Sea (off China)
+      { lat: 20.0, lng: 115.0 }, // South China Sea (off China)
+      { lat: 15.0, lng: 115.0 }, // South China Sea (off Philippines)
+      { lat: 10.0, lng: 115.0 }, // South China Sea (off Philippines)
+      { lat: 5.0, lng: 110.0 }, // South China Sea (off Malaysia)
+      { lat: 0.0, lng: 110.0 }, // South China Sea (off Indonesia)
+      { lat: -5.0, lng: 115.0 }, // Java Sea (off Indonesia)
+      { lat: -5.0, lng: 120.0 }, // Banda Sea (off Indonesia)
+      { lat: -5.0, lng: 130.0 }, // Arafura Sea (off Indonesia)
+      { lat: 0.0, lng: 140.0 }, // Pacific Ocean (off Papua New Guinea)
+      { lat: 5.0, lng: 150.0 }, // Pacific Ocean
+      { lat: 10.0, lng: 160.0 }, // Pacific Ocean
+      { lat: 15.0, lng: 170.0 }, // Pacific Ocean
+      { lat: 15.0, lng: -175.0 }, // Pacific Ocean
+      { lat: 15.0, lng: -170.0 }, // Pacific Ocean
+      { lat: 15.0, lng: -160.0 }, // Pacific Ocean
+      { lat: 15.0, lng: -150.0 }, // Pacific Ocean
+      { lat: 15.0, lng: -140.0 }, // Pacific Ocean
+      { lat: 15.0, lng: -130.0 }, // Pacific Ocean
+      { lat: 15.0, lng: -120.0 }, // Pacific Ocean
+      { lat: 12.0, lng: -110.0 }, // Pacific Ocean (approach to Panama)
+      { lat: 10.0, lng: -100.0 }, // Pacific Ocean (approach to Panama)
+      { lat: 9.0, lng: -90.0 }, // Pacific Ocean (approach to Panama)
+      { lat: 9.0, lng: -80.0 }, // Pacific Ocean (approach to Panama)
+      { lat: 9.0, lng: -79.5 }, // Panama Canal (Pacific side)
       { lat: 9.0, lng: -79.5 }, // Panama Canal
-      { lat: 12.0, lng: -78.0 }, // Caribbean Sea
-      { lat: 15.0, lng: -75.0 }, // Caribbean Sea
-      { lat: 18.0, lng: -72.0 }, // Caribbean Sea
-      { lat: 22.0, lng: -70.0 }, // North Atlantic
-      { lat: 25.0, lng: -70.0 }, // North Atlantic
-      { lat: 30.0, lng: -72.0 }, // North Atlantic
-      { lat: 35.0, lng: -73.0 }, // North Atlantic
+      { lat: 9.5, lng: -79.5 }, // Panama Canal (Atlantic side)
+      { lat: 10.0, lng: -79.0 }, // Caribbean Sea (off Panama)
+      { lat: 12.0, lng: -78.0 }, // Caribbean Sea (off Colombia)
+      { lat: 15.0, lng: -75.0 }, // Caribbean Sea (off Jamaica)
+      { lat: 18.0, lng: -72.0 }, // Caribbean Sea (off Haiti/Dominican Republic)
+      { lat: 22.0, lng: -70.0 }, // North Atlantic (off Bahamas)
+      { lat: 25.0, lng: -72.0 }, // North Atlantic (off Bahamas)
+      { lat: 30.0, lng: -73.0 }, // North Atlantic (off US East Coast)
+      { lat: 35.0, lng: -73.5 }, // North Atlantic (off US East Coast)
+      { lat: 40.0, lng: -73.5 }, // North Atlantic (off New York)
+      { lat: 40.7, lng: -73.8 }, // New York approach
     ]
   },
   // C5: Asia ↔ Middle East (via Indian Ocean)
