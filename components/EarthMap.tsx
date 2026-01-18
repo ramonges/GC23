@@ -724,6 +724,7 @@ export default function EarthMap() {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
   const [showCargoes, setShowCargoes] = useState(false)
   const [showCities, setShowCities] = useState(true) // Cities visible by default
+  const [showShippingRoutes, setShowShippingRoutes] = useState(false) // Shipping routes section visibility
   const [enabledRoutes, setEnabledRoutes] = useState<Set<string>>(new Set())
   const [advancedFilters, setAdvancedFilters] = useState({
     apiRange: '',
@@ -871,6 +872,19 @@ export default function EarthMap() {
             </label>
           </div>
 
+          {/* Shipping Routes Toggle */}
+          <div className="flex items-center">
+            <label className="flex items-center gap-2.5 text-white cursor-pointer hover:text-blue-400 transition-colors group">
+              <input
+                type="checkbox"
+                checked={showShippingRoutes}
+                onChange={(e) => setShowShippingRoutes(e.target.checked)}
+                className="w-5 h-5 rounded-md border-2 border-gray-500 bg-gray-800 text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 focus:border-blue-500 transition-all duration-200 cursor-pointer checked:bg-blue-500 checked:border-blue-500 hover:border-blue-400"
+              />
+              <span className="font-semibold">Shipping Routes</span>
+            </label>
+          </div>
+
           {/* Cities Toggle */}
           <div className="flex items-center">
             <label className="flex items-center gap-2.5 text-white cursor-pointer hover:text-blue-400 transition-colors group">
@@ -964,41 +978,62 @@ export default function EarthMap() {
           </div>
         )}
 
-        {/* Shipping Routes Section */}
-        <div className="mt-6 pt-4 border-t border-gray-700">
-          <p className="text-white font-semibold mb-3 flex items-center gap-2">
-            <Filter size={16} />
-            Shipping Routes
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-            {shippingRoutes.map((route) => (
-              <label
-                key={route.id}
-                className="flex items-center gap-2 text-white cursor-pointer hover:text-blue-400 transition-colors group text-sm"
-              >
+        {/* Shipping Routes Section - Only show when checkbox is selected */}
+        {showShippingRoutes && (
+          <div className="mt-6 pt-4 border-t border-gray-700">
+            <p className="text-white font-semibold mb-3 flex items-center gap-2">
+              <Filter size={16} />
+              Shipping Routes
+            </p>
+            <div className="mb-4">
+              <label className="flex items-center gap-2.5 text-white cursor-pointer hover:text-blue-400 transition-colors group">
                 <input
                   type="checkbox"
-                  checked={enabledRoutes.has(route.id)}
+                  checked={enabledRoutes.size === shippingRoutes.length}
                   onChange={(e) => {
-                    const newSet = new Set(enabledRoutes)
                     if (e.target.checked) {
-                      newSet.add(route.id)
+                      // Select all routes
+                      setEnabledRoutes(new Set(shippingRoutes.map(r => r.id)))
                     } else {
-                      newSet.delete(route.id)
+                      // Deselect all routes
+                      setEnabledRoutes(new Set())
                     }
-                    setEnabledRoutes(newSet)
                   }}
-                  className="w-4 h-4 rounded-md border-2 border-gray-500 bg-gray-800 text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 focus:border-blue-500 transition-all duration-200 cursor-pointer checked:bg-blue-500 checked:border-blue-500 hover:border-blue-400"
-                  style={{ accentColor: route.color }}
+                  className="w-5 h-5 rounded-md border-2 border-gray-500 bg-gray-800 text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 focus:border-blue-500 transition-all duration-200 cursor-pointer checked:bg-blue-500 checked:border-blue-500 hover:border-blue-400"
                 />
-                <span className="font-medium flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: route.color }}></span>
-                  {route.id}
-                </span>
+                <span className="font-semibold">Select All</span>
               </label>
-            ))}
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+              {shippingRoutes.map((route) => (
+                <label
+                  key={route.id}
+                  className="flex items-center gap-2 text-white cursor-pointer hover:text-blue-400 transition-colors group text-sm"
+                >
+                  <input
+                    type="checkbox"
+                    checked={enabledRoutes.has(route.id)}
+                    onChange={(e) => {
+                      const newSet = new Set(enabledRoutes)
+                      if (e.target.checked) {
+                        newSet.add(route.id)
+                      } else {
+                        newSet.delete(route.id)
+                      }
+                      setEnabledRoutes(newSet)
+                    }}
+                    className="w-4 h-4 rounded-md border-2 border-gray-500 bg-gray-800 text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 focus:border-blue-500 transition-all duration-200 cursor-pointer checked:bg-blue-500 checked:border-blue-500 hover:border-blue-400"
+                    style={{ accentColor: route.color }}
+                  />
+                  <span className="font-medium flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: route.color }}></span>
+                    {route.id}
+                  </span>
+                </label>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* 3D Globe */}
