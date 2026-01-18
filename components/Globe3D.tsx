@@ -21,12 +21,23 @@ interface CommodityData {
   company?: string
 }
 
+interface ShippingRoute {
+  id: string
+  name: string
+  startLat: number
+  startLng: number
+  endLat: number
+  endLng: number
+  color: string
+}
+
 interface Globe3DProps {
   markers: CommodityData[]
   showCities?: boolean
+  routes?: ShippingRoute[]
 }
 
-const Globe3D = dynamic(() => import('./Globe3DClient'), {
+const Globe3DClient = dynamic(() => import('./Globe3DClient'), {
   ssr: false,
   loading: () => (
     <div className="flex-1 flex items-center justify-center bg-black">
@@ -38,4 +49,6 @@ const Globe3D = dynamic(() => import('./Globe3DClient'), {
   ),
 })
 
-export default Globe3D
+export default function Globe3D({ markers, showCities, routes }: Globe3DProps) {
+  return <Globe3DClient markers={markers} showCities={showCities} routes={routes} />
+}

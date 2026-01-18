@@ -50,6 +50,39 @@ const companies = [
   'Cargill', 'Olam', 'Storage - All', 'Storage - Independent'
 ]
 
+interface ShippingRoute {
+  id: string
+  name: string
+  startLat: number
+  startLng: number
+  endLat: number
+  endLng: number
+  color: string
+}
+
+const shippingRoutes: ShippingRoute[] = [
+  { id: 'C1', name: 'Asia ↔ Europe (Far East to North Europe / Med)', startLat: 35.7, startLng: 139.8, endLat: 51.5, endLng: -0.1, color: '#3B82F6' },
+  { id: 'C2', name: 'Asia ↔ Mediterranean', startLat: 35.7, startLng: 139.8, endLat: 41.0, endLng: 28.9, color: '#8B5CF6' },
+  { id: 'C3', name: 'Asia ↔ North America West Coast', startLat: 35.7, startLng: 139.8, endLat: 37.8, endLng: -122.4, color: '#10B981' },
+  { id: 'C4', name: 'Asia ↔ North America East Coast', startLat: 35.7, startLng: 139.8, endLat: 40.7, endLng: -74.0, color: '#F59E0B' },
+  { id: 'C5', name: 'Asia ↔ Middle East', startLat: 35.7, startLng: 139.8, endLat: 25.2, endLng: 55.3, color: '#EF4444' },
+  { id: 'C6', name: 'Asia ↔ Indian Subcontinent', startLat: 35.7, startLng: 139.8, endLat: 19.1, endLng: 72.9, color: '#EC4899' },
+  { id: 'C7', name: 'Asia ↔ Africa', startLat: 35.7, startLng: 139.8, endLat: -33.9, endLng: 18.4, color: '#14B8A6' },
+  { id: 'C8', name: 'Intra-Asia', startLat: 22.3, startLng: 114.2, endLat: 1.3, endLng: 103.8, color: '#06B6D4' },
+  { id: 'C9', name: 'Australia ↔ China / East Asia', startLat: -33.9, startLng: 151.2, endLat: 31.2, endLng: 121.5, color: '#84CC16' },
+  { id: 'C10', name: 'Europe ↔ North America', startLat: 51.5, startLng: -0.1, endLat: 40.7, endLng: -74.0, color: '#6366F1' },
+  { id: 'C11', name: 'Europe ↔ Africa', startLat: 51.5, startLng: -0.1, endLat: -33.9, endLng: 18.4, color: '#A855F7' },
+  { id: 'C12', name: 'Europe ↔ Middle East', startLat: 51.5, startLng: -0.1, endLat: 25.2, endLng: 55.3, color: '#F97316' },
+  { id: 'C13', name: 'Europe ↔ Indian Subcontinent', startLat: 51.5, startLng: -0.1, endLat: 19.1, endLng: 72.9, color: '#22D3EE' },
+  { id: 'C14', name: 'North America ↔ South America (East)', startLat: 40.7, startLng: -74.0, endLat: -23.5, endLng: -46.6, color: '#34D399' },
+  { id: 'C15', name: 'North America ↔ South America (West)', startLat: 37.8, startLng: -122.4, endLat: -12.0, endLng: -77.0, color: '#60A5FA' },
+  { id: 'C16', name: 'Asia ↔ South America (West)', startLat: 35.7, startLng: 139.8, endLat: -12.0, endLng: -77.0, color: '#FB7185' },
+  { id: 'C17', name: 'Asia ↔ South America (East)', startLat: 35.7, startLng: 139.8, endLat: -23.5, endLng: -46.6, color: '#A78BFA' },
+  { id: 'C18', name: 'Middle East ↔ Africa', startLat: 25.2, startLng: 55.3, endLat: -33.9, endLng: 18.4, color: '#FBBF24' },
+  { id: 'C19', name: 'Intra-Europe', startLat: 51.5, startLng: -0.1, endLat: 52.5, endLng: 13.4, color: '#4ADE80' },
+  { id: 'C20', name: 'Intra-Americas', startLat: 40.7, startLng: -74.0, endLat: 19.4, endLng: -99.1, color: '#818CF8' },
+]
+
 export default function EarthMap() {
   const [selectedCategory, setSelectedCategory] = useState<string>('')
   const [selectedCommodity, setSelectedCommodity] = useState<string>('')
@@ -58,6 +91,7 @@ export default function EarthMap() {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
   const [showCargoes, setShowCargoes] = useState(false)
   const [showCities, setShowCities] = useState(true) // Cities visible by default
+  const [enabledRoutes, setEnabledRoutes] = useState<Set<string>>(new Set())
   const [advancedFilters, setAdvancedFilters] = useState({
     apiRange: '',
     sulfurRange: '',
@@ -296,11 +330,51 @@ export default function EarthMap() {
             </div>
           </div>
         )}
+
+        {/* Shipping Routes Section */}
+        <div className="mt-6 pt-4 border-t border-gray-700">
+          <p className="text-white font-semibold mb-3 flex items-center gap-2">
+            <Filter size={16} />
+            Shipping Routes
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
+            {shippingRoutes.map((route) => (
+              <label
+                key={route.id}
+                className="flex items-center gap-2 text-white cursor-pointer hover:text-blue-400 transition-colors group text-sm"
+              >
+                <input
+                  type="checkbox"
+                  checked={enabledRoutes.has(route.id)}
+                  onChange={(e) => {
+                    const newSet = new Set(enabledRoutes)
+                    if (e.target.checked) {
+                      newSet.add(route.id)
+                    } else {
+                      newSet.delete(route.id)
+                    }
+                    setEnabledRoutes(newSet)
+                  }}
+                  className="w-4 h-4 rounded-md border-2 border-gray-500 bg-gray-800 text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 focus:border-blue-500 transition-all duration-200 cursor-pointer checked:bg-blue-500 checked:border-blue-500 hover:border-blue-400"
+                  style={{ accentColor: route.color }}
+                />
+                <span className="font-medium flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: route.color }}></span>
+                  {route.id}
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* 3D Globe */}
       <div className="flex-1 relative">
-        <Globe3D markers={markers} showCities={showCities} />
+        <Globe3D 
+          markers={markers} 
+          showCities={showCities} 
+          routes={shippingRoutes.filter(r => enabledRoutes.has(r.id))}
+        />
 
         {/* Results Counter */}
         <div className="absolute bottom-6 right-6 bg-black bg-opacity-90 border border-gray-600 rounded-xl px-6 py-3 z-10 shadow-2xl backdrop-blur-sm">

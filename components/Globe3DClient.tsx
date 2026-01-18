@@ -20,12 +20,23 @@ interface CommodityData {
   company?: string
 }
 
+interface ShippingRoute {
+  id: string
+  name: string
+  startLat: number
+  startLng: number
+  endLat: number
+  endLng: number
+  color: string
+}
+
 interface Globe3DClientProps {
   markers: CommodityData[]
   showCities?: boolean
+  routes?: ShippingRoute[]
 }
 
-export default function Globe3DClient({ markers, showCities = true }: Globe3DClientProps) {
+export default function Globe3DClient({ markers, showCities = true, routes = [] }: Globe3DClientProps) {
   const globeEl = useRef<HTMLDivElement>(null)
   const globeRef = useRef<any>(null)
   const currentAltitudeRef = useRef<number>(2.5)
@@ -258,6 +269,31 @@ export default function Globe3DClient({ markers, showCities = true }: Globe3DCli
         }, 1000)
       })
 
+    // Convert routes to arcs
+    const arcs = routes.map(route => ({
+      startLat: route.startLat,
+      startLng: route.startLng,
+      endLat: route.endLat,
+      endLng: route.endLng,
+      color: route.color,
+      name: route.name,
+      id: route.id
+    }))
+
+    // Add arcs for shipping routes
+    globe
+      .arcsData(arcs)
+      .arcStartLat((d: any) => d.startLat)
+      .arcStartLng((d: any) => d.startLng)
+      .arcEndLat((d: any) => d.endLat)
+      .arcEndLng((d: any) => d.endLng)
+      .arcColor((d: any) => d.color)
+      .arcStroke((d: any) => 1.5)
+      .arcDashLength(0.4)
+      .arcDashGap(0.1)
+      .arcDashAnimateTime(2000)
+      .arcsTransitionDuration(500)
+
     // Handle window resize
     const handleResize = () => {
       if (globeRef.current) {
@@ -273,7 +309,7 @@ export default function Globe3DClient({ markers, showCities = true }: Globe3DCli
         globeRef.current._destructor()
       }
     }
-  }, [markers])
+  }, [markers, routes])
 
   // Handle showCities toggle
   useEffect(() => {
