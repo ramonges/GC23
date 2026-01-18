@@ -438,7 +438,7 @@ const shippingRoutes: ShippingRoute[] = [
       { lat: 25.2, lng: 55.2 }, // Dubai approach
     ]
   },
-  // C13: Europe ↔ Indian Subcontinent (via Suez)
+  // C13: Europe ↔ Indian Subcontinent (via Suez, around Arabian Peninsula)
   { 
     id: 'C13', 
     name: 'Europe ↔ Indian Subcontinent', 
@@ -460,15 +460,24 @@ const shippingRoutes: ShippingRoute[] = [
       { lat: 31.0, lng: 29.0 }, // Eastern Mediterranean (off Egypt)
       { lat: 29.9, lng: 32.5 }, // Suez Canal
       { lat: 28.0, lng: 34.0 }, // Red Sea (off Egypt)
-      { lat: 26.0, lng: 38.0 }, // Red Sea (off Saudi Arabia)
-      { lat: 24.0, lng: 42.0 }, // Red Sea (off Saudi Arabia)
-      { lat: 22.0, lng: 46.0 }, // Red Sea (off Yemen)
-      { lat: 20.0, lng: 50.0 }, // Arabian Sea (off Oman)
-      { lat: 18.0, lng: 55.0 }, // Arabian Sea (off Oman)
-      { lat: 16.0, lng: 60.0 }, // Arabian Sea (off Pakistan)
-      { lat: 15.0, lng: 65.0 }, // Arabian Sea (off Pakistan)
-      { lat: 14.0, lng: 70.0 }, // Arabian Sea (off India)
-      { lat: 16.0, lng: 72.0 }, // Arabian Sea (off India)
+      { lat: 26.0, lng: 36.0 }, // Red Sea (off Saudi Arabia - west coast)
+      { lat: 24.0, lng: 38.0 }, // Red Sea (off Saudi Arabia - west coast)
+      { lat: 22.0, lng: 39.0 }, // Red Sea (off Saudi Arabia - west coast)
+      { lat: 20.0, lng: 40.0 }, // Red Sea (off Saudi Arabia - west coast)
+      { lat: 18.0, lng: 41.0 }, // Red Sea (off Saudi Arabia - west coast)
+      { lat: 16.0, lng: 42.0 }, // Red Sea (off Yemen - west coast)
+      { lat: 14.0, lng: 43.0 }, // Red Sea (off Yemen - west coast)
+      { lat: 13.0, lng: 44.0 }, // Bab-el-Mandeb Strait (off Yemen)
+      { lat: 12.0, lng: 45.0 }, // Gulf of Aden (off Yemen)
+      { lat: 14.0, lng: 50.0 }, // Arabian Sea (off Yemen - south coast)
+      { lat: 16.0, lng: 52.0 }, // Arabian Sea (off Oman - south coast)
+      { lat: 18.0, lng: 55.0 }, // Arabian Sea (off Oman - east coast)
+      { lat: 18.0, lng: 58.0 }, // Arabian Sea (off Oman - east coast)
+      { lat: 18.0, lng: 60.0 }, // Arabian Sea (off Pakistan)
+      { lat: 18.0, lng: 65.0 }, // Arabian Sea (off Pakistan)
+      { lat: 17.0, lng: 68.0 }, // Arabian Sea (off Pakistan)
+      { lat: 16.0, lng: 70.0 }, // Arabian Sea (off India)
+      { lat: 17.0, lng: 72.0 }, // Arabian Sea (off India)
       { lat: 18.0, lng: 72.5 }, // Arabian Sea (off India)
       { lat: 19.0, lng: 72.8 }, // Mumbai approach
     ]
