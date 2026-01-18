@@ -482,7 +482,7 @@ const shippingRoutes: ShippingRoute[] = [
       { lat: 19.0, lng: 72.8 }, // Mumbai approach
     ]
   },
-  // C14: North America ↔ South America (East Coast)
+  // C14: North America ↔ South America (East Coast - along Atlantic)
   { 
     id: 'C14', 
     name: 'North America ↔ South America (East)', 
@@ -490,20 +490,34 @@ const shippingRoutes: ShippingRoute[] = [
     endLat: -23.5, endLng: -46.6, 
     color: '#34D399',
     waypoints: [
-      { lat: 40.0, lng: -72.0 }, // North Atlantic
-      { lat: 35.0, lng: -70.0 }, // North Atlantic
-      { lat: 30.0, lng: -70.0 }, // North Atlantic
-      { lat: 25.0, lng: -70.0 }, // North Atlantic
-      { lat: 20.0, lng: -68.0 }, // Caribbean Sea
-      { lat: 15.0, lng: -65.0 }, // Caribbean Sea
-      { lat: 10.0, lng: -62.0 }, // Caribbean Sea
-      { lat: 5.0, lng: -58.0 }, // South Atlantic
-      { lat: 0.0, lng: -55.0 }, // South Atlantic
-      { lat: -5.0, lng: -52.0 }, // South Atlantic
-      { lat: -10.0, lng: -50.0 }, // South Atlantic
-      { lat: -15.0, lng: -48.0 }, // South Atlantic
-      { lat: -20.0, lng: -47.0 }, // South Atlantic
-      { lat: -22.0, lng: -46.5 }, // São Paulo approach
+      { lat: 40.5, lng: -73.5 }, // North Atlantic (off New York)
+      { lat: 39.0, lng: -72.0 }, // North Atlantic (off US East Coast)
+      { lat: 37.0, lng: -71.0 }, // North Atlantic (off US East Coast)
+      { lat: 35.0, lng: -70.0 }, // North Atlantic (off US East Coast)
+      { lat: 32.0, lng: -70.0 }, // North Atlantic (off US East Coast)
+      { lat: 30.0, lng: -70.0 }, // North Atlantic (off US East Coast)
+      { lat: 27.0, lng: -70.0 }, // North Atlantic (off Florida)
+      { lat: 25.0, lng: -70.0 }, // North Atlantic (off Florida)
+      { lat: 22.0, lng: -68.0 }, // Caribbean Sea (off Bahamas)
+      { lat: 20.0, lng: -68.0 }, // Caribbean Sea (off Dominican Republic)
+      { lat: 18.0, lng: -66.0 }, // Caribbean Sea (off Puerto Rico)
+      { lat: 15.0, lng: -65.0 }, // Caribbean Sea (off Venezuela)
+      { lat: 12.0, lng: -63.0 }, // Caribbean Sea (off Venezuela)
+      { lat: 10.0, lng: -62.0 }, // Caribbean Sea (off Venezuela)
+      { lat: 8.0, lng: -60.0 }, // Caribbean Sea (off Venezuela)
+      { lat: 5.0, lng: -58.0 }, // Atlantic (off Guyana)
+      { lat: 2.0, lng: -56.0 }, // Atlantic (off Suriname)
+      { lat: 0.0, lng: -54.0 }, // Atlantic (off French Guiana)
+      { lat: -2.0, lng: -52.0 }, // Atlantic (off Brazil - north coast)
+      { lat: -5.0, lng: -50.0 }, // Atlantic (off Brazil - north coast)
+      { lat: -8.0, lng: -48.0 }, // Atlantic (off Brazil - northeast coast)
+      { lat: -10.0, lng: -46.0 }, // Atlantic (off Brazil - northeast coast)
+      { lat: -12.0, lng: -45.0 }, // Atlantic (off Brazil - northeast coast)
+      { lat: -15.0, lng: -46.0 }, // Atlantic (off Brazil - east coast)
+      { lat: -18.0, lng: -46.5 }, // Atlantic (off Brazil - east coast)
+      { lat: -20.0, lng: -46.5 }, // Atlantic (off Brazil - east coast)
+      { lat: -22.0, lng: -46.5 }, // Atlantic (off Brazil - east coast)
+      { lat: -23.0, lng: -46.5 }, // São Paulo approach
     ]
   },
   // C15: North America ↔ South America (West Coast)
