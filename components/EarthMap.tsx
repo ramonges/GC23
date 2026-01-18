@@ -180,12 +180,12 @@ export default function EarthMap() {
 
           {/* Storage */}
           <div className="flex items-center">
-            <label className="flex items-center gap-2 text-white cursor-pointer hover:text-blue-400 transition-colors">
+            <label className="flex items-center gap-2.5 text-white cursor-pointer hover:text-blue-400 transition-colors group">
               <input
                 type="checkbox"
                 checked={showStorage}
                 onChange={(e) => setShowStorage(e.target.checked)}
-                className="w-5 h-5 rounded border-gray-600 text-blue-500 focus:ring-blue-500"
+                className="w-5 h-5 rounded-md border-2 border-gray-500 bg-gray-800 text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 focus:border-blue-500 transition-all duration-200 cursor-pointer checked:bg-blue-500 checked:border-blue-500 hover:border-blue-400"
               />
               <span className="font-semibold">Storage</span>
             </label>
@@ -193,12 +193,12 @@ export default function EarthMap() {
 
           {/* Cargoes */}
           <div className="flex items-center">
-            <label className="flex items-center gap-2 text-white cursor-pointer hover:text-blue-400 transition-colors">
+            <label className="flex items-center gap-2.5 text-white cursor-pointer hover:text-blue-400 transition-colors group">
               <input
                 type="checkbox"
                 checked={showCargoes}
                 onChange={(e) => setShowCargoes(e.target.checked)}
-                className="w-5 h-5 rounded border-gray-600 text-blue-500 focus:ring-blue-500"
+                className="w-5 h-5 rounded-md border-2 border-gray-500 bg-gray-800 text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 focus:border-blue-500 transition-all duration-200 cursor-pointer checked:bg-blue-500 checked:border-blue-500 hover:border-blue-400"
               />
               <span className="font-semibold">Cargo Ships</span>
             </label>
@@ -206,12 +206,12 @@ export default function EarthMap() {
 
           {/* Cities Toggle */}
           <div className="flex items-center">
-            <label className="flex items-center gap-2 text-white cursor-pointer hover:text-blue-400 transition-colors">
+            <label className="flex items-center gap-2.5 text-white cursor-pointer hover:text-blue-400 transition-colors group">
               <input
                 type="checkbox"
                 checked={showCities}
                 onChange={(e) => setShowCities(e.target.checked)}
-                className="w-5 h-5 rounded border-gray-600 text-blue-500 focus:ring-blue-500"
+                className="w-5 h-5 rounded-md border-2 border-gray-500 bg-gray-800 text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 focus:border-blue-500 transition-all duration-200 cursor-pointer checked:bg-blue-500 checked:border-blue-500 hover:border-blue-400"
               />
               <span className="font-semibold">Cities</span>
             </label>
@@ -219,12 +219,12 @@ export default function EarthMap() {
 
           {/* Advanced Filters Toggle */}
           <div className="flex items-center">
-            <label className="flex items-center gap-2 text-white cursor-pointer hover:text-blue-400 transition-colors">
+            <label className="flex items-center gap-2.5 text-white cursor-pointer hover:text-blue-400 transition-colors group">
               <input
                 type="checkbox"
                 checked={showAdvancedFilters}
                 onChange={(e) => setShowAdvancedFilters(e.target.checked)}
-                className="w-5 h-5 rounded border-gray-600 text-blue-500 focus:ring-blue-500"
+                className="w-5 h-5 rounded-md border-2 border-gray-500 bg-gray-800 text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 focus:border-blue-500 transition-all duration-200 cursor-pointer checked:bg-blue-500 checked:border-blue-500 hover:border-blue-400"
               />
               <span className="font-semibold">Advanced</span>
             </label>
