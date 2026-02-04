@@ -52,7 +52,7 @@ interface RefineryData {
 }
 
 const commodityCategories = {
-  Energy: ['Crude Oil', 'Natural Gas', 'LNG', 'Gas Condensate', 'Uranium', 'Coal'],
+  Energy: ['Crude Oil', 'Natural Gas', 'Oil & Gas', 'LNG', 'Gas Condensate', 'Uranium', 'Coal'],
   Metals: ['Gold', 'Silver', 'Copper', 'Steel', 'Lithium', 'Iron Ore', 'Platinum', 'Silicon', 'Titanium'],
   Agricultural: ['Soybeans', 'Wheat', 'Coffee', 'Cotton', 'Rice', 'Sugar', 'Cocoa', 'Corn'],
   Industrial: ['Cobalt', 'Aluminium', 'Zinc', 'Nickel', 'Rhodium', 'Palladium', 'Magnesium'],
@@ -917,7 +917,7 @@ export default function EarthMap() {
 
   const fetchData = useCallback(async (ignoreCompany = false) => {
     try {
-      let query = supabase.from('commodity_locations').select('*')
+      let query = supabase.from('commodity_locations').select('*').limit(10000)
 
       if (selectedCategory) {
         query = query.eq('commodity_type', selectedCategory)
