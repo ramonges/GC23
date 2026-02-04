@@ -69,38 +69,32 @@ export default function Home() {
         <div className="relative z-20 text-center px-6 max-w-6xl">
           <div className="mb-8">
             <span className="inline-block px-6 py-2 bg-white bg-opacity-10 backdrop-blur-sm border border-white border-opacity-20 rounded-full text-white text-sm font-medium tracking-wider uppercase">
-              Premium Intelligence Platform
+              Open Access Platform
             </span>
           </div>
           
           <h1 className="text-7xl md:text-8xl lg:text-9xl font-bold text-white mb-8 leading-tight tracking-tight">
-            Commodities Platform for<br />
+            Global Oil & Gas Fields<br />
             <span className="bg-gradient-to-r from-blue-200 via-blue-100 to-white bg-clip-text text-transparent">
-              Producers and Traders
+              Interactive Map
             </span>
           </h1>
           
           <p className="text-2xl md:text-3xl text-gray-300 mb-12 font-light tracking-wide">
-            World Energy, Metals and Agriculture Producers Analytics
+            Explore oil and gas fields worldwide with comprehensive production data
           </p>
           
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
             <Link
-              href="/request-demo"
+              href="/platform"
               className="group px-12 py-5 bg-white text-black text-lg font-semibold rounded-lg hover:bg-opacity-90 transition-all duration-300 shadow-2xl hover:shadow-white/20 hover:scale-105"
             >
               <span className="flex items-center justify-center gap-2">
-                Get Started
+                Explore Oil & Gas Fields
                 <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </span>
-            </Link>
-            <Link
-              href="/#pricing"
-              className="px-12 py-5 border-2 border-white text-white text-lg font-semibold rounded-lg hover:bg-white hover:text-black transition-all duration-300 backdrop-blur-sm"
-            >
-              View Pricing
             </Link>
           </div>
 
@@ -146,130 +140,49 @@ export default function Home() {
         <div className="container mx-auto px-6 relative z-10">
           <div className="text-center mb-20">
             <h2 className="text-5xl md:text-6xl font-bold text-white mb-6">
-              Unparalleled Market Intelligence
+              Comprehensive Oil & Gas Data
             </h2>
             <p className="text-xl text-gray-400 font-light max-w-3xl mx-auto">
-              Access comprehensive data that institutional traders rely on for strategic decisions
+              Open access to global oil and gas field information, production data, and infrastructure details
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
             <div className="group p-10 bg-gradient-to-br from-white/5 to-white/[0.02] rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-500 hover:transform hover:scale-105 backdrop-blur-sm">
+              <div className="text-5xl mb-6 group-hover:scale-110 transition-transform duration-300">🛢️</div>
+              <h3 className="text-2xl font-bold text-white mb-4">Oil Fields</h3>
+              <p className="text-gray-400 leading-relaxed">
+                Comprehensive database of oil fields worldwide with production data, reserves, and operator information.
+              </p>
+            </div>
+
+            <div className="group p-10 bg-gradient-to-br from-white/5 to-white/[0.02] rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-500 hover:transform hover:scale-105 backdrop-blur-sm">
+              <div className="text-5xl mb-6 group-hover:scale-110 transition-transform duration-300">⛽</div>
+              <h3 className="text-2xl font-bold text-white mb-4">Gas Fields</h3>
+              <p className="text-gray-400 leading-relaxed">
+                Detailed information on natural gas fields including production capacity, reserves, and infrastructure.
+              </p>
+            </div>
+
+            <div className="group p-10 bg-gradient-to-br from-white/5 to-white/[0.02] rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-500 hover:transform hover:scale-105 backdrop-blur-sm">
               <div className="text-5xl mb-6 group-hover:scale-110 transition-transform duration-300">📍</div>
-              <h3 className="text-2xl font-bold text-white mb-4">Global Asset Mapping</h3>
+              <h3 className="text-2xl font-bold text-white mb-4">Precise Locations</h3>
               <p className="text-gray-400 leading-relaxed">
-                Precision coordinates for mines, reserves, and energy facilities worldwide with real-time production data.
-              </p>
-            </div>
-
-            <div className="group p-10 bg-gradient-to-br from-white/5 to-white/[0.02] rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-500 hover:transform hover:scale-105 backdrop-blur-sm">
-              <div className="text-5xl mb-6 group-hover:scale-110 transition-transform duration-300">🚢</div>
-              <h3 className="text-2xl font-bold text-white mb-4">Maritime Intelligence</h3>
-              <p className="text-gray-400 leading-relaxed">
-                Live tracking of LNG carriers, tankers, and bulk vessels with cargo specifications and routing.
-              </p>
-            </div>
-
-            <div className="group p-10 bg-gradient-to-br from-white/5 to-white/[0.02] rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-500 hover:transform hover:scale-105 backdrop-blur-sm">
-              <div className="text-5xl mb-6 group-hover:scale-110 transition-transform duration-300">🏢</div>
-              <h3 className="text-2xl font-bold text-white mb-4">Producer Networks</h3>
-              <p className="text-gray-400 leading-relaxed">
-                Comprehensive database of producers with contract relationships, contacts, and trade flows.
+                Interactive 3D globe with precise coordinates for all oil and gas fields around the world.
               </p>
             </div>
 
             <div className="group p-10 bg-gradient-to-br from-white/5 to-white/[0.02] rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-500 hover:transform hover:scale-105 backdrop-blur-sm">
               <div className="text-5xl mb-6 group-hover:scale-110 transition-transform duration-300">📊</div>
-              <h3 className="text-2xl font-bold text-white mb-4">Storage Analytics</h3>
+              <h3 className="text-2xl font-bold text-white mb-4">Production Data</h3>
               <p className="text-gray-400 leading-relaxed">
-                Global storage capacity data across ports and terminals with inventory levels and ownership details.
+                Monthly and yearly production volumes, reserves estimates, and operational status for each field.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Pricing Section */}
-      <section id="pricing" className="py-32 bg-black relative overflow-hidden">
-        {/* Gradient orbs */}
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10"></div>
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10"></div>
-        
-        <div className="container mx-auto px-6 text-center relative z-10">
-          <h2 className="text-5xl md:text-6xl font-bold text-white mb-6">
-            Professional Access
-          </h2>
-          <p className="text-xl text-gray-400 mb-16 font-light">
-            Enterprise-grade intelligence for sophisticated traders
-          </p>
-          
-          <div className="max-w-2xl mx-auto">
-            <div className="p-12 bg-gradient-to-br from-white/10 to-white/5 rounded-3xl border border-white/20 backdrop-blur-xl shadow-2xl">
-              <div className="mb-10">
-                <div className="text-7xl font-bold text-white mb-2">
-                  €599
-                </div>
-                <div className="text-gray-400 text-xl font-light">per month</div>
-              </div>
-              
-              <div className="space-y-4 mb-10">
-                {[
-                  '15-day complimentary trial',
-                  'Complete platform access',
-                  'Real-time market data',
-                  'Priority support',
-                  'Advanced analytics suite',
-                  'Custom data exports'
-                ].map((feature, index) => (
-                  <div key={index} className="flex items-center justify-center gap-3 text-gray-300">
-                    <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-lg">{feature}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link
-                  href="/request-demo"
-                  className="px-10 py-4 bg-white text-black text-lg font-bold rounded-lg hover:bg-opacity-90 transition-all duration-300 shadow-xl hover:scale-105"
-                >
-                  Schedule Consultation
-                </Link>
-                <a
-                  href="mailto:ram2315@columbia.edu"
-                  className="px-10 py-4 border-2 border-white/30 text-white text-lg font-bold rounded-lg hover:bg-white/10 transition-all duration-300"
-                >
-                  Contact Sales
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Call to Action Section */}
-      <section className="py-32 bg-gradient-to-br from-blue-900 via-indigo-900 to-black relative overflow-hidden">
-        <div className="absolute inset-0 bg-black opacity-40"></div>
-        <div className="container mx-auto px-6 text-center relative z-10">
-          <h2 className="text-5xl md:text-6xl font-bold text-white mb-8 leading-tight">
-            Elevate Your Trading Strategy
-          </h2>
-          <p className="text-2xl text-gray-300 mb-12 font-light max-w-3xl mx-auto">
-            Join elite traders at leading merchants, banks, and hedge funds
-          </p>
-          <Link
-            href="/request-demo"
-            className="inline-flex items-center gap-3 px-14 py-6 bg-white text-black text-xl font-bold rounded-lg hover:bg-opacity-90 transition-all duration-300 shadow-2xl hover:scale-105"
-          >
-            Begin Your Trial
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-          </Link>
-        </div>
-      </section>
 
       <Footer />
     </div>
