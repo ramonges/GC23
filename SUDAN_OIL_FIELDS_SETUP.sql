@@ -1,6 +1,6 @@
 -- ============================================
 -- SUDAN OIL & GAS FIELDS SETUP
--- Generated: 2026-02-04T16:17:29.659823
+-- Generated: 2026-02-04T16:24:52.052889
 -- Total sites: 20
 -- ============================================
 
@@ -825,8 +825,8 @@ INSERT INTO public.commodity_locations (
   'Upper Nile State',
   'Sudan',
   'Upper Nile State',
-  NULL,
-  NULL,
+  10.5,
+  32.5,
   'Energy',
   'Crude Oil',
   'oil_field',
@@ -871,8 +871,8 @@ INSERT INTO public.commodity_locations (
   'Upper Nile State',
   'Sudan',
   'Upper Nile State',
-  NULL,
-  NULL,
+  10.45,
+  32.55,
   'Energy',
   'Crude Oil',
   'oil_field',
@@ -917,8 +917,8 @@ INSERT INTO public.commodity_locations (
   'Upper Nile State',
   'Sudan',
   'Upper Nile State',
-  NULL,
-  NULL,
+  10.4,
+  32.6,
   'Energy',
   'Crude Oil',
   'oil_field',

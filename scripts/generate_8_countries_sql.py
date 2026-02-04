@@ -34,29 +34,103 @@ NIGER_COORDS = {
 }
 
 NIGERIA_COORDS = {
-    # Rivers State - onshore Niger Delta
+    # Rivers State - onshore Niger Delta (OML 17, 53, 54 area)
     "ogbele": (4.85, 6.85),
     "omerelu": (4.9, 6.9),
     "olo": (4.95, 6.95),
     "obagi": (5.0, 6.8),
     "ibewa": (5.23472, 6.6793),
-    # Bonny Island area
+    "otamini": (4.88, 6.95),
+    "obigbo": (4.87, 7.05),
+    "agbada": (4.9, 6.82),
+    "alakiri": (4.75, 7.1),
+    "rumuekpe": (4.92, 6.88),
+    # Bayelsa State
+    "nembe": (4.5, 6.4),
+    "ogbia": (4.68, 6.33),
+    "okordia": (4.65, 6.35),
+    "kolo creek": (4.7, 6.38),
+    "etelebou": (4.55, 6.28),
+    "clough creek": (4.52, 6.3),
+    "tebidaba": (4.6, 6.2),
+    "diebu creek": (4.55, 6.25),
+    # Delta State - onshore
+    "ughelli": (5.5, 5.98),
+    "olomoro": (5.55, 6.05),
+    "oleh": (5.45, 6.18),
+    "uzere": (5.48, 6.12),
+    "afiesere": (5.52, 5.85),
+    "eriemu": (5.58, 5.82),
+    "oben": (6.2, 6.1),
+    "sapele": (5.88, 5.68),
+    "ethiope": (5.65, 5.78),
+    "kokori": (5.62, 6.02),
+    "evwreni": (5.6, 5.95),
+    "oweh": (5.55, 6.0),
+    "oroni": (5.4, 5.85),
+    "delta south": (5.2, 5.9),
+    # Edo State
+    "oben": (6.2, 6.1),
+    "ologbo": (6.15, 5.6),
+    "gilli-gilli": (6.18, 5.55),
+    # Bonny Island / Port Harcourt area
     "bonny": (4.45, 7.15),
-    # Warri/Delta State
+    "port harcourt": (4.75, 7.0),
+    "okrika": (4.7, 7.08),
+    # Warri/Delta State offshore and coastal
     "warri": (5.5, 5.75),
     "escravos": (5.58, 5.2),
-    # Port Harcourt area
-    "port harcourt": (4.75, 7.0),
-    # Offshore Niger Delta
+    "forcados": (5.35, 5.35),
+    "pennington": (5.3, 5.28),
+    "jones creek": (5.25, 5.4),
+    "opobo": (4.52, 7.53),
+    # OML areas - general coordinates
+    "oml 17": (4.88, 7.0),
+    "oml 53": (4.9, 6.9),
+    "oml 54": (4.85, 6.85),
+    "oml 18": (4.6, 6.4),
+    "oml 29": (5.45, 6.1),
+    "oml 30": (5.5, 5.9),
+    "oml 34": (5.6, 5.8),
+    "oml 40": (5.3, 5.5),
+    "oml 42": (4.8, 6.5),
+    "oml 58": (5.2, 5.7),
+    "oml 65": (4.7, 6.6),
+    "oml 4": (5.55, 6.0),
+    "oml 38": (5.65, 5.75),
+    "oml 41": (5.35, 5.45),
+    # Offshore Niger Delta - shallow water
     "bonga": (4.35, 5.1),
     "akpo": (4.4, 5.3),
     "egina": (4.25, 5.0),
     "agbami": (4.2, 5.2),
     "erha": (4.1, 5.1),
     "usan": (4.3, 5.5),
-    # General Niger Delta offshore
+    "amenam": (4.3, 7.4),
+    "ima": (4.35, 7.5),
+    "kpono": (4.4, 7.55),
+    "asabo": (4.45, 7.6),
+    "oso": (4.38, 7.45),
+    "edop": (4.42, 7.58),
+    "yoho": (4.5, 7.6),
+    "ukpokiti": (4.3, 5.15),
+    "abo": (4.5, 5.4),
+    "okono": (4.4, 7.5),
+    "okpoho": (4.35, 7.45),
+    "eket": (4.65, 7.95),
+    "qua iboe": (4.55, 7.9),
+    "stubb creek": (4.6, 7.85),
+    "mfem": (4.7, 8.1),
+    "ebok": (4.75, 8.2),
+    "ekpe": (4.55, 8.05),
+    # General Niger Delta offshore fallback
     "offshore": (4.5, 5.5),
     "deepwater": (4.3, 5.2),
+    # Anambra Basin
+    "anambra": (6.2, 6.8),
+    # Chad Basin (northeast)
+    "chad": (12.5, 14.0),
+    "borno": (12.0, 13.5),
 }
 
 NORWAY_COORDS = {
@@ -119,6 +193,7 @@ SOUTH_AFRICA_COORDS = {
 SOUTH_SUDAN_COORDS = {
     # Unity State - Muglad Basin
     "heglig": (10.0066666667, 29.3986111111),
+    "panthou": (10.0066666667, 29.3986111111),  # Heglig alternative name
     "unity": (9.4776, 29.67463),
     "toma south": (9.8052777778, 29.5813888889),
     "munga": (9.5, 29.6),
@@ -141,8 +216,9 @@ SOUTH_SUDAN_COORDS = {
 }
 
 SUDAN_COORDS = {
-    # West Kordofan
+    # West Kordofan - Muglad Basin
     "heglig": (10.0068, 29.39859),
+    "higlig": (10.0068, 29.39859),  # Alternative spelling
     "bamboo": (9.7, 29.4),
     # Unity/South Sudan border area
     "unity": (9.4776, 29.67463),
@@ -159,6 +235,10 @@ SUDAN_COORDS = {
     # Melut Basin
     "paloch": (10.46211, 32.54055),
     "adar yale": (10.008014, 32.958759),
+    "adar": (10.008014, 32.958759),
+    "moleeta": (10.5, 32.5),
+    "gumry": (10.45, 32.55),
+    "gassab": (10.4, 32.6),
     # Red Sea offshore
     "tokar": (19.5, 38.0),
 }
@@ -171,7 +251,21 @@ TUNISIA_COORDS = {
     "chergui": (34.7, 11.1),
     "cercina": (34.6, 11.0),
     "didon": (34.3, 11.7),
+    "zarat": (34.3, 11.7),  # Didon is in Zarat permit
     "salloum": (34.4, 11.3),
+    # TPS Assets - Sfax region
+    "el ain": (34.55, 10.9),
+    "gremda": (34.55, 10.9),
+    "el hajeb": (34.5, 10.85),
+    "guebiba": (34.5, 10.85),
+    "rhemoura": (34.52, 10.88),
+    "tps": (34.5, 10.9),
+    # SOEP - Sfax Offshore area
+    "jawahra": (34.4, 11.2),
+    "jawhara": (34.4, 11.2),
+    "cosmos": (34.35, 11.25),
+    "elyssa": (34.38, 11.18),
+    "soep": (34.4, 11.2),
     # Southern Tunisia - Tataouine
     "el borma": (31.7, 9.2),
     "adam": (31.6, 9.3),
@@ -182,6 +276,9 @@ TUNISIA_COORDS = {
     "chouech": (31.8, 9.1),
     # Kebili region
     "sabria": (33.0, 8.5),
+    # General offshore Gulf of Gabes
+    "offshore": (34.4, 11.0),
+    "gulf of gabes": (34.3, 11.2),
 }
 
 UGANDA_COORDS = {
