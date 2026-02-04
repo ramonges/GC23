@@ -854,23 +854,15 @@ export default function EarthMap() {
   const [selectedCategory, setSelectedCategory] = useState<string>('')
   const [selectedCommodity, setSelectedCommodity] = useState<string>('')
   const [selectedCompany, setSelectedCompany] = useState<string>('')
-  const [showStorage, setShowStorage] = useState(false)
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
-  const [showCargoes, setShowCargoes] = useState(false)
   const [showCities, setShowCities] = useState(true) // Cities visible by default
   const [showShippingRoutes, setShowShippingRoutes] = useState(false) // Shipping routes section visibility
   const [enabledRoutes, setEnabledRoutes] = useState<Set<string>>(new Set())
-  const [advancedFilters, setAdvancedFilters] = useState({
-    apiRange: '',
-    sulfurRange: '',
-    concentrationLevel: '',
-  })
   const [markers, setMarkers] = useState<CommodityData[]>([])
   const [refineries, setRefineries] = useState<RefineryData[]>([])
   const [showRefineries, setShowRefineries] = useState(false)
   const [refineryFilter, setRefineryFilter] = useState<Set<string>>(new Set(['light', 'medium', 'extra_heavy']))
 
-  const fetchData = useCallback(async (ignoreCompanyAndStorage = false) => {
+  const fetchData = useCallback(async (ignoreCompany = false) => {
     try {
       let query = supabase.from('commodity_locations').select('*')
 
@@ -880,13 +872,10 @@ export default function EarthMap() {
       if (selectedCommodity) {
         query = query.eq('commodity_name', selectedCommodity)
       }
-      // Only apply company and storage filters if not ignoring them (i.e., manual search)
-      if (!ignoreCompanyAndStorage) {
+      // Only apply company filter if not ignoring it (i.e., manual search)
+      if (!ignoreCompany) {
         if (selectedCompany) {
           query = query.eq('company', selectedCompany)
-        }
-        if (showStorage) {
-          query = query.eq('is_storage', true)
         }
       }
 
@@ -898,14 +887,14 @@ export default function EarthMap() {
     } catch (err) {
       console.error('Error fetching data:', err)
     }
-  }, [selectedCategory, selectedCommodity, selectedCompany, showStorage])
+  }, [selectedCategory, selectedCommodity, selectedCompany])
 
   // Automatically load all data when component mounts and when filters are set to "All"
   useEffect(() => {
     // Only auto-fetch when both category and commodity are empty (meaning "All")
-    // When both are "All", show ALL points regardless of company/storage filters
+    // When both are "All", show ALL points regardless of company filters
     if (!selectedCategory && !selectedCommodity) {
-      fetchData(true) // Ignore company and storage filters for auto-load
+      fetchData(true) // Ignore company filters for auto-load
     }
   }, [selectedCategory, selectedCommodity, fetchData])
 
@@ -939,7 +928,7 @@ export default function EarthMap() {
   }, [showRefineries, refineryFilter, fetchRefineries])
 
   const handleSearch = async () => {
-    await fetchData(false) // Apply all filters including company and storage
+    await fetchData(false) // Apply all filters including company
   }
 
   return (
@@ -1012,32 +1001,6 @@ export default function EarthMap() {
             </select>
           </div>
 
-          {/* Storage */}
-          <div className="flex items-center">
-            <label className="flex items-center gap-2.5 text-white cursor-pointer hover:text-blue-400 transition-colors group">
-              <input
-                type="checkbox"
-                checked={showStorage}
-                onChange={(e) => setShowStorage(e.target.checked)}
-                className="w-5 h-5 rounded-md border-2 border-gray-500 bg-gray-800 text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 focus:border-blue-500 transition-all duration-200 cursor-pointer checked:bg-blue-500 checked:border-blue-500 hover:border-blue-400"
-              />
-              <span className="font-semibold">Storage</span>
-            </label>
-          </div>
-
-          {/* Cargoes */}
-          <div className="flex items-center">
-            <label className="flex items-center gap-2.5 text-white cursor-pointer hover:text-blue-400 transition-colors group">
-              <input
-                type="checkbox"
-                checked={showCargoes}
-                onChange={(e) => setShowCargoes(e.target.checked)}
-                className="w-5 h-5 rounded-md border-2 border-gray-500 bg-gray-800 text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 focus:border-blue-500 transition-all duration-200 cursor-pointer checked:bg-blue-500 checked:border-blue-500 hover:border-blue-400"
-              />
-              <span className="font-semibold">Cargo Ships</span>
-            </label>
-          </div>
-
           {/* Shipping Routes Toggle */}
           <div className="flex items-center">
             <label className="flex items-center gap-2.5 text-white cursor-pointer hover:text-blue-400 transition-colors group">
@@ -1064,19 +1027,6 @@ export default function EarthMap() {
             </label>
           </div>
 
-          {/* Advanced Filters Toggle */}
-          <div className="flex items-center">
-            <label className="flex items-center gap-2.5 text-white cursor-pointer hover:text-blue-400 transition-colors group">
-              <input
-                type="checkbox"
-                checked={showAdvancedFilters}
-                onChange={(e) => setShowAdvancedFilters(e.target.checked)}
-                className="w-5 h-5 rounded-md border-2 border-gray-500 bg-gray-800 text-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 focus:border-blue-500 transition-all duration-200 cursor-pointer checked:bg-blue-500 checked:border-blue-500 hover:border-blue-400"
-              />
-              <span className="font-semibold">Advanced</span>
-            </label>
-          </div>
-
           {/* Search Button */}
           <button
             onClick={handleSearch}
@@ -1086,63 +1036,6 @@ export default function EarthMap() {
             Search
           </button>
         </div>
-
-        {/* Advanced Filters */}
-        {showAdvancedFilters && (selectedCategory === 'Energy' || selectedCategory === 'Metals') && (
-          <div className="mt-6 pt-4 border-t border-gray-700">
-            <p className="text-white font-semibold mb-3 flex items-center gap-2">
-              <Filter size={16} />
-              Advanced Filters
-            </p>
-            <div className="flex flex-wrap gap-4">
-              {selectedCategory === 'Energy' && (
-                <>
-                  <div className="flex-1 min-w-[200px]">
-                    <label className="block text-white text-sm font-medium mb-2">API Range</label>
-                    <input
-                      type="text"
-                      value={advancedFilters.apiRange}
-                      onChange={(e) =>
-                        setAdvancedFilters({ ...advancedFilters, apiRange: e.target.value })
-                      }
-                      placeholder="e.g., 30-40"
-                      className="w-full px-4 py-2.5 rounded-lg bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                    />
-                  </div>
-                  <div className="flex-1 min-w-[200px]">
-                    <label className="block text-white text-sm font-medium mb-2">Sulfur Range (%)</label>
-                    <input
-                      type="text"
-                      value={advancedFilters.sulfurRange}
-                      onChange={(e) =>
-                        setAdvancedFilters({ ...advancedFilters, sulfurRange: e.target.value })
-                      }
-                      placeholder="e.g., 0.5-1.5"
-                      className="w-full px-4 py-2.5 rounded-lg bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                    />
-                  </div>
-                </>
-              )}
-              {selectedCategory === 'Metals' && (
-                <div className="flex-1 min-w-[200px]">
-                  <label className="block text-white text-sm font-medium mb-2">Concentration Level (%)</label>
-                  <input
-                    type="text"
-                    value={advancedFilters.concentrationLevel}
-                    onChange={(e) =>
-                      setAdvancedFilters({
-                        ...advancedFilters,
-                        concentrationLevel: e.target.value,
-                      })
-                    }
-                    placeholder="e.g., 5-10"
-                    className="w-full px-4 py-2.5 rounded-lg bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-        )}
 
         {/* Refineries Section - Only show when checkbox is selected */}
         {showRefineries && (
