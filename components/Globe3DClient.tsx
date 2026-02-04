@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, memo } from 'react'
 import Globe from 'globe.gl'
 import { CommodityData, RefineryData, ShippingRoute } from '@/lib/types'
 
@@ -12,7 +12,7 @@ interface Globe3DClientProps {
   onPointSelect?: (point: CommodityData | RefineryData | null, type: 'commodity' | 'refinery') => void
 }
 
-export default function Globe3DClient({ markers, showCities = true, routes = [], refineries = [], onPointSelect }: Globe3DClientProps) {
+function Globe3DClient({ markers, showCities = true, routes = [], refineries = [], onPointSelect }: Globe3DClientProps) {
   const globeEl = useRef<HTMLDivElement>(null)
   const globeRef = useRef<any>(null)
   const currentAltitudeRef = useRef<number>(2.5)
@@ -492,3 +492,15 @@ export default function Globe3DClient({ markers, showCities = true, routes = [],
     <div ref={globeEl} style={{ width: '100%', height: '100%' }} className="bg-black" />
   )
 }
+
+// Memoize to prevent re-renders when parent state changes (like selectedPoint)
+export default memo(Globe3DClient, (prevProps, nextProps) => {
+  // Only re-render if these specific props change
+  return (
+    prevProps.markers === nextProps.markers &&
+    prevProps.showCities === nextProps.showCities &&
+    prevProps.routes === nextProps.routes &&
+    prevProps.refineries === nextProps.refineries
+    // Intentionally NOT comparing onPointSelect - we use a ref for that
+  )
+})

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Search, Filter } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { CommodityData, RefineryData, ShippingRoute } from '@/lib/types'
@@ -955,6 +955,17 @@ export default function EarthMap() {
     setSelectedPoint({ data, type })
   }, [])
 
+  // Memoize props to prevent globe re-renders
+  const filteredRoutes = useMemo(() => 
+    shippingRoutes.filter(r => enabledRoutes.has(r.id)), 
+    [enabledRoutes]
+  )
+  
+  const displayedRefineries = useMemo(() => 
+    showRefineries ? refineries : [], 
+    [showRefineries, refineries]
+  )
+
   return (
     <div className="flex-1 flex flex-col bg-black">
       {/* Filters Bar */}
@@ -1168,8 +1179,8 @@ export default function EarthMap() {
         <Globe3D 
           markers={markers} 
           showCities={showCities} 
-          routes={shippingRoutes.filter(r => enabledRoutes.has(r.id))}
-          refineries={showRefineries ? refineries : []}
+          routes={filteredRoutes}
+          refineries={displayedRefineries}
           onPointSelect={handlePointSelect}
         />
 
