@@ -970,9 +970,9 @@ export default function EarthMap() {
 
   return (
     <div className="flex-1 flex flex-col bg-black">
-      {/* Compact Modern Filters Bar */}
-      <div className="bg-gray-900/95 backdrop-blur-sm border-b border-gray-800 px-4 py-3">
-        <div className="flex items-center gap-3 flex-wrap">
+      {/* Modern Monochrome Filters Bar */}
+      <div className="bg-black border-b border-neutral-800 px-5 py-4">
+        <div className="flex items-center gap-4 flex-wrap">
           {/* Category Select */}
           <select
             value={selectedCategory}
@@ -980,7 +980,7 @@ export default function EarthMap() {
               setSelectedCategory(e.target.value)
               setSelectedCommodity('')
             }}
-            className="h-9 px-3 text-sm rounded-md bg-gray-800/80 text-white border border-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all min-w-[140px]"
+            className="h-10 px-4 text-sm rounded-lg bg-neutral-900 text-white border border-neutral-700 focus:outline-none focus:border-white transition-all min-w-[150px] appearance-none cursor-pointer"
           >
             <option value="">All Categories</option>
             {Object.keys(commodityCategories).map((category) => (
@@ -992,7 +992,7 @@ export default function EarthMap() {
           <select
             value={selectedCommodity}
             onChange={(e) => setSelectedCommodity(e.target.value)}
-            className="h-9 px-3 text-sm rounded-md bg-gray-800/80 text-white border border-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed min-w-[150px]"
+            className="h-10 px-4 text-sm rounded-lg bg-neutral-900 text-white border border-neutral-700 focus:outline-none focus:border-white transition-all disabled:opacity-40 disabled:cursor-not-allowed min-w-[160px] appearance-none cursor-pointer"
             disabled={!selectedCategory}
           >
             <option value="">All Commodities</option>
@@ -1008,7 +1008,7 @@ export default function EarthMap() {
           <select
             value={selectedCompany}
             onChange={(e) => setSelectedCompany(e.target.value)}
-            className="h-9 px-3 text-sm rounded-md bg-gray-800/80 text-white border border-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all min-w-[150px]"
+            className="h-10 px-4 text-sm rounded-lg bg-neutral-900 text-white border border-neutral-700 focus:outline-none focus:border-white transition-all min-w-[160px] appearance-none cursor-pointer"
           >
             <option value="">All Companies</option>
             {companies.map((company) => (
@@ -1016,30 +1016,30 @@ export default function EarthMap() {
             ))}
           </select>
 
-          <div className="h-6 w-px bg-gray-700 mx-1" />
+          <div className="h-6 w-px bg-neutral-700 mx-1" />
 
           {/* Routes Button */}
           <button
             onClick={() => setShowRoutesModal(true)}
-            className={`h-9 px-4 text-sm font-medium rounded-md transition-all flex items-center gap-2 ${
+            className={`h-10 px-5 text-sm font-medium rounded-lg transition-all flex items-center gap-2 ${
               enabledRoutes.size > 0 
-                ? 'bg-blue-600 text-white hover:bg-blue-500' 
-                : 'bg-gray-800/80 text-gray-300 border border-gray-700 hover:border-gray-600 hover:text-white'
+                ? 'bg-white text-black hover:bg-neutral-200' 
+                : 'bg-neutral-900 text-neutral-300 border border-neutral-700 hover:border-neutral-500 hover:text-white'
             }`}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
             </svg>
-            Routes {enabledRoutes.size > 0 && <span className="bg-white/20 px-1.5 py-0.5 rounded text-xs">{enabledRoutes.size}</span>}
+            Routes {enabledRoutes.size > 0 && <span className="bg-black/20 px-1.5 py-0.5 rounded text-xs">{enabledRoutes.size}</span>}
           </button>
 
           {/* Cities Toggle */}
           <button
             onClick={() => setShowCities(!showCities)}
-            className={`h-9 px-4 text-sm font-medium rounded-md transition-all flex items-center gap-2 ${
+            className={`h-10 px-5 text-sm font-medium rounded-lg transition-all flex items-center gap-2 ${
               showCities 
-                ? 'bg-blue-600 text-white hover:bg-blue-500' 
-                : 'bg-gray-800/80 text-gray-300 border border-gray-700 hover:border-gray-600 hover:text-white'
+                ? 'bg-white text-black hover:bg-neutral-200' 
+                : 'bg-neutral-900 text-neutral-300 border border-neutral-700 hover:border-neutral-500 hover:text-white'
             }`}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1048,27 +1048,12 @@ export default function EarthMap() {
             Cities
           </button>
 
-          {/* Refineries Toggle */}
-          <button
-            onClick={() => setShowRefineries(!showRefineries)}
-            className={`h-9 px-4 text-sm font-medium rounded-md transition-all flex items-center gap-2 ${
-              showRefineries 
-                ? 'bg-orange-600 text-white hover:bg-orange-500' 
-                : 'bg-gray-800/80 text-gray-300 border border-gray-700 hover:border-gray-600 hover:text-white'
-            }`}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-            </svg>
-            Refineries
-          </button>
-
           <div className="flex-1" />
 
           {/* Search Button */}
           <button
             onClick={handleSearch}
-            className="h-9 px-5 bg-blue-600 text-white text-sm font-semibold rounded-md hover:bg-blue-500 transition-all flex items-center gap-2 shadow-lg shadow-blue-600/20"
+            className="h-10 px-6 bg-white text-black text-sm font-semibold rounded-lg hover:bg-neutral-200 transition-all flex items-center gap-2"
           >
             <Search size={16} />
             Search
@@ -1079,23 +1064,23 @@ export default function EarthMap() {
       {/* Shipping Routes Modal */}
       {showRoutesModal && (
         <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center"
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center"
           onClick={() => setShowRoutesModal(false)}
         >
           <div 
-            className="bg-gray-900 border border-gray-700 rounded-xl p-6 max-w-2xl w-full mx-4 shadow-2xl"
+            className="bg-neutral-950 border border-neutral-800 rounded-xl p-6 max-w-2xl w-full mx-4 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                 </svg>
                 Select Shipping Routes
               </h3>
               <button 
                 onClick={() => setShowRoutesModal(false)}
-                className="text-gray-400 hover:text-white transition-colors p-1"
+                className="text-neutral-500 hover:text-white transition-colors p-1"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -1107,14 +1092,14 @@ export default function EarthMap() {
             <div className="flex gap-3 mb-4">
               <button
                 onClick={() => setEnabledRoutes(new Set(shippingRoutes.map(r => r.id)))}
-                className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+                className="text-sm text-white hover:text-neutral-300 transition-colors underline underline-offset-2"
               >
                 Select All
               </button>
-              <span className="text-gray-600">|</span>
+              <span className="text-neutral-700">|</span>
               <button
                 onClick={() => setEnabledRoutes(new Set())}
-                className="text-sm text-gray-400 hover:text-white transition-colors"
+                className="text-sm text-neutral-400 hover:text-white transition-colors underline underline-offset-2"
               >
                 Clear All
               </button>
@@ -1127,8 +1112,8 @@ export default function EarthMap() {
                   key={route.id}
                   className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all ${
                     enabledRoutes.has(route.id)
-                      ? 'bg-gray-800 border border-blue-500/50'
-                      : 'bg-gray-800/50 border border-transparent hover:bg-gray-800 hover:border-gray-700'
+                      ? 'bg-neutral-900 border border-white/30'
+                      : 'bg-neutral-900/50 border border-transparent hover:bg-neutral-900 hover:border-neutral-700'
                   }`}
                 >
                   <input
@@ -1148,12 +1133,12 @@ export default function EarthMap() {
                   <div 
                     className={`w-5 h-5 rounded flex items-center justify-center border-2 transition-all ${
                       enabledRoutes.has(route.id)
-                        ? 'border-blue-500 bg-blue-500'
-                        : 'border-gray-600 bg-transparent'
+                        ? 'border-white bg-white'
+                        : 'border-neutral-600 bg-transparent'
                     }`}
                   >
                     {enabledRoutes.has(route.id) && (
-                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="w-3 h-3 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     )}
@@ -1166,20 +1151,20 @@ export default function EarthMap() {
                       />
                       <span className="text-white font-medium text-sm">{route.id}</span>
                     </div>
-                    <p className="text-gray-400 text-xs truncate mt-0.5">{route.name}</p>
+                    <p className="text-neutral-500 text-xs truncate mt-0.5">{route.name}</p>
                   </div>
                 </label>
               ))}
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between mt-5 pt-4 border-t border-gray-800">
-              <p className="text-gray-400 text-sm">
+            <div className="flex items-center justify-between mt-5 pt-4 border-t border-neutral-800">
+              <p className="text-neutral-500 text-sm">
                 {enabledRoutes.size} of {shippingRoutes.length} routes selected
               </p>
               <button
                 onClick={() => setShowRoutesModal(false)}
-                className="px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-500 transition-all"
+                className="px-5 py-2 bg-white text-black text-sm font-semibold rounded-lg hover:bg-neutral-200 transition-all"
               >
                 Apply Routes
               </button>
