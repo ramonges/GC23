@@ -81,7 +81,24 @@ const companies = [
   // Chad companies
   'SHT', 'CNPC',
   // China companies
-  'CNOOC', 'ConocoPhillips', 'Genting'
+  'CNOOC', 'ConocoPhillips', 'Genting',
+  // Congo DRC & Republic companies
+  'Trident Energy', 'Canadian Natural Resources', 'Murphy Oil', 'BW Energy', 'VAALCO Energy', 'Assala Energy',
+  // Côte d\'Ivoire companies
+  'Foxtrot International',
+  // Egypt companies
+  'Apache', 'BAPETCO', 'Cheiron', 'Dana Gas', 'EGPC', 'Energean', 'GPC', 'GUPCO',
+  'Gemsa Petroleum Company', 'Khalda Petroleum', 'Kuwait Energy', 'PetroGulf Misr',
+  'Petrobel', 'Rashid Petroleum Company', 'SUCO', 'Tharwa Petroleum Company', 'Vegas Oil & Gas',
+  // Equatorial Guinea companies
+  'GEPetrol', 'Marathon Oil',
+  // Ghana companies
+  'Tullow Oil', 'MODEC',
+  // India companies
+  'ONGC', 'Oil India Limited', 'Cairn Oil & Gas', 'Reliance Industries', 'Selan', 'Nippon Power Limited',
+  // Libya companies
+  'AGOCO', 'Akakus Oil', 'Harouge Oil', 'Mellitah Oil & Gas', 'NOC Libya',
+  'Sirte Oil Company', 'Waha Oil Company', 'Zueitina Oil Company'
 ]
 
 interface ShippingRoute {
