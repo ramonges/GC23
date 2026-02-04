@@ -61,7 +61,11 @@ const commodityCategories = {
 
 const companies = [
   'Trafigura', 'Glencore', 'Vitol', 'Mercuria', 'Total', 'Chevron', 'BP', 'Shell', 
-  'Cargill', 'Olam', 'Storage - All', 'Storage - Independent'
+  'Cargill', 'Olam',
+  // Algeria companies
+  'Sonatrach', 'Cepsa', 'Eni', 'Occidental Petroleum', 'TotalEnergies', 'Repsol', 
+  'PTTEP', 'Petrovietnam', 'Wintershall Dea', 'Groupement Berkine', 'Organisation Ourhoud', 
+  'Groupement Reggane Nord', 'Groupement Isarene'
 ]
 
 interface ShippingRoute {
@@ -881,8 +885,12 @@ export default function EarthMap() {
 
       const { data, error } = await query
 
-      if (error) throw error
+      if (error) {
+        console.error('Supabase query error:', error)
+        throw error
+      }
 
+      console.log('Raw data from Supabase:', data?.length || 0, 'records')
       const validMarkers = (data || []).filter(m => m.latitude != null && m.longitude != null)
       console.log(`Fetched ${data?.length || 0} total locations, ${validMarkers.length} with valid coordinates`)
       setMarkers(validMarkers)
