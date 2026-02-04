@@ -65,7 +65,11 @@ const companies = [
   // Algeria companies
   'Sonatrach', 'Cepsa', 'Eni', 'Occidental Petroleum', 'TotalEnergies', 'Repsol', 
   'PTTEP', 'Petrovietnam', 'Wintershall Dea', 'Groupement Berkine', 'Organisation Ourhoud', 
-  'Groupement Reggane Nord', 'Groupement Isarene'
+  'Groupement Reggane Nord', 'Groupement Isarene',
+  // Angola companies
+  'ExxonMobil', 'Pluspetrol', 'Sonangol', 'Cobalt International Energy',
+  // Azerbaijan companies
+  'SOCAR', 'Lukoil', 'Equinor', 'TPAO', 'Petronas', 'Union Grand Energy', 'Binagadi Oil Company'
 ]
 
 interface ShippingRoute {
