@@ -107,64 +107,77 @@ export default function PlatformSidebar({ currentPage, onNavigate, userEmail }: 
             })}
           </nav>
 
-          {/* Profile Section */}
-          <div className="border-t border-gray-200 pt-6 space-y-2">
-            <button
-              onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-all"
-            >
-              <User size={20} />
-              <span className="font-medium">My Profile</span>
-            </button>
+          {/* Profile Section - Only show if user is logged in */}
+          {userEmail && (
+            <div className="border-t border-gray-200 pt-6 space-y-2">
+              <button
+                onClick={() => setIsProfileOpen(!isProfileOpen)}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-all"
+              >
+                <User size={20} />
+                <span className="font-medium">My Profile</span>
+              </button>
 
-            {isProfileOpen && (
-              <div className="bg-gray-50 p-4 rounded-lg space-y-3 ml-4 animate-fade-in">
-                <div>
-                  <label className="block text-xs text-gray-600 mb-1 font-medium">First Name</label>
-                  <input
-                    type="text"
-                    value={profileData.firstName}
-                    onChange={(e) => setProfileData({ ...profileData, firstName: e.target.value })}
-                    className="w-full px-3 py-2 text-sm rounded-lg bg-white text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
-                  />
+              {isProfileOpen && (
+                <div className="bg-gray-50 p-4 rounded-lg space-y-3 ml-4 animate-fade-in">
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1 font-medium">First Name</label>
+                    <input
+                      type="text"
+                      value={profileData.firstName}
+                      onChange={(e) => setProfileData({ ...profileData, firstName: e.target.value })}
+                      className="w-full px-3 py-2 text-sm rounded-lg bg-white text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1 font-medium">Last Name</label>
+                    <input
+                      type="text"
+                      value={profileData.lastName}
+                      onChange={(e) => setProfileData({ ...profileData, lastName: e.target.value })}
+                      className="w-full px-3 py-2 text-sm rounded-lg bg-white text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1 font-medium">Email</label>
+                    <input
+                      type="email"
+                      value={profileData.email}
+                      disabled
+                      className="w-full px-3 py-2 text-sm rounded-lg bg-gray-200 text-gray-600 border border-gray-300 cursor-not-allowed"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-gray-600 mb-1 font-medium">New Password</label>
+                    <input
+                      type="password"
+                      value={profileData.newPassword}
+                      onChange={(e) => setProfileData({ ...profileData, newPassword: e.target.value })}
+                      className="w-full px-3 py-2 text-sm rounded-lg bg-white text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
+                      placeholder="Enter new password"
+                    />
+                  </div>
+                  <button
+                    onClick={handlePasswordChange}
+                    className="w-full px-3 py-2 text-sm bg-black text-white rounded-lg hover:bg-accent transition-all"
+                  >
+                    Change Password
+                  </button>
                 </div>
-                <div>
-                  <label className="block text-xs text-gray-600 mb-1 font-medium">Last Name</label>
-                  <input
-                    type="text"
-                    value={profileData.lastName}
-                    onChange={(e) => setProfileData({ ...profileData, lastName: e.target.value })}
-                    className="w-full px-3 py-2 text-sm rounded-lg bg-white text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-gray-600 mb-1 font-medium">Email</label>
-                  <input
-                    type="email"
-                    value={profileData.email}
-                    disabled
-                    className="w-full px-3 py-2 text-sm rounded-lg bg-gray-200 text-gray-600 border border-gray-300 cursor-not-allowed"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-gray-600 mb-1 font-medium">New Password</label>
-                  <input
-                    type="password"
-                    value={profileData.newPassword}
-                    onChange={(e) => setProfileData({ ...profileData, newPassword: e.target.value })}
-                    className="w-full px-3 py-2 text-sm rounded-lg bg-white text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
-                    placeholder="Enter new password"
-                  />
-                </div>
-                <button
-                  onClick={handlePasswordChange}
-                  className="w-full px-3 py-2 text-sm bg-black text-white rounded-lg hover:bg-accent transition-all"
-                >
-                  Change Password
-                </button>
-              </div>
-            )}
+              )}
 
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-all"
+              >
+                <LogOut size={20} />
+                <span className="font-medium">Log Out</span>
+              </button>
+            </div>
+          )}
+
+          {/* Contact section - Always visible */}
+          <div className="border-t border-gray-200 pt-6">
             <a
               href="mailto:ram2315@columbia.edu"
               className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-all"
@@ -172,14 +185,6 @@ export default function PlatformSidebar({ currentPage, onNavigate, userEmail }: 
               <Mail size={20} />
               <span className="font-medium">Contact Us</span>
             </a>
-
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-all"
-            >
-              <LogOut size={20} />
-              <span className="font-medium">Log Out</span>
-            </button>
           </div>
         </div>
       </div>

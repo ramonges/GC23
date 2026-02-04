@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import PlatformSidebar from '@/components/PlatformSidebar'
 import EarthMap from '@/components/EarthMap'
 import OptionsDashboard from '@/components/OptionsDashboard'
@@ -10,35 +9,17 @@ import { supabase } from '@/lib/supabase'
 export default function Platform() {
   const [currentPage, setCurrentPage] = useState('earth-map')
   const [userEmail, setUserEmail] = useState<string>('')
-  const [loading, setLoading] = useState(true)
-  const router = useRouter()
 
   useEffect(() => {
+    // Optionally check for user session, but don't require it
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session) {
+        setUserEmail(session.user.email || '')
+      }
+    }
     checkUser()
   }, [])
-
-  const checkUser = async () => {
-    const { data: { session } } = await supabase.auth.getSession()
-    
-    if (!session) {
-      router.push('/')
-      return
-    }
-
-    setUserEmail(session.user.email || '')
-    setLoading(false)
-  }
-
-  if (loading) {
-    return (
-      <div className="h-screen flex items-center justify-center bg-white">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-gray-200 border-t-black rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-black text-xl font-medium">Loading platform...</p>
-        </div>
-      </div>
-    )
-  }
 
   return (
     <div className="h-screen flex flex-col bg-white overflow-hidden">
@@ -57,7 +38,7 @@ export default function Platform() {
           
           {/* User info */}
           <div className="text-right">
-            <p className="text-sm text-gray-600">{userEmail}</p>
+            <p className="text-sm text-gray-600">{userEmail || 'Guest Access'}</p>
           </div>
         </div>
       </div>
