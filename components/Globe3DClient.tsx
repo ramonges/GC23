@@ -50,9 +50,10 @@ interface Globe3DClientProps {
   showCities?: boolean
   routes?: ShippingRoute[]
   refineries?: RefineryData[]
+  onPointSelect?: (point: CommodityData | RefineryData | null, type: 'commodity' | 'refinery') => void
 }
 
-export default function Globe3DClient({ markers, showCities = true, routes = [], refineries = [] }: Globe3DClientProps) {
+export default function Globe3DClient({ markers, showCities = true, routes = [], refineries = [], onPointSelect }: Globe3DClientProps) {
   const globeEl = useRef<HTMLDivElement>(null)
   const globeRef = useRef<any>(null)
   const currentAltitudeRef = useRef<number>(2.5)
@@ -333,9 +334,75 @@ export default function Globe3DClient({ markers, showCities = true, routes = [],
         globe.pointOfView({
           lat: point.lat,
           lng: point.lng,
-          altitude: 1.5
+          altitude: 0.8
         }, 1000)
+
+        // Notify parent of selection
+        if (onPointSelect) {
+          onPointSelect(point.data, point.type)
+        }
+
+        // Highlight effect
+        globe.pointRadius((d: any) => {
+          if (d === point) return (d.type === 'refinery' ? 0.25 : 0.15) * 2.5
+          return d.type === 'refinery' ? 0.25 : 0.15
+        })
+        setTimeout(() => {
+          globe.pointRadius((d: any) => d.type === 'refinery' ? 0.25 : 0.15)
+        }, 1500)
       })
+
+    // Click on globe (not on a point) - find nearest point and zoom to it
+    globe.onGlobeClick(({ lat, lng }: { lat: number, lng: number }) => {
+      if (allPoints.length === 0) return
+
+      // Calculate distance to each point using Haversine formula
+      const haversineDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => {
+        const R = 6371 // Earth's radius in km
+        const dLat = (lat2 - lat1) * Math.PI / 180
+        const dLng = (lng2 - lng1) * Math.PI / 180
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLng/2) * Math.sin(dLng/2)
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))
+        return R * c
+      }
+
+      // Find the closest point
+      let closestPoint = allPoints[0]
+      let closestDistance = haversineDistance(lat, lng, closestPoint.lat, closestPoint.lng)
+
+      for (const point of allPoints) {
+        const distance = haversineDistance(lat, lng, point.lat, point.lng)
+        if (distance < closestDistance) {
+          closestDistance = distance
+          closestPoint = point
+        }
+      }
+
+      // Zoom to the closest point
+      globe.pointOfView({
+        lat: closestPoint.lat,
+        lng: closestPoint.lng,
+        altitude: 0.8 // Zoomed in view
+      }, 1000)
+
+      // Notify parent of selection
+      if (onPointSelect) {
+        onPointSelect(closestPoint.data, closestPoint.type)
+      }
+
+      // Highlight the point with a pulse effect
+      globe.pointRadius((d: any) => {
+        if (d === closestPoint) return (d.type === 'refinery' ? 0.25 : 0.15) * 2.5
+        return d.type === 'refinery' ? 0.25 : 0.15
+      })
+
+      // Reset after animation
+      setTimeout(() => {
+        globe.pointRadius((d: any) => d.type === 'refinery' ? 0.25 : 0.15)
+      }, 1500)
+    })
 
     // Convert routes to arcs with waypoints for maritime paths
     const arcs: any[] = []
