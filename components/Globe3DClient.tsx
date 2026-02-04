@@ -2,48 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import Globe from 'globe.gl'
-
-interface CommodityData {
-  id: string
-  title: string
-  owner: string
-  address: string
-  contact: string
-  long_term_contract: boolean
-  contract_with: string
-  supply_volume: number
-  storage_volume: number
-  latitude: number
-  longitude: number
-  commodity_type: string
-  commodity_name: string
-  company?: string
-}
-
-interface ShippingRoute {
-  id: string
-  name: string
-  startLat: number
-  startLng: number
-  endLat: number
-  endLng: number
-  color: string
-  waypoints?: Array<{ lat: number; lng: number }>
-}
-
-interface RefineryData {
-  id: string
-  name: string
-  operator?: string
-  country: string
-  city?: string
-  address?: string
-  latitude: number
-  longitude: number
-  capacity_bpd: number
-  crude_types_accepted: string[]
-  operational_status?: string
-}
+import { CommodityData, RefineryData, ShippingRoute } from '@/lib/types'
 
 interface Globe3DClientProps {
   markers: CommodityData[]
@@ -57,6 +16,12 @@ export default function Globe3DClient({ markers, showCities = true, routes = [],
   const globeEl = useRef<HTMLDivElement>(null)
   const globeRef = useRef<any>(null)
   const currentAltitudeRef = useRef<number>(2.5)
+  const onPointSelectRef = useRef(onPointSelect)
+
+  // Keep the callback ref updated
+  useEffect(() => {
+    onPointSelectRef.current = onPointSelect
+  }, [onPointSelect])
 
   useEffect(() => {
     if (!globeEl.current) return
@@ -338,8 +303,8 @@ export default function Globe3DClient({ markers, showCities = true, routes = [],
         }, 1000)
 
         // Notify parent of selection
-        if (onPointSelect) {
-          onPointSelect(point.data, point.type as 'commodity' | 'refinery')
+        if (onPointSelectRef.current) {
+          onPointSelectRef.current(point.data, point.type as 'commodity' | 'refinery')
         }
 
         // Highlight effect
@@ -388,8 +353,8 @@ export default function Globe3DClient({ markers, showCities = true, routes = [],
       }, 1000)
 
       // Notify parent of selection
-      if (onPointSelect) {
-        onPointSelect(closestPoint.data, closestPoint.type as 'commodity' | 'refinery')
+      if (onPointSelectRef.current) {
+        onPointSelectRef.current(closestPoint.data, closestPoint.type as 'commodity' | 'refinery')
       }
 
       // Highlight the point with a pulse effect

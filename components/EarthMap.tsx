@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Search, Filter } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { CommodityData, RefineryData, ShippingRoute } from '@/lib/types'
 import dynamic from 'next/dynamic'
 
 const Globe3D = dynamic(() => import('./Globe3DClient'), {
@@ -16,40 +17,6 @@ const Globe3D = dynamic(() => import('./Globe3DClient'), {
     </div>
   ),
 })
-
-interface CommodityData {
-  id: string
-  title: string
-  owner: string
-  address: string
-  contact: string
-  long_term_contract: boolean
-  contract_with: string
-  supply_volume: number
-  storage_volume: number
-  latitude: number
-  longitude: number
-  commodity_type: string
-  commodity_name: string
-  company?: string
-  api_range?: string
-  sulfur_range?: string
-  concentration_level?: string
-}
-
-interface RefineryData {
-  id: string
-  name: string
-  operator?: string
-  country: string
-  city?: string
-  address?: string
-  latitude: number
-  longitude: number
-  capacity_bpd: number
-  crude_types_accepted: string[] // ['light', 'medium', 'extra_heavy']
-  operational_status?: string
-}
 
 const commodityCategories = {
   Energy: ['Crude Oil', 'Natural Gas', 'Oil & Gas', 'LNG', 'Gas Condensate', 'Uranium', 'Coal'],
@@ -116,17 +83,6 @@ const companies = [
   // Uganda companies
   'UNOC'
 ]
-
-interface ShippingRoute {
-  id: string
-  name: string
-  startLat: number
-  startLng: number
-  endLat: number
-  endLng: number
-  color: string
-  waypoints?: Array<{ lat: number; lng: number }> // Maritime waypoints to follow sea routes
-}
 
 const shippingRoutes: ShippingRoute[] = [
   // C1: Asia ↔ Europe (via Suez Canal, around Spain through Gibraltar)
@@ -994,6 +950,11 @@ export default function EarthMap() {
     await fetchData(false) // Apply all filters including company
   }
 
+  // Stable callback for point selection - won't cause globe re-initialization
+  const handlePointSelect = useCallback((data: CommodityData | RefineryData | null, type: 'commodity' | 'refinery') => {
+    setSelectedPoint({ data, type })
+  }, [])
+
   return (
     <div className="flex-1 flex flex-col bg-black">
       {/* Filters Bar */}
@@ -1209,67 +1170,169 @@ export default function EarthMap() {
           showCities={showCities} 
           routes={shippingRoutes.filter(r => enabledRoutes.has(r.id))}
           refineries={showRefineries ? refineries : []}
-          onPointSelect={(data, type) => setSelectedPoint({ data, type })}
+          onPointSelect={handlePointSelect}
         />
 
-        {/* Selected Point Info Panel */}
+        {/* Selected Point Info Panel - Centered */}
         {selectedPoint.data && (
-          <div className="absolute bottom-6 left-6 bg-black bg-opacity-95 border border-gray-500 rounded-xl p-5 z-20 shadow-2xl backdrop-blur-sm max-w-md animate-in slide-in-from-left duration-300">
-            <button 
-              onClick={() => setSelectedPoint({ data: null, type: null })}
-              className="absolute top-3 right-3 text-gray-400 hover:text-white transition-colors"
+          <div 
+            className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div 
+              className="bg-black bg-opacity-95 border border-gray-500 rounded-xl p-6 shadow-2xl backdrop-blur-sm max-w-lg max-h-[80vh] overflow-y-auto pointer-events-auto"
+              onClick={(e) => e.stopPropagation()}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-            </button>
-            
-            {selectedPoint.type === 'commodity' && (
-              <div className="text-white">
-                <h3 className="text-lg font-bold text-orange-400 mb-3 pr-6">
-                  {(selectedPoint.data as CommodityData).title}
-                </h3>
-                <div className="space-y-2 text-sm">
-                  <p><span className="text-gray-400">Owner:</span> {(selectedPoint.data as CommodityData).owner}</p>
-                  <p><span className="text-gray-400">Type:</span> {(selectedPoint.data as CommodityData).commodity_type} - {(selectedPoint.data as CommodityData).commodity_name}</p>
-                  <p><span className="text-gray-400">Location:</span> {(selectedPoint.data as CommodityData).address}</p>
-                  {(selectedPoint.data as CommodityData).supply_volume > 0 && (
-                    <p><span className="text-gray-400">Supply:</span> {(selectedPoint.data as CommodityData).supply_volume.toLocaleString()} metric tonnes</p>
-                  )}
-                  {(selectedPoint.data as CommodityData).long_term_contract && (
-                    <p className="text-green-400">
-                      ✓ Long-term Contract
-                      {(selectedPoint.data as CommodityData).contract_with ? ` with ${(selectedPoint.data as CommodityData).contract_with}` : ''}
-                    </p>
-                  )}
-                  <p className="text-xs text-gray-500 mt-3">
-                    Coordinates: {(selectedPoint.data as CommodityData).latitude.toFixed(4)}, {(selectedPoint.data as CommodityData).longitude.toFixed(4)}
-                  </p>
-                </div>
-              </div>
-            )}
-            
-            {selectedPoint.type === 'refinery' && (
-              <div className="text-white">
-                <h3 className="text-lg font-bold text-yellow-400 mb-3 pr-6">
-                  {(selectedPoint.data as RefineryData).name}
-                </h3>
-                <div className="space-y-2 text-sm">
-                  <p><span className="text-gray-400">Operator:</span> {(selectedPoint.data as RefineryData).operator || 'N/A'}</p>
-                  <p><span className="text-gray-400">Location:</span> {(selectedPoint.data as RefineryData).city || ''}{(selectedPoint.data as RefineryData).city && (selectedPoint.data as RefineryData).country ? ', ' : ''}{(selectedPoint.data as RefineryData).country}</p>
-                  <p><span className="text-gray-400">Capacity:</span> {(selectedPoint.data as RefineryData).capacity_bpd.toLocaleString()} bpd</p>
-                  <p><span className="text-gray-400">Crude Types:</span> {(selectedPoint.data as RefineryData).crude_types_accepted.map(t => {
-                    if (t === 'light') return 'Light';
-                    if (t === 'medium') return 'Medium';
-                    if (t === 'extra_heavy') return 'Extra Heavy';
-                    return t;
-                  }).join(', ')}</p>
-                  <p className="text-xs text-gray-500 mt-3">
-                    Coordinates: {(selectedPoint.data as RefineryData).latitude.toFixed(4)}, {(selectedPoint.data as RefineryData).longitude.toFixed(4)}
-                  </p>
-                </div>
-              </div>
-            )}
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation()
+                  e.preventDefault()
+                  setSelectedPoint({ data: null, type: null })
+                }}
+                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors z-10 bg-gray-800 rounded-full p-1"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+              
+              {selectedPoint.type === 'commodity' && (() => {
+                const data = selectedPoint.data as CommodityData
+                const fieldLabels: Record<string, string> = {
+                  title: 'Site Name',
+                  owner: 'Owner',
+                  company: 'Company',
+                  operator: 'Operator',
+                  commodity_type: 'Category',
+                  commodity_name: 'Commodity',
+                  country: 'Country',
+                  region: 'Region',
+                  address: 'Address',
+                  location_type: 'Location Type',
+                  operational_status: 'Status',
+                  ownership_type: 'Ownership Type',
+                  ownership_details: 'Ownership Details',
+                  production_monthly: 'Monthly Production',
+                  production_yearly: 'Yearly Production',
+                  production_unit: 'Production Unit',
+                  estimated_reserves: 'Estimated Reserves',
+                  reserves_unit: 'Reserves Unit',
+                  start_date: 'Start Date',
+                  closing_date: 'Closing Date',
+                  quality_type: 'Quality Type',
+                  api_gravity: 'API Gravity',
+                  quality_sulfur_content: 'Sulfur Content',
+                  grade: 'Grade',
+                  last_transaction_value: 'Last Transaction Value',
+                  last_transaction_currency: 'Currency',
+                  last_transaction_date: 'Transaction Date',
+                  contract_duration_years: 'Contract Duration',
+                  pipelines: 'Pipelines',
+                  ports: 'Ports',
+                  rail_connections: 'Rail Connections',
+                  supply_volume: 'Supply Volume',
+                  storage_volume: 'Storage Volume',
+                  long_term_contract: 'Long-term Contract',
+                  contract_with: 'Contract With',
+                }
+                
+                return (
+                  <div className="text-white">
+                    <h3 className="text-xl font-bold text-orange-400 mb-4 pr-8">
+                      {data.title}
+                    </h3>
+                    <div className="space-y-2 text-sm">
+                      {Object.entries(fieldLabels).map(([key, label]) => {
+                        const value = data[key as keyof CommodityData]
+                        if (value === null || value === undefined || value === '' || value === 0) return null
+                        if (key === 'title') return null // Already shown as header
+                        if (key === 'latitude' || key === 'longitude' || key === 'id') return null
+                        
+                        // Format arrays
+                        if (Array.isArray(value)) {
+                          if (value.length === 0) return null
+                          return (
+                            <div key={key} className="py-1">
+                              <span className="text-gray-400">{label}:</span>
+                              <ul className="ml-4 mt-1 text-gray-200">
+                                {value.map((item, i) => (
+                                  <li key={i} className="text-xs">• {item}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )
+                        }
+                        
+                        // Format booleans
+                        if (typeof value === 'boolean') {
+                          return (
+                            <p key={key} className={value ? 'text-green-400' : 'text-gray-400'}>
+                              {value ? '✓' : '✗'} {label}
+                            </p>
+                          )
+                        }
+                        
+                        // Format numbers
+                        if (typeof value === 'number') {
+                          return (
+                            <p key={key}>
+                              <span className="text-gray-400">{label}:</span>{' '}
+                              <span className="text-gray-200">{value.toLocaleString()}</span>
+                            </p>
+                          )
+                        }
+                        
+                        // Format strings
+                        return (
+                          <p key={key}>
+                            <span className="text-gray-400">{label}:</span>{' '}
+                            <span className="text-gray-200">{String(value)}</span>
+                          </p>
+                        )
+                      })}
+                      <p className="text-xs text-gray-500 mt-4 pt-2 border-t border-gray-700">
+                        Coordinates: {data.latitude?.toFixed(4)}, {data.longitude?.toFixed(4)}
+                      </p>
+                    </div>
+                  </div>
+                )
+              })()}
+              
+              {selectedPoint.type === 'refinery' && (() => {
+                const data = selectedPoint.data as RefineryData
+                return (
+                  <div className="text-white">
+                    <h3 className="text-xl font-bold text-yellow-400 mb-4 pr-8">
+                      {data.name}
+                    </h3>
+                    <div className="space-y-2 text-sm">
+                      {data.operator && <p><span className="text-gray-400">Operator:</span> <span className="text-gray-200">{data.operator}</span></p>}
+                      {data.country && <p><span className="text-gray-400">Country:</span> <span className="text-gray-200">{data.country}</span></p>}
+                      {data.city && <p><span className="text-gray-400">City:</span> <span className="text-gray-200">{data.city}</span></p>}
+                      {data.address && <p><span className="text-gray-400">Address:</span> <span className="text-gray-200">{data.address}</span></p>}
+                      {data.capacity_bpd > 0 && <p><span className="text-gray-400">Capacity:</span> <span className="text-gray-200">{data.capacity_bpd.toLocaleString()} bpd</span></p>}
+                      {data.operational_status && <p><span className="text-gray-400">Status:</span> <span className="text-gray-200">{data.operational_status}</span></p>}
+                      {data.crude_types_accepted && data.crude_types_accepted.length > 0 && (
+                        <p>
+                          <span className="text-gray-400">Crude Types:</span>{' '}
+                          <span className="text-gray-200">
+                            {data.crude_types_accepted.map(t => {
+                              if (t === 'light') return 'Light';
+                              if (t === 'medium') return 'Medium';
+                              if (t === 'extra_heavy') return 'Extra Heavy';
+                              return t;
+                            }).join(', ')}
+                          </span>
+                        </p>
+                      )}
+                      <p className="text-xs text-gray-500 mt-4 pt-2 border-t border-gray-700">
+                        Coordinates: {data.latitude?.toFixed(4)}, {data.longitude?.toFixed(4)}
+                      </p>
+                    </div>
+                  </div>
+                )
+              })()}
+            </div>
           </div>
         )}
 
