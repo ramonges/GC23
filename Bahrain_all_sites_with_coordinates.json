@@ -1,0 +1,74 @@
+{
+  "country": "Bahrain",
+  "total_sites": 2,
+  "generated_date": "2026-01-21 22:33:09",
+  "sites": [
+    {
+      "site_name": "Abu Safah (Abu Saafa / Abu Sa'fah) Oil Field",
+      "country": "Bahrain",
+      "state_province": "Offshore Bahrain (Arabian Gulf; shared Bahrain–Saudi Arabia waters)",
+      "latitude": 26.975,
+      "longitude": 50.5522,
+      "status": "active",
+      "start_date": "1966",
+      "closing_date": null,
+      "production_monthly": 4500000,
+      "production_yearly": 54750000,
+      "production_unit": "barrels (Bahrain equity share marketed by Bahrain; field gross capacity ~300,000 bpd, Bahrain equity ~150,000 bpd)",
+      "operator": "Saudi Aramco",
+      "ownership_type": "JV (unitized/shared field)",
+      "ownership_details": "Joint Bahrain–Saudi field (widely reported as 50/50); Saudi Aramco operates; Bahrain’s equity crude marketed by Bapco (Bapco Refining) as agent for Government of Bahrain.",
+      "estimated_reserves": 1023180000,
+      "reserves_unit": "barrels (remaining recoverable crude oil & condensate; 2023)",
+      "quality_api_gravity": 29,
+      "quality_type": "sour medium crude",
+      "quality_sulfur_content": 2.85,
+      "quality_grade_percent": null,
+      "last_transaction_value": null,
+      "last_transaction_currency": "USD",
+      "last_transaction_date": "",
+      "contract_duration_years": null,
+      "pipelines": [
+        "(historical/legacy) Undersea pipeline connection to Bahrain (Sitra refinery) referenced in public sources; specific line name not consistently disclosed"
+      ],
+      "ports": [
+        "Ras Tanura Terminal (Saudi Arabia)"
+      ],
+      "rail_connections": []
+    },
+    {
+      "site_name": "Bahrain Field (Awali Field)",
+      "country": "Bahrain",
+      "state_province": "Southern Governorate (Awali region)",
+      "latitude": 26.0333,
+      "longitude": 50.532,
+      "status": "active",
+      "start_date": "1932",
+      "closing_date": null,
+      "production_monthly": 1290000,
+      "production_yearly": 15480000,
+      "production_unit": "barrels (crude+condensate)",
+      "operator": "Bapco Upstream (Bapco Energies)",
+      "ownership_type": "state-owned",
+      "ownership_details": "Bahrain government via Bapco Energies (Bapco Upstream; formerly Tatweer Petroleum).",
+      "estimated_reserves": 0,
+      "reserves_unit": "barrels (remaining, not publicly disclosed)",
+      "quality_api_gravity": null,
+      "quality_type": "mixed (field produces crude and condensate; includes multiple reservoirs)",
+      "quality_sulfur_content": null,
+      "quality_grade_percent": null,
+      "last_transaction_value": 500000000,
+      "last_transaction_currency": "USD",
+      "last_transaction_date": "2024-08-13",
+      "contract_duration_years": null,
+      "pipelines": [
+        "Awali field gathering system (multiple flowlines; specific line names not publicly disclosed)",
+        "Crude transfer lines to Sitra refining/export area (Bapco facilities; specific line names not publicly disclosed)"
+      ],
+      "ports": [
+        "Sitra (Bapco/Bahrain Petroleum Company export/refinery terminal area)"
+      ],
+      "rail_connections": []
+    }
+  ]
+}

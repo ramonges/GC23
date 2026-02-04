@@ -69,7 +69,9 @@ const companies = [
   // Angola companies
   'ExxonMobil', 'Pluspetrol', 'Sonangol', 'Cobalt International Energy',
   // Azerbaijan companies
-  'SOCAR', 'Lukoil', 'Equinor', 'TPAO', 'Petronas', 'Union Grand Energy', 'Binagadi Oil Company'
+  'SOCAR', 'Lukoil', 'Equinor', 'TPAO', 'Petronas', 'Union Grand Energy', 'Binagadi Oil Company',
+  // Bahrain companies
+  'Saudi Aramco', 'Bapco Energies'
 ]
 
 interface ShippingRoute {
