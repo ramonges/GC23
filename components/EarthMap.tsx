@@ -883,20 +883,25 @@ export default function EarthMap() {
 
       if (error) throw error
 
-      setMarkers(data || [])
+      const validMarkers = (data || []).filter(m => m.latitude != null && m.longitude != null)
+      console.log(`Fetched ${data?.length || 0} total locations, ${validMarkers.length} with valid coordinates`)
+      setMarkers(validMarkers)
     } catch (err) {
       console.error('Error fetching data:', err)
     }
   }, [selectedCategory, selectedCommodity, selectedCompany])
 
-  // Automatically load all data when component mounts and when filters are set to "All"
+  // Automatically load all data when component mounts and when filters change
   useEffect(() => {
     // Only auto-fetch when both category and commodity are empty (meaning "All")
     // When both are "All", show ALL points regardless of company filters
     if (!selectedCategory && !selectedCommodity) {
       fetchData(true) // Ignore company filters for auto-load
+    } else {
+      // If filters are selected, still fetch data with filters
+      fetchData(false)
     }
-  }, [selectedCategory, selectedCommodity, fetchData])
+  }, [selectedCategory, selectedCommodity, selectedCompany, fetchData])
 
   const fetchRefineries = useCallback(async () => {
     try {

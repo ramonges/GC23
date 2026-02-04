@@ -224,8 +224,11 @@ export default function Globe3DClient({ markers, showCities = true, routes = [],
         globeRef.current.updateCityDisplay = updateCityDisplay
       })
 
-    // Convert markers to globe points
-    const points = markers.map(marker => ({
+    // Convert markers to globe points - filter out markers with null coordinates
+    const validMarkers = markers.filter(marker => marker.latitude != null && marker.longitude != null)
+    console.log(`Globe3D: Received ${markers.length} markers, ${validMarkers.length} with valid coordinates`)
+    
+    const points = validMarkers.map(marker => ({
       lat: marker.latitude,
       lng: marker.longitude,
       size: 0.05, // Much smaller altitude
@@ -261,6 +264,7 @@ export default function Globe3DClient({ markers, showCities = true, routes = [],
 
     // Combine all points
     const allPoints = [...points, ...refineryPoints]
+    console.log(`Globe3D: Adding ${allPoints.length} total points to globe (${points.length} commodity markers, ${refineryPoints.length} refineries)`)
 
     // Add points
     globe
