@@ -339,7 +339,7 @@ export default function Globe3DClient({ markers, showCities = true, routes = [],
 
         // Notify parent of selection
         if (onPointSelect) {
-          onPointSelect(point.data, point.type)
+          onPointSelect(point.data, point.type as 'commodity' | 'refinery')
         }
 
         // Highlight effect
@@ -389,7 +389,7 @@ export default function Globe3DClient({ markers, showCities = true, routes = [],
 
       // Notify parent of selection
       if (onPointSelect) {
-        onPointSelect(closestPoint.data, closestPoint.type)
+        onPointSelect(closestPoint.data, closestPoint.type as 'commodity' | 'refinery')
       }
 
       // Highlight the point with a pulse effect
