@@ -72,9 +72,15 @@ def format_array(arr):
         return 'ARRAY[]::TEXT[]'
     return 'ARRAY[' + ', '.join([escape_sql(item) for item in arr]) + ']'
 
-# Read JSON file
+# Read JSON file (use the one with coordinates if available)
 script_dir = os.path.dirname(os.path.abspath(__file__))
-json_path = os.path.join(script_dir, '../../Countries data/Algeria_all_sites.json')
+json_path_with_coords = os.path.join(script_dir, '../Algeria_all_sites_with_coordinates.json')
+json_path_original = os.path.join(script_dir, '../../Countries data/Algeria_all_sites.json')
+
+if os.path.exists(json_path_with_coords):
+    json_path = json_path_with_coords
+else:
+    json_path = json_path_original
 
 with open(json_path, 'r') as f:
     data = json.load(f)
