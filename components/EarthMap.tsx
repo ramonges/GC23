@@ -71,7 +71,17 @@ const companies = [
   // Azerbaijan companies
   'SOCAR', 'Lukoil', 'Equinor', 'TPAO', 'Petronas', 'Union Grand Energy', 'Binagadi Oil Company',
   // Bahrain companies
-  'Saudi Aramco', 'Bapco Energies'
+  'Saudi Aramco', 'Bapco Energies',
+  // Benin companies
+  'Rex International', 'Saga Petroleum', 'Addax Petroleum',
+  // Brunei companies
+  'Hibiscus Petroleum', 'EnQuest',
+  // Cameroon companies
+  'Perenco', 'Tower Resources', 'NewAge', 'Bowleven', 'Victoria Oil & Gas', 'Sinopec',
+  // Chad companies
+  'SHT', 'CNPC',
+  // China companies
+  'CNOOC', 'ConocoPhillips', 'Genting'
 ]
 
 interface ShippingRoute {
