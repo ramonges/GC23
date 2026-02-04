@@ -295,19 +295,12 @@ export default function Globe3DClient({ markers, showCities = true, routes = [],
         </div>
       `)
       .onPointClick((point: any) => {
-        // Zoom to clicked point
-        globe.pointOfView({
-          lat: point.lat,
-          lng: point.lng,
-          altitude: 0.8
-        }, 1000)
-
-        // Notify parent of selection
+        // Show info panel without changing zoom
         if (onPointSelectRef.current) {
           onPointSelectRef.current(point.data, point.type as 'commodity' | 'refinery')
         }
 
-        // Highlight effect
+        // Highlight effect - briefly make the point larger
         globe.pointRadius((d: any) => {
           if (d === point) return (d.type === 'refinery' ? 0.25 : 0.15) * 2.5
           return d.type === 'refinery' ? 0.25 : 0.15
@@ -345,14 +338,7 @@ export default function Globe3DClient({ markers, showCities = true, routes = [],
         }
       }
 
-      // Zoom to the closest point
-      globe.pointOfView({
-        lat: closestPoint.lat,
-        lng: closestPoint.lng,
-        altitude: 0.8 // Zoomed in view
-      }, 1000)
-
-      // Notify parent of selection
+      // Show info panel for the closest point without changing zoom
       if (onPointSelectRef.current) {
         onPointSelectRef.current(closestPoint.data, closestPoint.type as 'commodity' | 'refinery')
       }

@@ -1173,24 +1173,20 @@ export default function EarthMap() {
           onPointSelect={handlePointSelect}
         />
 
-        {/* Selected Point Info Panel - Centered */}
+        {/* Selected Point Info Panel - Left Side */}
         {selectedPoint.data && (
           <div 
-            className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none"
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-30 bg-black bg-opacity-95 border border-gray-500 rounded-xl p-6 shadow-2xl backdrop-blur-sm w-80 max-h-[80vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div 
-              className="bg-black bg-opacity-95 border border-gray-500 rounded-xl p-6 shadow-2xl backdrop-blur-sm max-w-lg max-h-[80vh] overflow-y-auto pointer-events-auto"
-              onClick={(e) => e.stopPropagation()}
+            <button 
+              onClick={(e) => {
+                e.stopPropagation()
+                e.preventDefault()
+                setSelectedPoint({ data: null, type: null })
+              }}
+              className="absolute top-3 right-3 text-gray-400 hover:text-white transition-colors z-10 bg-gray-800 rounded-full p-1"
             >
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation()
-                  e.preventDefault()
-                  setSelectedPoint({ data: null, type: null })
-                }}
-                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors z-10 bg-gray-800 rounded-full p-1"
-              >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
@@ -1332,7 +1328,6 @@ export default function EarthMap() {
                   </div>
                 )
               })()}
-            </div>
           </div>
         )}
 
