@@ -98,7 +98,23 @@ const companies = [
   'ONGC', 'Oil India Limited', 'Cairn Oil & Gas', 'Reliance Industries', 'Selan', 'Nippon Power Limited',
   // Libya companies
   'AGOCO', 'Akakus Oil', 'Harouge Oil', 'Mellitah Oil & Gas', 'NOC Libya',
-  'Sirte Oil Company', 'Waha Oil Company', 'Zueitina Oil Company'
+  'Sirte Oil Company', 'Waha Oil Company', 'Zueitina Oil Company',
+  // Niger companies
+  'Savannah Energy',
+  // Nigeria companies
+  'Aradel Energy', 'NNPC', 'Seplat Energy', 'Oando', 'Heirs Holdings', 'Heritage Oil', 'Elcrest Exploration',
+  // Norway companies
+  'Aker BP', 'DNO', 'Harbour Energy', 'OKEA', 'Vår Energi', 'Petoro',
+  // South Africa companies
+  'PetroSA',
+  // South Sudan companies
+  'GPOC', 'GNPOC', 'DPOC', 'SPOC', 'Nilepet',
+  // Sudan companies
+  'Sudapet', 'WNPOC',
+  // Tunisia companies
+  'ETAP', 'OMV', 'Panoro Energy', 'Petrofac', 'SEREPT', 'Serinus Energy', 'SITEP',
+  // Uganda companies
+  'UNOC'
 ]
 
 interface ShippingRoute {
