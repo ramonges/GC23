@@ -301,9 +301,8 @@ export default function PhysicalDeliveryModeling() {
       </div>
 
       {!showMap ? (
-        <div className="flex-1 overflow-y-auto">
-          <div className="flex justify-center p-8">
-            <div className="max-w-4xl w-full">
+        <div className="flex-1 overflow-y-auto min-h-0">
+          <div className="max-w-4xl w-full mx-auto px-8 py-8 pb-16">
             {/* Progress Steps */}
             <div className="flex items-center justify-between mb-8">
               {[1, 2, 3, 4].map((s) => (
@@ -594,7 +593,6 @@ export default function PhysicalDeliveryModeling() {
                 </div>
               </div>
             )}
-            </div>
           </div>
         </div>
       ) : (
