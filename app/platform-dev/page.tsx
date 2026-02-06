@@ -4,6 +4,7 @@ import { useState } from 'react'
 import PlatformSidebarDev from '@/components/PlatformSidebarDev'
 import EarthMap from '@/components/EarthMap'
 import OptionsDashboard from '@/components/OptionsDashboard'
+import PhysicalDeliveryModeling from '@/components/PhysicalDeliveryModeling'
 
 export default function PlatformDev() {
   const [currentPage, setCurrentPage] = useState('earth-map')
@@ -56,15 +57,7 @@ export default function PlatformDev() {
             </div>
           )}
           
-          {currentPage === 'pricer' && (
-            <div className="flex-1 flex items-center justify-center bg-gray-50">
-              <div className="text-center">
-                <div className="text-6xl mb-6">💰</div>
-                <h2 className="text-5xl font-bold text-black mb-4">Physical Trading Pricer</h2>
-                <p className="text-gray-600 text-xl">Coming Soon</p>
-              </div>
-            </div>
-          )}
+          {currentPage === 'pricer' && <PhysicalDeliveryModeling />}
         </div>
       </div>
     </div>

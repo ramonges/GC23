@@ -1001,7 +1001,7 @@ export default function EarthMap() {
       {/* Shipping Routes Modal */}
       {showRoutesModal && (
         <div 
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center"
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] flex items-center justify-center"
           onClick={() => setShowRoutesModal(false)}
         >
           <div 

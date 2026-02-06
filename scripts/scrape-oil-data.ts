@@ -42,9 +42,20 @@ interface OilReserveData {
   company?: string
   country: string
   location_type?: string
-  api_gravity?: number
-  sulfur_content?: number
+  api_gravity?: number | null
+  sulfur_content?: number | null
   operational_status?: string
+  // Additional fields for Supabase schema
+  operator?: string
+  current_production?: number
+  production_capacity?: number
+  region?: string | null
+  city?: string | null
+  ownership_type?: string | null
+  reserves_estimate?: number | null
+  grade?: string | null
+  concentration_level?: number | null
+  additional_info?: any
 }
 
 // Major oil fields database (curated from public sources)
@@ -21873,25 +21884,59 @@ function transformToDbFormat(field: typeof majorOilFields[0]): OilReserveData {
     sulfurContent = undefined
   }
 
+  // Parse API gravity - handle ranges and single values, convert to number or null
+  let parsedApiGravity: number | null = null
+  if (apiGravity !== undefined && !isNaN(apiGravity) && apiGravity > 0) {
+    parsedApiGravity = apiGravity
+  }
+
+  // Parse sulfur content - handle percentages and special cases, convert to number or null
+  let parsedSulfurContent: number | null = null
+  if (sulfurContent !== undefined && !isNaN(sulfurContent) && sulfurContent >= 0) {
+    parsedSulfurContent = sulfurContent
+  }
+
+  // Convert production_bpd to annual volume (barrels per day * 365)
+  const annualProduction = field.production_bpd * 365
+
+  // Extract primary company name (before '/' if multiple operators)
+  const primaryCompany = field.operator.split('/')[0].trim()
+
   return {
     title: field.name,
     owner: field.operator,
     address: `${field.name}, ${field.country}`,
-    contact: `${field.operator.toLowerCase().replace(/\s+/g, '')}@contact.com`,
+    contact: `${primaryCompany.toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '')}@contact.com`,
     latitude: field.latitude,
     longitude: field.longitude,
-    supply_volume: field.production_bpd * 365, // Convert to annual volume
+    supply_volume: annualProduction,
     storage_volume: 0,
     long_term_contract: true,
     contract_with: "Various International Buyers",
     commodity_type: commodityType,
     commodity_name: commodityName,
-    company: field.operator.split('/')[0], // Primary operator
+    company: primaryCompany,
     country: field.country,
     location_type: locationType,
-    api_gravity: apiGravity,
-    sulfur_content: sulfurContent,
-    operational_status: 'operational'
+    api_gravity: parsedApiGravity,
+    sulfur_content: parsedSulfurContent,
+    operational_status: 'operational',
+    // Additional fields for Supabase schema
+    operator: field.operator,
+    current_production: annualProduction,
+    production_capacity: annualProduction, // Assume capacity equals current production
+    region: null, // Can be populated later if needed
+    city: null, // Can be populated later if needed
+    ownership_type: null, // Can be determined later if needed
+    reserves_estimate: null, // Not available in source data
+    grade: null, // Can be populated later if needed
+    concentration_level: null, // Only for metals, can be populated later
+    additional_info: {
+      type: field.type,
+      production_bpd: field.production_bpd,
+      api_gravity_raw: field.api_gravity,
+      sulfur_content_raw: field.sulfur_content
+    }
   }
 }
 
@@ -21904,41 +21949,69 @@ async function insertOilReserves() {
   let successCount = 0
   let errorCount = 0
 
-  for (const field of majorOilFields) {
-    try {
-      const data = transformToDbFormat(field)
-      
-      // Check if already exists
-      const { data: existing } = await supabase
-        .from('commodity_locations')
-        .select('id')
-        .eq('title', data.title)
-        .single()
-
-      if (existing) {
-        console.log(`⏭️  Skipping ${data.title} - already exists`)
-        continue
-      }
-
-      // Insert new record
-      const { error } = await supabase
-        .from('commodity_locations')
-        .insert([data])
-
-      if (error) {
-        console.error(`❌ Error inserting ${data.title}:`, error.message)
+  // Process in batches to avoid overwhelming the database
+  const batchSize = 50
+  for (let i = 0; i < majorOilFields.length; i += batchSize) {
+    const batch = majorOilFields.slice(i, i + batchSize)
+    const batchData = []
+    
+    // Transform all fields in batch
+    for (const field of batch) {
+      try {
+        const data = transformToDbFormat(field)
+        batchData.push(data)
+      } catch (err) {
+        console.error(`❌ Error transforming ${field.name}:`, err)
         errorCount++
-      } else {
-        console.log(`✅ Inserted: ${data.title} (${data.owner})`)
-        successCount++
       }
+    }
 
-      // Small delay to avoid rate limiting
-      await new Promise(resolve => setTimeout(resolve, 100))
+    if (batchData.length > 0) {
+      try {
+        // Get existing titles for this batch to filter duplicates
+        const titles = batchData.map(d => d.title)
+        const countries = batchData.map(d => d.country)
+        
+        const { data: existing } = await supabase
+          .from('commodity_locations')
+          .select('title, country')
+          .in('title', titles)
+          .in('country', countries)
 
-    } catch (err) {
-      console.error(`❌ Error processing ${field.name}:`, err)
-      errorCount++
+        const existingSet = new Set(
+          (existing || []).map(e => `${e.title}|${e.country}`)
+        )
+
+        // Filter out duplicates
+        const newData = batchData.filter(
+          d => !existingSet.has(`${d.title}|${d.country}`)
+        )
+
+        if (newData.length > 0) {
+          // Insert only new records
+          const { error } = await supabase
+            .from('commodity_locations')
+            .insert(newData)
+
+          if (error) {
+            console.error(`❌ Error inserting batch ${Math.floor(i / batchSize) + 1}:`, error.message)
+            errorCount += newData.length
+          } else {
+            console.log(`✅ Inserted batch ${Math.floor(i / batchSize) + 1}: ${newData.length} new records (${batchData.length - newData.length} duplicates skipped)`)
+            successCount += newData.length
+          }
+        } else {
+          console.log(`⏭️  Batch ${Math.floor(i / batchSize) + 1}: All ${batchData.length} records already exist`)
+        }
+      } catch (err) {
+        console.error(`❌ Error processing batch ${Math.floor(i / batchSize) + 1}:`, err)
+        errorCount += batchData.length
+      }
+    }
+
+    // Small delay between batches to avoid rate limiting
+    if (i + batchSize < majorOilFields.length) {
+      await new Promise(resolve => setTimeout(resolve, 200))
     }
   }
 

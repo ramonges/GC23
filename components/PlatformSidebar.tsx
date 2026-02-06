@@ -36,7 +36,7 @@ export default function PlatformSidebar({ currentPage, onNavigate, userEmail }: 
     { id: 'earth-map', label: 'Earth Map', icon: Globe },
     { id: 'options', label: 'Commodities Options', icon: TrendingUp },
     { id: 'futures', label: 'Commodities Futures', icon: LineChart },
-    { id: 'pricer', label: 'Physical Trading Pricer', icon: DollarSign },
+    { id: 'pricer', label: 'Physical Delivery Modeling', icon: DollarSign },
   ]
 
   const handleLogout = async () => {
