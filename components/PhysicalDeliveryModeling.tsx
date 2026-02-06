@@ -17,7 +17,6 @@ import {
 } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { ShippingRoute } from '@/lib/types'
-import { shippingRoutes } from './EarthMap'
 
 const Globe3D = dynamic(() => import('./Globe3DClient'), {
   ssr: false,
@@ -597,6 +596,7 @@ export default function PhysicalDeliveryModeling() {
             )}
             </div>
           </div>
+        </div>
       ) : (
         <div className="flex-1 flex flex-col">
           {/* Map Header with Results */}
@@ -637,41 +637,28 @@ export default function PhysicalDeliveryModeling() {
           
           {/* Earth Map */}
           <div className="flex-1 relative">
-            {calculatedData && (() => {
-              // Try to find matching route from shipping routes, or create custom route
-              const existingRoute = shippingRoutes.find(r => r.id === detectedRoute)
-              const routeToDisplay: ShippingRoute = existingRoute ? {
-                ...existingRoute,
-                startLat: calculatedData.origin.lat,
-                startLng: calculatedData.origin.lng,
-                endLat: calculatedData.destination.lat,
-                endLng: calculatedData.destination.lng,
-                name: `${originPort} → ${destinationPort}`
-              } : {
-                id: detectedRoute,
-                name: `${originPort} → ${destinationPort}`,
-                startLat: calculatedData.origin.lat,
-                startLng: calculatedData.origin.lng,
-                endLat: calculatedData.destination.lat,
-                endLng: calculatedData.destination.lng,
-                color: '#3B82F6',
-                waypoints: generateWaypoints(
-                  calculatedData.origin.lat,
-                  calculatedData.origin.lng,
-                  calculatedData.destination.lat,
-                  calculatedData.destination.lng
-                )
-              }
-              
-              return (
-                <Globe3D
-                  markers={[]}
-                  showCities={false}
-                  routes={[routeToDisplay]}
-                  refineries={[]}
-                />
-              )
-            })()}
+            {calculatedData && (
+              <Globe3D
+                markers={[]}
+                showCities={false}
+                routes={[{
+                  id: detectedRoute,
+                  name: `${originPort} → ${destinationPort}`,
+                  startLat: calculatedData.origin.lat,
+                  startLng: calculatedData.origin.lng,
+                  endLat: calculatedData.destination.lat,
+                  endLng: calculatedData.destination.lng,
+                  color: '#3B82F6',
+                  waypoints: generateWaypoints(
+                    calculatedData.origin.lat,
+                    calculatedData.origin.lng,
+                    calculatedData.destination.lat,
+                    calculatedData.destination.lng
+                  )
+                }]}
+                refineries={[]}
+              />
+            )}
           </div>
         </div>
       )}
