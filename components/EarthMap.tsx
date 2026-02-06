@@ -84,7 +84,7 @@ const companies = [
   'UNOC'
 ]
 
-const shippingRoutes: ShippingRoute[] = [
+export const shippingRoutes: ShippingRoute[] = [
   // C1: Asia (Far East) ↔ North Europe (via Suez Canal, around Spain through Gibraltar)
   { 
     id: 'C1', 
