@@ -293,7 +293,7 @@ export default function PhysicalDeliveryModeling() {
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-gray-50 overflow-hidden">
+    <div className="flex-1 flex flex-col bg-gray-50 min-h-0 overflow-hidden">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-8 py-6 flex-shrink-0">
         <h1 className="text-3xl font-bold text-black mb-2">Physical Delivery Modeling</h1>
@@ -301,7 +301,7 @@ export default function PhysicalDeliveryModeling() {
       </div>
 
       {!showMap ? (
-        <div className="flex-1 overflow-y-auto min-h-0">
+        <div className="flex-1 overflow-y-auto min-h-0 overscroll-contain">
           <div className="max-w-4xl w-full mx-auto px-8 py-8 pb-16">
             {/* Progress Steps */}
             <div className="flex items-center justify-between mb-8">
