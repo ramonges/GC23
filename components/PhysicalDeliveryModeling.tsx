@@ -294,16 +294,17 @@ export default function PhysicalDeliveryModeling() {
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-gray-50 overflow-auto">
+    <div className="flex-1 flex flex-col bg-gray-50 overflow-hidden">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-8 py-6">
+      <div className="bg-white border-b border-gray-200 px-8 py-6 flex-shrink-0">
         <h1 className="text-3xl font-bold text-black mb-2">Physical Delivery Modeling</h1>
         <p className="text-gray-600">Model real-world delivery outcomes for physical commodities</p>
       </div>
 
       {!showMap ? (
-        <div className="flex-1 flex items-center justify-center p-8">
-          <div className="max-w-4xl w-full">
+        <div className="flex-1 overflow-y-auto">
+          <div className="flex justify-center p-8">
+            <div className="max-w-4xl w-full">
             {/* Progress Steps */}
             <div className="flex items-center justify-between mb-8">
               {[1, 2, 3, 4].map((s) => (
@@ -594,8 +595,8 @@ export default function PhysicalDeliveryModeling() {
                 </div>
               </div>
             )}
+            </div>
           </div>
-        </div>
       ) : (
         <div className="flex-1 flex flex-col">
           {/* Map Header with Results */}
