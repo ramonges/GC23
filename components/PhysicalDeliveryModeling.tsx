@@ -20,9 +20,10 @@ const Globe3D = dynamic(() => import('./Globe3DClient'), {
   ),
 })
 
-// Major ports with region for route detection
+// Major ports — used for selection and exact benchmark matching
 const majorPorts = [
   { name: 'Port Hedland', country: 'Australia', lat: -20.3, lng: 118.6, region: 'Oceania' },
+  { name: 'Dampier', country: 'Australia', lat: -20.7, lng: 116.7, region: 'Oceania' },
   { name: 'Newcastle', country: 'Australia', lat: -32.9, lng: 151.8, region: 'Oceania' },
   { name: 'Tubarao', country: 'Brazil', lat: -20.3, lng: -40.3, region: 'South America' },
   { name: 'Santos', country: 'Brazil', lat: -23.9, lng: -46.3, region: 'South America' },
@@ -32,10 +33,12 @@ const majorPorts = [
   { name: 'Shanghai', country: 'China', lat: 31.2, lng: 121.5, region: 'East Asia' },
   { name: 'Ningbo', country: 'China', lat: 29.9, lng: 121.6, region: 'East Asia' },
   { name: 'Beilun/Baoshan', country: 'China', lat: 29.9, lng: 121.8, region: 'East Asia' },
+  { name: 'Busan', country: 'South Korea', lat: 35.1, lng: 129.0, region: 'East Asia' },
   { name: 'Ras Tanura', country: 'Saudi Arabia', lat: 26.6, lng: 50.2, region: 'Middle East' },
   { name: 'Jubail', country: 'Saudi Arabia', lat: 27.0, lng: 49.7, region: 'Middle East' },
   { name: 'Fujairah', country: 'UAE', lat: 25.1, lng: 56.3, region: 'Middle East' },
   { name: 'Singapore', country: 'Singapore', lat: 1.3, lng: 103.8, region: 'Southeast Asia' },
+  { name: 'Lagos', country: 'Nigeria', lat: 6.4, lng: 3.4, region: 'West Africa' },
   { name: 'Rotterdam', country: 'Netherlands', lat: 51.9, lng: 4.5, region: 'North Europe' },
   { name: 'Antwerp', country: 'Belgium', lat: 51.2, lng: 4.4, region: 'North Europe' },
   { name: 'Hamburg', country: 'Germany', lat: 53.6, lng: 10.0, region: 'North Europe' },
@@ -43,6 +46,16 @@ const majorPorts = [
   { name: 'New Orleans', country: 'United States', lat: 29.9, lng: -90.1, region: 'US Gulf' },
   { name: 'New York', country: 'United States', lat: 40.7, lng: -74.0, region: 'US East Coast' },
 ]
+
+// Which commodities are typically exported from each origin (for validation)
+const originCommodityExport: Record<string, string[]> = {
+  'Port Hedland': ['Iron Ore', 'Coal'], 'Dampier': ['Iron Ore', 'LNG'], 'Newcastle': ['Coal', 'Grain'],
+  'Tubarao': ['Iron Ore', 'Bauxite'], 'Santos': ['Grain', 'Crude Oil'],
+  'Richards Bay': ['Coal'], 'Bolivar': ['Coal'],
+  'Ras Tanura': ['Crude Oil'], 'Jubail': ['Crude Oil'], 'Fujairah': ['Crude Oil'],
+  'Lagos': ['Crude Oil'],
+  'Houston': ['Crude Oil', 'Grain', 'LNG'], 'New Orleans': ['Grain', 'Crude Oil'], 'New York': ['Grain'],
+}
 
 // Commodities with standard parcel sizes (industry standard)
 type CommodityConfig = {
@@ -167,40 +180,80 @@ const vesselClasses: Record<string, VesselConfig> = {
   'Handysize': { dwtMin: 25000, dwtMax: 50000, speed: 12, fuelAtSea: 21, fuelInPort: 2.5, tceRate: 8000, portCostPerCall: 25000, demurrageRate: 9000, canalPanama: true, canalSuez: true, commodities: ['Grain', 'Copper'] },
 }
 
-// Route definitions with typical commodity, distance (nm), canal flags
-const routeDefinitions: Record<string, { name: string; distanceNm: number; viaSuez?: boolean; viaPanama?: boolean; typicalCommodity: string }> = {
-  'C1': { name: 'Asia (Far East) ↔ North Europe', distanceNm: 10500, viaSuez: true, typicalCommodity: 'Iron Ore, Containers' },
-  'C2': { name: 'Asia (Far East) ↔ Mediterranean', distanceNm: 8500, viaSuez: true, typicalCommodity: 'Iron Ore, Coal' },
-  'C3': { name: 'Tubarao (Brazil) → Beilun/Baoshan (China)', distanceNm: 11000, viaPanama: false, viaSuez: true, typicalCommodity: 'Iron Ore' },
-  'C4': { name: 'Richards Bay → Rotterdam', distanceNm: 7200, typicalCommodity: 'Coal' },
-  'C5': { name: 'Western Australia → Qingdao (China)', distanceNm: 3700, typicalCommodity: 'Iron Ore, Coal' },
-  'C7': { name: 'Bolivar (Colombia) → Rotterdam', distanceNm: 4700, viaPanama: true, typicalCommodity: 'Coal' },
-  'C10': { name: 'Europe ↔ North America (Transatlantic)', distanceNm: 3500, typicalCommodity: 'Grain, Oil' },
-  'TD3C': { name: 'Middle East Gulf → China (VLCC crude)', distanceNm: 6500, viaSuez: true, typicalCommodity: 'Crude Oil' },
-  'TD20': { name: 'West Africa → Continent (Suezmax)', distanceNm: 5200, viaSuez: true, typicalCommodity: 'Crude Oil' },
-  'P2': { name: 'Skaw–Gibraltar → Far East (grain)', distanceNm: 10500, viaSuez: true, typicalCommodity: 'Grain' },
-  'S1': { name: 'US Gulf → Skaw–Passero', distanceNm: 4200, typicalCommodity: 'Grain, Coal' },
+// Baltic Exchange benchmark routes — EXACT origin port + destination port + commodity
+// A route is only assigned when there is an exact match. Otherwise: Custom Route.
+type BenchmarkDef = {
+  name: string
+  originPorts: string[]
+  destPorts: string[]
+  commodities: string[]
+  distanceNm: number
+  viaSuez?: boolean
+  viaPanama?: boolean
 }
 
-// Default route when no specific match
-const DEFAULT_ROUTE = { name: 'Custom route', distanceNm: 5000, typicalCommodity: 'Various' }
+const benchmarkRoutes: BenchmarkDef[] = [
+  { name: 'C2 — Tubarao → Rotterdam', originPorts: ['Tubarao'], destPorts: ['Rotterdam'], commodities: ['Iron Ore'], distanceNm: 5800, viaSuez: false },
+  { name: 'C3 — Tubarao → Beilun/Baoshan (China)', originPorts: ['Tubarao'], destPorts: ['Beilun/Baoshan'], commodities: ['Iron Ore'], distanceNm: 11000, viaSuez: true },
+  { name: 'C4 — Richards Bay → Rotterdam', originPorts: ['Richards Bay'], destPorts: ['Rotterdam'], commodities: ['Coal'], distanceNm: 7200 },
+  { name: 'C5 — Port Hedland/Dampier → Qingdao (China)', originPorts: ['Port Hedland', 'Dampier'], destPorts: ['Qingdao'], commodities: ['Iron Ore', 'Coal'], distanceNm: 3700 },
+  { name: 'C7 — Bolivar → Rotterdam', originPorts: ['Bolivar'], destPorts: ['Rotterdam'], commodities: ['Coal'], distanceNm: 4700, viaPanama: true },
+  { name: 'P2 — US Gulf/East Coast → Japan/Korea (grain)', originPorts: ['Houston', 'New Orleans', 'New York'], destPorts: ['Busan'], commodities: ['Grain'], distanceNm: 10500, viaPanama: true },
+  { name: 'P6 — US Gulf → Continent (grain)', originPorts: ['Houston', 'New Orleans'], destPorts: ['Rotterdam', 'Antwerp', 'Hamburg'], commodities: ['Grain'], distanceNm: 4500 },
+  { name: 'S1 — US Gulf → Skaw/Passero', originPorts: ['Houston', 'New Orleans'], destPorts: ['Rotterdam', 'Antwerp', 'Hamburg'], commodities: ['Grain', 'Coal'], distanceNm: 4200 },
+  { name: 'TD1 — Middle East Gulf → US Gulf (VLCC)', originPorts: ['Ras Tanura', 'Jubail', 'Fujairah'], destPorts: ['Houston', 'New Orleans'], commodities: ['Crude Oil'], distanceNm: 8500, viaSuez: true },
+  { name: 'TD2 — Middle East Gulf → Singapore', originPorts: ['Ras Tanura', 'Jubail', 'Fujairah'], destPorts: ['Singapore'], commodities: ['Crude Oil'], distanceNm: 3500 },
+  { name: 'TD3C — Middle East Gulf → China (VLCC crude)', originPorts: ['Ras Tanura', 'Jubail', 'Fujairah'], destPorts: ['Qingdao', 'Shanghai', 'Ningbo'], commodities: ['Crude Oil'], distanceNm: 6500, viaSuez: true },
+  { name: 'TD20 — West Africa → Continent (Suezmax)', originPorts: ['Lagos'], destPorts: ['Rotterdam', 'Antwerp', 'Hamburg'], commodities: ['Crude Oil'], distanceNm: 5200, viaSuez: true },
+  { name: 'TD25 — US Gulf → China (VLCC)', originPorts: ['Houston', 'New Orleans'], destPorts: ['Qingdao', 'Shanghai', 'Ningbo'], commodities: ['Crude Oil'], distanceNm: 10500, viaPanama: true },
+]
 
-function detectRoute(origin: typeof majorPorts[0], dest: typeof majorPorts[0]): string {
+// Custom route — used when no benchmark matches
+const CUSTOM_ROUTE = { name: 'Custom Route', distanceNm: 0, typicalCommodity: 'Calculated from port coordinates' }
+
+function detectRoute(
+  origin: typeof majorPorts[0],
+  dest: typeof majorPorts[0],
+  commodity: string
+): { id: string; def: BenchmarkDef | typeof CUSTOM_ROUTE } {
+  const match = benchmarkRoutes.find(
+    (b) =>
+      b.originPorts.includes(origin.name) &&
+      b.destPorts.includes(dest.name) &&
+      b.commodities.includes(commodity)
+  )
+  if (match) {
+    return { id: match.name.split(' — ')[0], def: match }
+  }
+  return { id: 'Custom Route', def: CUSTOM_ROUTE }
+}
+
+// Estimate canal usage for custom routes (rough: crossing Atlantic-Pacific or Europe-Asia)
+function estimateCanalForCustomRoute(origin: typeof majorPorts[0], dest: typeof majorPorts[0]): { viaSuez?: boolean; viaPanama?: boolean } {
   const o = origin.region
   const d = dest.region
-  if (o === 'Oceania' && d === 'East Asia') return 'C5'
-  if (o === 'East Asia' && d === 'Oceania') return 'C5'
-  if (o === 'South America' && d === 'East Asia') return 'C3'
-  if (o === 'East Asia' && d === 'South America') return 'C3'
-  if (o === 'South Africa' && d === 'North Europe') return 'C4'
-  if (o === 'South America' && d === 'North Europe') return 'C7'
-  if (o === 'East Asia' && d === 'North Europe') return 'C1'
-  if (o === 'North Europe' && d === 'East Asia') return 'C1'
-  if (o === 'Middle East' && d === 'East Asia') return 'TD3C'
-  if (o === 'East Asia' && d === 'Middle East') return 'TD3C'
-  if ((o === 'North Europe' || o === 'Mediterranean') && d === 'US Gulf') return 'C10'
-  if (o === 'US Gulf' && (d === 'North Europe' || d === 'Mediterranean')) return 'S1'
-  return 'C5'
+  const result: { viaSuez?: boolean; viaPanama?: boolean } = {}
+  // Suez: Europe ↔ Asia, Middle East ↔ Asia/Europe, Africa ↔ Asia
+  if ((o === 'North Europe' && d === 'East Asia') || (o === 'East Asia' && d === 'North Europe')) result.viaSuez = true
+  if ((o === 'Middle East' && (d === 'East Asia' || d === 'North Europe')) || ((o === 'East Asia' || o === 'North Europe') && d === 'Middle East')) result.viaSuez = true
+  if ((o === 'West Africa' && (d === 'East Asia' || d === 'North Europe')) || ((o === 'East Asia' || o === 'North Europe') && d === 'West Africa')) result.viaSuez = true
+  // Panama: US Gulf ↔ West Coast / Asia-Pacific, South America ↔ Asia
+  if ((o === 'US Gulf' || o === 'US East Coast') && (d === 'East Asia' || d === 'Oceania')) result.viaPanama = true
+  if ((d === 'US Gulf' || d === 'US East Coast') && (o === 'East Asia' || o === 'Oceania')) result.viaPanama = true
+  if (o === 'South America' && (d === 'East Asia' || d === 'Oceania')) result.viaPanama = true
+  if (d === 'South America' && (o === 'East Asia' || o === 'Oceania')) result.viaPanama = true
+  return result
+}
+
+// Origin/commodity validation: warn when origin doesn't typically export this commodity
+function getOriginCommodityWarning(originPort: string, commodity: string): string | null {
+  const exports = originCommodityExport[originPort]
+  if (!exports) return null
+  if (exports.includes(commodity)) return null
+  if (commodity === 'Crude Oil' && ['Port Hedland', 'Dampier', 'Newcastle'].includes(originPort)) {
+    return 'Australia is not a standard crude oil export origin. Typical crude export origins: Middle East Gulf, West Africa, US Gulf.'
+  }
+  return `${originPort} does not typically export ${commodity}. This may be an unusual trade.`
 }
 
 function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -212,11 +265,29 @@ function calculateDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
   return R * c
 }
 
+// Great-circle waypoints for realistic maritime routes (follows Earth curvature)
 function generateWaypoints(lat1: number, lng1: number, lat2: number, lng2: number): Array<{ lat: number; lng: number }> {
+  const toRad = (x: number) => x * Math.PI / 180
+  const toDeg = (x: number) => x * 180 / Math.PI
+  const φ1 = toRad(lat1), λ1 = toRad(lng1)
+  const φ2 = toRad(lat2), λ2 = toRad(lng2)
+  const Δλ = λ2 - λ1
+  const δ = 2 * Math.asin(Math.sqrt(
+    Math.pow(Math.sin((φ1 - φ2) / 2), 2) +
+    Math.cos(φ1) * Math.cos(φ2) * Math.pow(Math.sin(Δλ / 2), 2)
+  ))
+  if (δ < 1e-6) return [{ lat: lat2, lng: lng2 }]
   const w: Array<{ lat: number; lng: number }> = []
-  for (let i = 0; i <= 20; i++) {
-    const t = i / 20
-    w.push({ lat: lat1 + (lat2-lat1)*t, lng: lng1 + (lng2-lng1)*t })
+  for (let i = 0; i <= 30; i++) {
+    const f = i / 30
+    const A = Math.sin((1 - f) * δ) / Math.sin(δ)
+    const B = Math.sin(f * δ) / Math.sin(δ)
+    const x = A * Math.cos(φ1) * Math.cos(λ1) + B * Math.cos(φ2) * Math.cos(λ2)
+    const y = A * Math.cos(φ1) * Math.sin(λ1) + B * Math.cos(φ2) * Math.sin(λ2)
+    const z = A * Math.sin(φ1) + B * Math.sin(φ2)
+    const φ = Math.atan2(z, Math.sqrt(x * x + y * y))
+    const λ = Math.atan2(y, x)
+    w.push({ lat: toDeg(φ), lng: toDeg(λ) })
   }
   return w
 }
@@ -237,9 +308,10 @@ export default function PhysicalDeliveryModeling() {
   const [destinationPort, setDestinationPort] = useState('')
   const [vesselClass, setVesselClass] = useState('')
   const [parcelSize, setParcelSize] = useState(0)
-  const [detectedRoute, setDetectedRoute] = useState('')
+  const [routeResult, setRouteResult] = useState<{ id: string; def: { name: string; distanceNm: number; viaSuez?: boolean; viaPanama?: boolean; typicalCommodity?: string } } | null>(null)
   const [calculatedData, setCalculatedData] = useState<any>(null)
   const [showMap, setShowMap] = useState(false)
+  const [routePanelOpen, setRoutePanelOpen] = useState(false) // left panel with review/result
   const [vesselAgeEco, setVesselAgeEco] = useState(false) // below 14 years = 0.85 fuel multiplier
 
   const commodityConfig = selectedCommodity ? commodities[selectedCommodity] : null
@@ -251,12 +323,45 @@ export default function PhysicalDeliveryModeling() {
   const isUnusualCombo = vesselConfig && selectedCommodity && !vesselConfig.commodities.includes(selectedCommodity)
 
   useEffect(() => {
-    if (originPort && destinationPort) {
+    if (originPort && destinationPort && selectedCommodity) {
       const o = majorPorts.find(p => p.name === originPort)
       const d = majorPorts.find(p => p.name === destinationPort)
-      if (o && d) setDetectedRoute(detectRoute(o, d))
+      if (o && d) {
+        const result = detectRoute(o, d, selectedCommodity)
+        if (result.id === 'Custom Route') {
+          const dist = calculateDistance(o.lat, o.lng, d.lat, d.lng)
+          const canal = estimateCanalForCustomRoute(o, d)
+          setRouteResult({
+            id: 'Custom Route',
+            def: { ...CUSTOM_ROUTE, distanceNm: dist, ...canal },
+          })
+        } else {
+          const def = result.def as BenchmarkDef
+          setRouteResult({
+            id: result.id,
+            def: {
+              name: def.name,
+              distanceNm: def.distanceNm,
+              viaSuez: def.viaSuez,
+              viaPanama: def.viaPanama,
+              typicalCommodity: def.commodities.join(', '),
+            },
+          })
+        }
+      }
+    } else if (originPort && destinationPort) {
+      // No commodity yet — compute distance only, label as Custom until commodity selected
+      const o = majorPorts.find(p => p.name === originPort)
+      const d = majorPorts.find(p => p.name === destinationPort)
+      if (o && d) {
+        const dist = calculateDistance(o.lat, o.lng, d.lat, d.lng)
+        const canal = estimateCanalForCustomRoute(o, d)
+        setRouteResult({ id: 'Custom Route', def: { ...CUSTOM_ROUTE, distanceNm: dist, ...canal } })
+      }
+    } else {
+      setRouteResult(null)
     }
-  }, [originPort, destinationPort])
+  }, [originPort, destinationPort, selectedCommodity])
 
   useEffect(() => {
     if (!selectedCommodity || !originPort || !destinationPort || !vesselClass || parcelSize <= 0) return
@@ -266,7 +371,7 @@ export default function PhysicalDeliveryModeling() {
     const commodity = commodities[selectedCommodity]
     if (!origin || !dest || !vessel || !commodity) return
 
-    const routeDef = routeDefinitions[detectedRoute] || { ...DEFAULT_ROUTE, distanceNm: calculateDistance(origin.lat, origin.lng, dest.lat, dest.lng) }
+    const routeDef = routeResult?.def ?? { ...CUSTOM_ROUTE, distanceNm: calculateDistance(origin.lat, origin.lng, dest.lat, dest.lng) }
     const distanceNm = routeDef.distanceNm
     const sailingDays = distanceNm / (vessel.speed * 24)
 
@@ -339,11 +444,11 @@ export default function PhysicalDeliveryModeling() {
       commodity,
       routeDef,
     })
-  }, [selectedCommodity, originPort, destinationPort, vesselClass, parcelSize, detectedRoute, vesselAgeEco])
+  }, [selectedCommodity, originPort, destinationPort, vesselClass, parcelSize, routeResult, vesselAgeEco])
 
-  const handleNext = () => { if (step < 4) setStep(step + 1); else setShowMap(true) }
+  const handleNext = () => { if (step < 4) setStep(step + 1); else { setShowMap(true); setRoutePanelOpen(true) } }
   const handleBack = () => { if (step > 1) setStep(step - 1); if (step === 4) setShowMap(false) }
-  const reset = () => { setStep(1); setSelectedCommodity(''); setOriginPort(''); setDestinationPort(''); setVesselClass(''); setParcelSize(0); setDetectedRoute(''); setCalculatedData(null); setShowMap(false) }
+  const reset = () => { setStep(1); setSelectedCommodity(''); setOriginPort(''); setDestinationPort(''); setVesselClass(''); setParcelSize(0); setRouteResult(null); setCalculatedData(null); setShowMap(false); setRoutePanelOpen(false) }
 
   // Benchmarks for context
   const getBenchmark = () => {
@@ -438,12 +543,21 @@ export default function PhysicalDeliveryModeling() {
                       </select>
                     </div>
                   </div>
-                  {detectedRoute && (
-                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                      <div className="flex items-center gap-2"><Route size={16} className="text-blue-600" /><span className="font-semibold text-blue-900 text-sm">Route {detectedRoute}</span></div>
-                      <div className="text-xs text-blue-700 mt-1">{(routeDefinitions[detectedRoute] || DEFAULT_ROUTE).name} — typical: {(routeDefinitions[detectedRoute] || DEFAULT_ROUTE).typicalCommodity}</div>
+                  {routeResult && (
+                    <div className={`p-3 rounded-lg border ${routeResult.id === 'Custom Route' ? 'bg-amber-50 border-amber-200' : 'bg-blue-50 border-blue-200'}`}>
+                      <div className="flex items-center gap-2"><Route size={16} className={routeResult.id === 'Custom Route' ? 'text-amber-600' : 'text-blue-600'} /><span className={`font-semibold text-sm ${routeResult.id === 'Custom Route' ? 'text-amber-900' : 'text-blue-900'}`}>Route {routeResult.id}</span></div>
+                      <div className={`text-xs mt-1 ${routeResult.id === 'Custom Route' ? 'text-amber-700' : 'text-blue-700'}`}>{routeResult.def.name} — {routeResult.def.distanceNm.toFixed(0)} nm{routeResult.id === 'Custom Route' ? ' (calculated from coordinates)' : ` • typical: ${routeResult.def.typicalCommodity ?? ''}`}</div>
                     </div>
                   )}
+                  {selectedCommodity && originPort && (() => {
+                    const warn = getOriginCommodityWarning(originPort, selectedCommodity)
+                    return warn ? (
+                      <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2">
+                        <AlertTriangle size={18} className="text-amber-600 flex-shrink-0 mt-0.5" />
+                        <div className="text-sm text-amber-800">{warn}</div>
+                      </div>
+                    ) : null
+                  })()}
                 </div>
                 <div className="mt-6 flex justify-between">
                   <button onClick={handleBack} className="px-6 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm">Back</button>
@@ -508,7 +622,7 @@ export default function PhysicalDeliveryModeling() {
                     </div>
                     <div className="bg-gray-50 rounded-lg p-3">
                       <div className="text-xs text-gray-600 mb-1">Route</div>
-                      <div className="font-semibold">{detectedRoute}</div>
+                      <div className="font-semibold">{routeResult?.id ?? '—'}</div>
                       <div className="text-xs text-gray-600">{calculatedData.distance.toFixed(0)} nm</div>
                     </div>
                     <div className="bg-gray-50 rounded-lg p-3">
@@ -567,36 +681,109 @@ export default function PhysicalDeliveryModeling() {
           </div>
         </div>
       ) : (
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col relative">
+          {/* Top bar */}
           {calculatedData && (
-            <div className="bg-white border-b border-gray-200 px-8 py-4">
+            <div className="bg-white border-b border-gray-200 px-8 py-4 flex-shrink-0">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-xl font-semibold text-black">{originPort} → {destinationPort}</h2>
-                  <div className="text-sm text-gray-600">{selectedCommodity} • {vesselClass} • Route {detectedRoute} • ${(calculatedData.costs.total/1e6).toFixed(2)}M</div>
+                  <div className="text-sm text-gray-600">{selectedCommodity} • {vesselClass} • Route {routeResult?.id ?? '—'} • ${(calculatedData.costs.total/1e6).toFixed(2)}M</div>
                 </div>
-                <button onClick={reset} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">New Scenario</button>
+                <button onClick={reset} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm">New Scenario</button>
               </div>
             </div>
           )}
-          <div className="flex-1 relative">
-            {calculatedData && (
-              <Globe3D
-                markers={[]}
-                showCities={false}
-                routes={[{
-                  id: detectedRoute,
-                  name: `${originPort} → ${destinationPort}`,
-                  startLat: calculatedData.origin.lat,
-                  startLng: calculatedData.origin.lng,
-                  endLat: calculatedData.destination.lat,
-                  endLng: calculatedData.destination.lng,
-                  color: '#3B82F6',
-                  waypoints: generateWaypoints(calculatedData.origin.lat, calculatedData.origin.lng, calculatedData.destination.lat, calculatedData.destination.lng)
-                }]}
-                refineries={[]}
-              />
+          {/* Map + left panel */}
+          <div className="flex-1 flex relative min-h-0">
+            {/* Left panel - voyage result */}
+            {calculatedData && routePanelOpen && (
+              <div className="absolute left-4 top-4 bottom-4 z-10 w-80 max-h-[calc(100vh-200px)] overflow-y-auto bg-white rounded-xl border border-gray-200 shadow-xl flex flex-col">
+                <div className="p-4 border-b border-gray-200 flex items-center justify-between flex-shrink-0">
+                  <h3 className="font-semibold text-black">Voyage Result</h3>
+                  <button onClick={() => setRoutePanelOpen(false)} className="text-gray-400 hover:text-gray-600 p-1">×</button>
+                </div>
+                <div className="p-4 space-y-4 flex-1 overflow-y-auto">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-gray-50 rounded-lg p-2">
+                      <div className="text-xs text-gray-600">Commodity</div>
+                      <div className="font-semibold text-sm">{selectedCommodity}</div>
+                      <div className="text-xs text-gray-500">{parcelSize.toLocaleString()} {calculatedData.commodity.unit}</div>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-2">
+                      <div className="text-xs text-gray-600">Route</div>
+                      <div className="font-semibold text-sm">{routeResult?.id ?? '—'}</div>
+                      <div className="text-xs text-gray-500">{calculatedData.distance.toFixed(0)} nm</div>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-2">
+                      <div className="text-xs text-gray-600">Vessel</div>
+                      <div className="font-semibold text-sm">{vesselClass}</div>
+                      <div className="text-xs text-gray-500">TCE ~${(calculatedData.vessel.tceRate/1000).toFixed(0)}k/day</div>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-2">
+                      <div className="text-xs text-gray-600">Total Cost</div>
+                      <div className="font-semibold text-sm">${(calculatedData.costs.total/1e6).toFixed(2)}M</div>
+                      <div className="text-xs text-gray-500">${calculatedData.costs.perUnit.toFixed(2)}/{calculatedData.costs.unitLabel}</div>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-semibold text-gray-600 mb-2">Timeline</h4>
+                    <div className="grid grid-cols-4 gap-1">
+                      <div className="bg-blue-50 rounded p-1.5 text-center"><div className="text-[10px] text-gray-600">Origin</div><div className="font-bold text-sm">{(calculatedData.loadingDays + calculatedData.waitingOrigin).toFixed(1)}d</div></div>
+                      <div className="bg-green-50 rounded p-1.5 text-center"><div className="text-[10px] text-gray-600">Sea</div><div className="font-bold text-sm">{calculatedData.sailingDays.toFixed(1)}d</div></div>
+                      <div className="bg-orange-50 rounded p-1.5 text-center"><div className="text-[10px] text-gray-600">Discharge</div><div className="font-bold text-sm">{(calculatedData.dischargeDays + calculatedData.waitingDest).toFixed(1)}d</div></div>
+                      <div className="bg-black text-white rounded p-1.5 text-center"><div className="text-[10px] text-gray-300">Total</div><div className="font-bold text-sm">{calculatedData.totalDays.toFixed(1)}d</div></div>
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-semibold text-gray-600 mb-2">Cost Breakdown</h4>
+                    <div className="space-y-1 text-sm">
+                      {[['Freight', calculatedData.costs.freight], ['Bunker', calculatedData.costs.bunker], ['Port', calculatedData.costs.port], ['Canal', calculatedData.costs.canal], ['Agency', calculatedData.costs.agency]].map(([l, v]) => (
+                        <div key={l} className="flex justify-between"><span className="text-gray-600">{l}</span><span>${((v as number)/1000).toFixed(0)}k</span></div>
+                      ))}
+                      <div className="flex justify-between font-bold pt-1 border-t"><span>Total</span><span>${(calculatedData.costs.total/1e6).toFixed(2)}M</span></div>
+                      <div className="text-xs text-gray-500">Risk: +1d demurrage ≈ +${(calculatedData.costs.demurrageRisk1Day/1000).toFixed(0)}k</div>
+                    </div>
+                  </div>
+                  {benchmark && (
+                    <div className="p-2 bg-slate-50 rounded-lg text-xs text-slate-700">
+                      <Info size={12} className="inline mr-1" /> Benchmark ({benchmark.route}): {benchmark.range}
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
+            {/* Hint when panel closed */}
+            {calculatedData && !routePanelOpen && (
+              <button
+                onClick={() => setRoutePanelOpen(true)}
+                className="absolute left-4 top-4 z-10 px-4 py-2 bg-white/95 hover:bg-white border border-gray-200 rounded-lg shadow-lg text-sm font-medium text-gray-700"
+              >
+                Show voyage result
+              </button>
+            )}
+            {/* Globe */}
+            <div className="flex-1 relative min-w-0">
+              {calculatedData && (
+                <Globe3D
+                  markers={[]}
+                  showCities={false}
+                  routes={[{
+                    id: routeResult?.id ?? 'Custom Route',
+                    name: `${originPort} → ${destinationPort}`,
+                    startLat: calculatedData.origin.lat,
+                    startLng: calculatedData.origin.lng,
+                    endLat: calculatedData.destination.lat,
+                    endLng: calculatedData.destination.lng,
+                    color: '#3B82F6',
+                    waypoints: generateWaypoints(calculatedData.origin.lat, calculatedData.origin.lng, calculatedData.destination.lat, calculatedData.destination.lng),
+                    data: calculatedData,
+                  }]}
+                  refineries={[]}
+                  onRouteClick={() => setRoutePanelOpen(true)}
+                />
+              )}
+            </div>
           </div>
         </div>
       )}

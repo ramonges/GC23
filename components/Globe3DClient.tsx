@@ -10,18 +10,22 @@ interface Globe3DClientProps {
   routes?: ShippingRoute[]
   refineries?: RefineryData[]
   onPointSelect?: (point: CommodityData | RefineryData | null, type: 'commodity' | 'refinery') => void
+  onRouteClick?: (route: ShippingRoute) => void
 }
 
-function Globe3DClient({ markers, showCities = true, routes = [], refineries = [], onPointSelect }: Globe3DClientProps) {
+function Globe3DClient({ markers, showCities = true, routes = [], refineries = [], onPointSelect, onRouteClick }: Globe3DClientProps) {
   const globeEl = useRef<HTMLDivElement>(null)
   const globeRef = useRef<any>(null)
   const currentAltitudeRef = useRef<number>(2.5)
   const onPointSelectRef = useRef(onPointSelect)
+  const onRouteClickRef = useRef(onRouteClick)
 
-  // Keep the callback ref updated
   useEffect(() => {
     onPointSelectRef.current = onPointSelect
   }, [onPointSelect])
+  useEffect(() => {
+    onRouteClickRef.current = onRouteClick
+  }, [onRouteClick])
 
   // Initialize globe ONCE on mount - never recreate
   useEffect(() => {
@@ -323,11 +327,16 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
       .arcEndLat((d: any) => d.endLat)
       .arcEndLng((d: any) => d.endLng)
       .arcColor((d: any) => d.color)
-      .arcStroke((d: any) => 1.5)
-      .arcDashLength(0.4)
-      .arcDashGap(0.1)
-      .arcDashAnimateTime(2000)
+      .arcStroke((d: any) => d.stroke ?? 2.5)
+      .arcDashLength(0.5)
+      .arcDashGap(0.08)
+      .arcDashAnimateTime(2500)
       .arcsTransitionDuration(500)
+      .onArcClick((arc: any) => {
+        if (arc.route && onRouteClickRef.current) {
+          onRouteClickRef.current(arc.route)
+        }
+      })
 
     // Handle window resize
     const handleResize = () => {
@@ -383,6 +392,13 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
 
     const arcs: any[] = []
     routes.forEach(route => {
+      const arcBase = {
+        color: route.color,
+        name: route.name,
+        id: route.id,
+        route,
+        stroke: 2.5,
+      }
       if (route.waypoints && route.waypoints.length > 0) {
         const pts = [
           { lat: route.startLat, lng: route.startLng },
@@ -391,24 +407,20 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
         ]
         for (let i = 0; i < pts.length - 1; i++) {
           arcs.push({
+            ...arcBase,
             startLat: pts[i].lat,
             startLng: pts[i].lng,
             endLat: pts[i + 1].lat,
             endLng: pts[i + 1].lng,
-            color: route.color,
-            name: route.name,
-            id: route.id
           })
         }
       } else {
         arcs.push({
+          ...arcBase,
           startLat: route.startLat,
           startLng: route.startLng,
           endLat: route.endLat,
           endLng: route.endLng,
-          color: route.color,
-          name: route.name,
-          id: route.id
         })
       }
     })

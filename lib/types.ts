@@ -64,4 +64,6 @@ export interface ShippingRoute {
   endLng: number
   color: string
   waypoints?: Array<{ lat: number; lng: number }>
+  /** Custom data passed to onRouteClick (e.g. voyage result) */
+  data?: any
 }
