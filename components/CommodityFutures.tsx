@@ -3,8 +3,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { TrendingUp, TrendingDown, Plus, X, Loader2, LineChart, Info, AlertTriangle, BarChart3 } from 'lucide-react'
 
-const FRED_API_KEY = '6e604ef99f29aa96480a8236b605c32c'
-const FRED_BASE = 'https://api.stlouisfed.org/fred/series/observations'
+// Proxied through /api/fred to avoid CORS issues
+const FRED_PROXY = '/api/fred'
 
 // Commodity groups with FRED series at different frequencies (proxy for term structure)
 // For each commodity we have regional benchmarks that can be compared
@@ -129,11 +129,12 @@ export default function CommodityFutures() {
 
     const start = startDate.toISOString().split('T')[0]
     const end = now.toISOString().split('T')[0]
-    const url = `${FRED_BASE}?series_id=${seriesId}&api_key=${FRED_API_KEY}&file_type=json&observation_start=${start}&observation_end=${end}&sort_order=asc`
+    const url = `${FRED_PROXY}?series_id=${seriesId}&observation_start=${start}&observation_end=${end}`
     const resp = await fetch(url)
-    if (!resp.ok) throw new Error(`FRED API error for ${seriesId}`)
+    if (!resp.ok) throw new Error(`FRED API error for ${seriesId} (${resp.status})`)
     const json = await resp.json()
     if (json.error_message) throw new Error(json.error_message)
+    if (json.error) throw new Error(json.error)
     const obs: ObsPoint[] = (json.observations || [])
       .filter((o: any) => o.value !== '.' && o.value !== '' && o.value != null)
       .map((o: any) => ({ date: o.date, value: parseFloat(o.value) }))
