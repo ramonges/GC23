@@ -2,6 +2,9 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Loader2 } from 'lucide-react'
+import dynamic from 'next/dynamic'
+
+const VolatilitySurface3D = dynamic(() => import('./VolatilitySurface3D'), { ssr: false })
 
 const ALPHA_VANTAGE_API_KEY = '970KAXUCXIOWX55C'
 
@@ -385,52 +388,23 @@ export default function OptionsDashboard() {
               </div>
             )}
 
+            {/* 3D Volatility Surface - Full Width */}
+            <Card title="3D Volatility Surface">
+              {surfaceData ? (
+                <VolatilitySurface3D
+                  points={surfaceData.points}
+                  days={surfaceData.days}
+                  strikes={surfaceData.strikes}
+                  minIv={surfaceData.minIv}
+                  maxIv={surfaceData.maxIv}
+                />
+              ) : (
+                <p className="text-gray-500 text-sm">Insufficient data for volatility surface.</p>
+              )}
+            </Card>
+
             {/* Charts Row 1 */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card title="Volatility Surface">
-                {surfaceData ? (
-                  <div>
-                    <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
-                      <span>Strike &darr;</span>
-                      <span>Days to Expiry &rarr;</span>
-                    </div>
-                    <svg viewBox="0 0 640 300" className="w-full h-64">
-                      {surfaceData.points.map((point) => {
-                        const xIdx = surfaceData.days.indexOf(point.days)
-                        const yIdx = surfaceData.strikes.indexOf(point.strike)
-                        const cellW = 640 / Math.max(surfaceData.days.length, 1)
-                        const cellH = 300 / Math.max(surfaceData.strikes.length, 1)
-                        const t = (point.iv - surfaceData.minIv) / (surfaceData.maxIv - surfaceData.minIv || 1)
-                        const r = Math.round(t * 255)
-                        const b = Math.round((1 - t) * 255)
-                        return (
-                          <rect
-                            key={`${point.days}-${point.strike}`}
-                            x={xIdx * cellW}
-                            y={300 - (yIdx + 1) * cellH}
-                            width={cellW}
-                            height={cellH}
-                            fill={`rgb(${r}, ${Math.round(40 + (1 - t) * 40)}, ${b})`}
-                          >
-                            <title>Strike: {point.strike} | Days: {point.days} | IV: {formatPercent(point.iv)}</title>
-                          </rect>
-                        )
-                      })}
-                    </svg>
-                    <div className="flex items-center justify-between text-xs text-gray-500 mt-2">
-                      <span className="flex items-center gap-1">
-                        <span className="w-3 h-3 rounded" style={{ background: 'rgb(0,80,255)' }} /> Low IV: {formatPercent(surfaceData.minIv)}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <span className="w-3 h-3 rounded" style={{ background: 'rgb(255,40,0)' }} /> High IV: {formatPercent(surfaceData.maxIv)}
-                      </span>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-gray-500 text-sm">Insufficient data for volatility surface.</p>
-                )}
-              </Card>
-
               <Card title="Volatility Smile / Skew">
                 {(smileData.calls.length > 0 || smileData.puts.length > 0) ? (
                   <div>
