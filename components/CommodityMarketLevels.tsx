@@ -230,10 +230,10 @@ export default function CommodityMarketLevels() {
     }
   }
 
-  const maxValue = marketData?.historicalData.length 
+  const maxValue = marketData && marketData.historicalData && marketData.historicalData.length > 0
     ? Math.max(...marketData.historicalData.map(d => d.value))
     : 0
-  const minValue = marketData?.historicalData.length
+  const minValue = marketData && marketData.historicalData && marketData.historicalData.length > 0
     ? Math.min(...marketData.historicalData.map(d => d.value))
     : 0
 
@@ -328,7 +328,7 @@ export default function CommodityMarketLevels() {
           )}
 
           {/* Historical Data Chart */}
-          {marketData?.historicalData.length > 0 && !loading && (
+          {marketData && marketData.historicalData && marketData.historicalData.length > 0 && !loading && (
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-black flex items-center gap-2">
