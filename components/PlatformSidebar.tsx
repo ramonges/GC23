@@ -8,6 +8,7 @@ import {
   TrendingUp,
   LineChart,
   DollarSign,
+  BarChart3,
   User,
   Mail,
   LogOut,
@@ -24,6 +25,7 @@ const menuItems = [
   { href: '/platform/map', label: 'Earth Map', icon: Globe },
   { href: '/platform/options', label: 'Commodities Options', icon: TrendingUp },
   { href: '/platform/market', label: 'Commodity Market Levels', icon: LineChart },
+  { href: '/platform/futures', label: 'Commodity Futures', icon: BarChart3 },
   { href: '/platform/shipping', label: 'Physical Delivery Modeling', icon: DollarSign },
 ]
 

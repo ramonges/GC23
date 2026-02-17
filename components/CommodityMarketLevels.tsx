@@ -346,35 +346,36 @@ export default function CommodityMarketLevels() {
                 </div>
               </div>
 
-              {/* Line Chart */}
-              <div className="relative h-80 w-full">
+              {/* Line Chart - left padding 80px for y-axis labels up to $999999.99 */}
+              <div className="relative h-80 w-full overflow-visible">
                 <svg className="w-full h-full" viewBox="0 0 800 320" preserveAspectRatio="none">
                   {/* Grid lines */}
                   {[0, 1, 2, 3, 4].map((i) => (
                     <line
                       key={`grid-${i}`}
-                      x1="40"
+                      x1="80"
                       y1={60 + i * 50}
-                      x2="760"
+                      x2="780"
                       y2={60 + i * 50}
                       stroke="#e5e7eb"
                       strokeWidth="1"
                     />
                   ))}
                   
-                  {/* Y-axis labels */}
+                  {/* Y-axis labels - enough space for 6+ digit prices (e.g. $5021.62) */}
                   {[0, 1, 2, 3, 4].map((i) => {
                     const value = maxValue - (i * (maxValue - minValue) / 4)
+                    const label = value >= 1000 ? value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : value.toFixed(2)
                     return (
                       <text
                         key={`y-label-${i}`}
-                        x="35"
+                        x="75"
                         y={65 + i * 50}
                         textAnchor="end"
-                        className="text-xs fill-gray-500"
-                        fontSize="10"
+                        className="fill-gray-600"
+                        fontSize="11"
                       >
-                        ${value.toFixed(2)}
+                        ${label}
                       </text>
                     )
                   })}
@@ -390,8 +391,8 @@ export default function CommodityMarketLevels() {
                   {/* Data points and line */}
                   {(() => {
                     const chartData = marketData.historicalData.slice(-50) // Show last 50 points
-                    const padding = 40
-                    const chartWidth = 720
+                    const padding = 80
+                    const chartWidth = 700
                     const chartHeight = 200
                     const stepX = chartWidth / (chartData.length - 1 || 1)
                     
@@ -444,9 +445,9 @@ export default function CommodityMarketLevels() {
 
                   {/* X-axis */}
                   <line
-                    x1="40"
+                    x1="80"
                     y1="260"
-                    x2="760"
+                    x2="780"
                     y2="260"
                     stroke="#000000"
                     strokeWidth="2"
@@ -463,10 +464,10 @@ export default function CommodityMarketLevels() {
                       { idx: chartData.length - 1, date: chartData[chartData.length - 1].date }
                     ]
                     
-                    const stepX = 720 / (chartData.length - 1 || 1)
+                    const stepX = 700 / (chartData.length - 1 || 1)
                     
                     return labels.map((label, i) => {
-                      const x = 40 + label.idx * stepX
+                      const x = 80 + label.idx * stepX
                       return (
                         <text
                           key={`x-label-${i}`}
