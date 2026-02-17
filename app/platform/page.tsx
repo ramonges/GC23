@@ -46,7 +46,7 @@ export default function Platform() {
       </div>
 
       {/* Main Layout with Sidebar */}
-      <div className="flex flex-1 pt-[73px]">
+      <div className="flex flex-1 min-h-0 pt-[73px]">
         <PlatformSidebar 
           currentPage={currentPage} 
           onNavigate={setCurrentPage}
@@ -54,7 +54,7 @@ export default function Platform() {
         />
 
         {/* Main Content */}
-        <div className={`flex-1 flex flex-col min-h-0 ${currentPage === 'earth-map' ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
           {currentPage === 'earth-map' && <EarthMap />}
           
           {currentPage === 'options' && <OptionsDashboard />}
