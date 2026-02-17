@@ -149,6 +149,11 @@ export default function CommodityMarketLevels() {
       throw new Error('API rate limit exceeded. Please try again in a moment.')
     }
 
+    // Check for demo/info message (e.g. demo key restrictions)
+    if (data['Information'] && !data['data']) {
+      throw new Error(data['Information'])
+    }
+
     // Handle Gold/Silver spot price response (if we're fetching spot)
     if (data['Realtime Currency Exchange Rate']) {
       const spotData = data['Realtime Currency Exchange Rate']
@@ -159,18 +164,20 @@ export default function CommodityMarketLevels() {
     }
 
     // Handle historical data - Alpha Vantage returns data in 'data' array
+    // Gold/Silver (GOLD_SILVER_HISTORY) use "price", other commodities use "value" or [1]
     if (data['data'] && Array.isArray(data['data'])) {
       result.historicalData = data['data']
         .filter((item: any) => {
           if (!item) return false
           const date = item.date || item[0]
-          const value = item.value !== undefined ? item.value : item[1]
+          const value = item.price !== undefined ? item.price : (item.value !== undefined ? item.value : item[1])
           return date && value !== undefined && value !== null && value !== ''
         })
         .slice(0, 100)
         .map((item: any) => {
           const date = item.date || item[0] || ''
-          const valueStr = String(item.value !== undefined ? item.value : item[1] || '0')
+          const valueRaw = item.price !== undefined ? item.price : (item.value !== undefined ? item.value : item[1])
+          const valueStr = String(valueRaw ?? '0')
           const value = parseFloat(valueStr.replace(/[^0-9.-]/g, ''))
           return { date, value }
         })
