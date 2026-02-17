@@ -3,5 +3,9 @@
 import PhysicalDeliveryModeling from '@/components/PhysicalDeliveryModeling'
 
 export default function ShippingPage() {
-  return <PhysicalDeliveryModeling />
+  return (
+    <div className="flex-1 overflow-y-auto">
+      <PhysicalDeliveryModeling />
+    </div>
+  )
 }
