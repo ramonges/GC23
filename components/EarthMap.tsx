@@ -19,7 +19,7 @@ const Globe3D = dynamic(() => import('./Globe3DClient'), {
 })
 
 const commodityCategories = {
-  Energy: ['Crude Oil', 'Natural Gas', 'LNG', 'Gas Condensate', 'Uranium', 'Coal'],
+  Energy: ['Crude Oil', 'Natural Gas', 'Uranium', 'Coal'],
   Metals: ['Gold', 'Silver', 'Copper', 'Steel', 'Lithium', 'Iron Ore', 'Platinum', 'Silicon', 'Titanium'],
   Agricultural: ['Soybeans', 'Wheat', 'Coffee', 'Cotton', 'Rice', 'Sugar', 'Cocoa', 'Corn'],
   Industrial: ['Cobalt', 'Aluminium', 'Zinc', 'Nickel', 'Rhodium', 'Palladium', 'Magnesium'],
@@ -808,6 +808,38 @@ export default function EarthMap() {
   const [showRefineries, setShowRefineries] = useState(false)
   const [refineryFilter, setRefineryFilter] = useState<Set<string>>(new Set(['light', 'medium', 'extra_heavy']))
   const [selectedPoint, setSelectedPoint] = useState<{ data: CommodityData | RefineryData | null, type: 'commodity' | 'refinery' | null }>({ data: null, type: null })
+  const [availableCompanies, setAvailableCompanies] = useState<string[]>([])
+
+  const fetchAvailableCompanies = useCallback(async () => {
+    try {
+      let query = supabase
+        .from('commodity_locations')
+        .select('company')
+        .not('company', 'is', null)
+        .neq('company', '')
+
+      if (selectedCategory) {
+        query = query.eq('commodity_type', selectedCategory)
+      }
+      if (selectedCommodity) {
+        query = query.eq('commodity_name', selectedCommodity)
+      }
+
+      const { data, error } = await query.limit(10000)
+
+      if (error) throw error
+
+      const unique = Array.from(new Set((data || []).map((r: { company: string }) => r.company).filter(Boolean))).sort()
+      setAvailableCompanies(unique)
+    } catch (err) {
+      console.error('Error fetching companies:', err)
+      setAvailableCompanies([])
+    }
+  }, [selectedCategory, selectedCommodity])
+
+  useEffect(() => {
+    fetchAvailableCompanies()
+  }, [fetchAvailableCompanies])
 
   const fetchData = useCallback(async (ignoreCompany = false) => {
     try {
@@ -925,6 +957,7 @@ export default function EarthMap() {
             onChange={(e) => {
               setSelectedCategory(e.target.value)
               setSelectedCommodity('')
+              setSelectedCompany('')
             }}
             className="h-10 px-4 text-sm rounded-lg bg-neutral-900 text-white border border-neutral-700 focus:outline-none focus:border-white transition-all min-w-[150px] appearance-none cursor-pointer"
           >
@@ -937,7 +970,10 @@ export default function EarthMap() {
           {/* Commodity Select */}
           <select
             value={selectedCommodity}
-            onChange={(e) => setSelectedCommodity(e.target.value)}
+            onChange={(e) => {
+              setSelectedCommodity(e.target.value)
+              setSelectedCompany('')
+            }}
             className="h-10 px-4 text-sm rounded-lg bg-neutral-900 text-white border border-neutral-700 focus:outline-none focus:border-white transition-all disabled:opacity-40 disabled:cursor-not-allowed min-w-[160px] appearance-none cursor-pointer"
             disabled={!selectedCategory}
           >
@@ -950,14 +986,14 @@ export default function EarthMap() {
               )}
           </select>
 
-          {/* Company Select */}
+          {/* Company Select - only shows companies with ≥1 location for selected category/commodity */}
           <select
             value={selectedCompany}
             onChange={(e) => setSelectedCompany(e.target.value)}
             className="h-10 px-4 text-sm rounded-lg bg-neutral-900 text-white border border-neutral-700 focus:outline-none focus:border-white transition-all min-w-[160px] appearance-none cursor-pointer"
           >
             <option value="">All Companies</option>
-            {companies.map((company) => (
+            {availableCompanies.map((company) => (
               <option key={company} value={company}>{company}</option>
             ))}
           </select>
