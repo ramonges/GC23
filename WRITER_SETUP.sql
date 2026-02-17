@@ -18,9 +18,13 @@ ALTER TABLE writer_credentials ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow read for auth" ON writer_credentials
   FOR SELECT USING (true);
 
--- Insert the default writer account
+-- Insert writer accounts
 INSERT INTO writer_credentials (email, password_hash)
 VALUES ('ram2315@columbia.edu', 'ram2905')
+ON CONFLICT (email) DO NOTHING;
+
+INSERT INTO writer_credentials (email, password_hash)
+VALUES ('mam2684@columbia.edu', 'mam2684')
 ON CONFLICT (email) DO NOTHING;
 
 
