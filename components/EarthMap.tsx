@@ -843,30 +843,46 @@ export default function EarthMap() {
 
   const fetchData = useCallback(async (ignoreCompany = false) => {
     try {
-      let query = supabase.from('commodity_locations').select('*').limit(10000)
+      // Supabase/PostgREST caps at ~1000 rows per request, so paginate
+      const PAGE_SIZE = 1000
+      let allData: any[] = []
+      let from = 0
+      let keepFetching = true
 
-      if (selectedCategory) {
-        query = query.eq('commodity_type', selectedCategory)
-      }
-      if (selectedCommodity) {
-        query = query.eq('commodity_name', selectedCommodity)
-      }
-      // Only apply company filter if not ignoring it (i.e., manual search)
-      if (!ignoreCompany) {
-        if (selectedCompany) {
+      while (keepFetching) {
+        let query = supabase
+          .from('commodity_locations')
+          .select('*')
+          .range(from, from + PAGE_SIZE - 1)
+
+        if (selectedCategory) {
+          query = query.eq('commodity_type', selectedCategory)
+        }
+        if (selectedCommodity) {
+          query = query.eq('commodity_name', selectedCommodity)
+        }
+        if (!ignoreCompany && selectedCompany) {
           query = query.eq('company', selectedCompany)
+        }
+
+        const { data, error } = await query
+
+        if (error) {
+          console.error('Supabase query error:', error)
+          throw error
+        }
+
+        const rows = data || []
+        allData = allData.concat(rows)
+        from += PAGE_SIZE
+
+        if (rows.length < PAGE_SIZE) {
+          keepFetching = false
         }
       }
 
-      const { data, error } = await query
-
-      if (error) {
-        console.error('Supabase query error:', error)
-        throw error
-      }
-
-      const rawCount = data?.length ?? 0
-      const validMarkers = (data || []).filter((m: any) => {
+      const rawCount = allData.length
+      const validMarkers = allData.filter((m: any) => {
         const lat = m.latitude ?? m.lat
         const lng = m.longitude ?? m.lng
         return lat != null && lng != null && !isNaN(Number(lat)) && !isNaN(Number(lng))
@@ -1278,6 +1294,22 @@ export default function EarthMap() {
                           </p>
                         )
                       })}
+                      {/* Render additional_info JSONB fields */}
+                      {data.additional_info && typeof data.additional_info === 'object' && Object.keys(data.additional_info as Record<string, any>).length > 0 && (
+                        <div className="mt-3 pt-3 border-t border-gray-700">
+                          <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Additional Details</p>
+                          {Object.entries(data.additional_info as Record<string, any>).map(([key, val]) => {
+                            if (val === null || val === undefined || val === '') return null
+                            const label = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+                            return (
+                              <p key={key}>
+                                <span className="text-gray-400">{label}:</span>{' '}
+                                <span className="text-gray-200">{typeof val === 'object' ? JSON.stringify(val) : String(val)}</span>
+                              </p>
+                            )
+                          })}
+                        </div>
+                      )}
                       <p className="text-xs text-gray-500 mt-4 pt-2 border-t border-gray-700">
                         Coordinates: {data.latitude?.toFixed(4)}, {data.longitude?.toFixed(4)}
                       </p>
