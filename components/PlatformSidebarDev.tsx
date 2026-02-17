@@ -25,7 +25,7 @@ export default function PlatformSidebarDev({ currentPage, onNavigate, userEmail 
   const menuItems = [
     { id: 'earth-map', label: 'Earth Map', icon: Globe },
     { id: 'options', label: 'Commodities Options', icon: TrendingUp },
-    { id: 'futures', label: 'Commodities Futures', icon: LineChart },
+    { id: 'futures', label: 'Commodity Market Levels', icon: LineChart },
     { id: 'pricer', label: 'Physical Delivery Modeling', icon: DollarSign },
   ]
 

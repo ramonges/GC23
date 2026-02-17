@@ -5,6 +5,7 @@ import PlatformSidebar from '@/components/PlatformSidebar'
 import EarthMap from '@/components/EarthMap'
 import OptionsDashboard from '@/components/OptionsDashboard'
 import PhysicalDeliveryModeling from '@/components/PhysicalDeliveryModeling'
+import CommodityMarketLevels from '@/components/CommodityMarketLevels'
 import { supabase } from '@/lib/supabase'
 
 export default function Platform() {
@@ -58,15 +59,7 @@ export default function Platform() {
           
           {currentPage === 'options' && <OptionsDashboard />}
           
-          {currentPage === 'futures' && (
-            <div className="flex-1 flex items-center justify-center bg-gray-50">
-              <div className="text-center">
-                <div className="text-6xl mb-6">📈</div>
-                <h2 className="text-5xl font-bold text-black mb-4">Commodities Futures</h2>
-                <p className="text-gray-600 text-xl">Coming Soon</p>
-              </div>
-            </div>
-          )}
+          {currentPage === 'futures' && <CommodityMarketLevels />}
           
           {currentPage === 'pricer' && <PhysicalDeliveryModeling />}
         </div>
