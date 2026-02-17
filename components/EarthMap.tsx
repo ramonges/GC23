@@ -19,7 +19,7 @@ const Globe3D = dynamic(() => import('./Globe3DClient'), {
 })
 
 const commodityCategories = {
-  Energy: ['Crude Oil', 'Natural Gas', 'Oil & Gas', 'LNG', 'Gas Condensate', 'Uranium', 'Coal'],
+  Energy: ['Crude Oil', 'Natural Gas', 'LNG', 'Gas Condensate', 'Uranium', 'Coal'],
   Metals: ['Gold', 'Silver', 'Copper', 'Steel', 'Lithium', 'Iron Ore', 'Platinum', 'Silicon', 'Titanium'],
   Agricultural: ['Soybeans', 'Wheat', 'Coffee', 'Cotton', 'Rice', 'Sugar', 'Cocoa', 'Corn'],
   Industrial: ['Cobalt', 'Aluminium', 'Zinc', 'Nickel', 'Rhodium', 'Palladium', 'Magnesium'],
