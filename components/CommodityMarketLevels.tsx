@@ -238,15 +238,14 @@ export default function CommodityMarketLevels() {
     : 0
 
   return (
-    <div className="flex-1 flex flex-col bg-gray-50 min-h-0 overflow-hidden">
+    <div className="bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-8 py-6 flex-shrink-0">
+      <div className="bg-white border-b border-gray-200 px-8 py-6">
         <h1 className="text-3xl font-bold text-black mb-2">Commodity Market Levels</h1>
         <p className="text-gray-600">Real-time and historical commodity price data</p>
       </div>
 
-      <div className="flex-1 overflow-y-auto min-h-0">
-        <div className="max-w-6xl w-full mx-auto px-8 py-6">
+      <div className="max-w-6xl w-full mx-auto px-8 py-6">
           {/* Selection Controls */}
           <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
             <div className="grid grid-cols-2 gap-4">
@@ -510,7 +509,6 @@ export default function CommodityMarketLevels() {
               <p className="text-gray-600">Select a commodity to view market data</p>
             </div>
           )}
-        </div>
       </div>
     </div>
   )

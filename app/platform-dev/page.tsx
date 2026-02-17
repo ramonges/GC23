@@ -43,12 +43,24 @@ export default function PlatformDev() {
         />
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-          {currentPage === 'earth-map' && <EarthMap />}
+        <div className="flex-1 min-h-0 overflow-hidden">
+          {currentPage === 'earth-map' && (
+            <div className="h-full overflow-hidden">
+              <EarthMap />
+            </div>
+          )}
           
-          {currentPage === 'options' && <OptionsDashboard />}
+          {currentPage === 'options' && (
+            <div className="h-full overflow-y-auto">
+              <OptionsDashboard />
+            </div>
+          )}
           
-          {currentPage === 'futures' && <CommodityMarketLevels />}
+          {currentPage === 'futures' && (
+            <div className="h-full overflow-y-auto">
+              <CommodityMarketLevels />
+            </div>
+          )}
           
           {currentPage === 'pricer' && <PhysicalDeliveryModeling />}
         </div>

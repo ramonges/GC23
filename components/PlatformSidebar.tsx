@@ -1,7 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
+import Link from 'next/link'
 import {
   Globe,
   TrendingUp,
@@ -16,12 +17,17 @@ import {
 import { supabase } from '@/lib/supabase'
 
 interface PlatformSidebarProps {
-  currentPage: string
-  onNavigate: (page: string) => void
   userEmail?: string
 }
 
-export default function PlatformSidebar({ currentPage, onNavigate, userEmail }: PlatformSidebarProps) {
+const menuItems = [
+  { href: '/platform/map', label: 'Earth Map', icon: Globe },
+  { href: '/platform/options', label: 'Commodities Options', icon: TrendingUp },
+  { href: '/platform/market', label: 'Commodity Market Levels', icon: LineChart },
+  { href: '/platform/shipping', label: 'Physical Delivery Modeling', icon: DollarSign },
+]
+
+export default function PlatformSidebar({ userEmail }: PlatformSidebarProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const [profileData, setProfileData] = useState({
@@ -31,13 +37,7 @@ export default function PlatformSidebar({ currentPage, onNavigate, userEmail }: 
     newPassword: '',
   })
   const router = useRouter()
-
-  const menuItems = [
-    { id: 'earth-map', label: 'Earth Map', icon: Globe },
-    { id: 'options', label: 'Commodities Options', icon: TrendingUp },
-    { id: 'futures', label: 'Commodity Market Levels', icon: LineChart },
-    { id: 'pricer', label: 'Physical Delivery Modeling', icon: DollarSign },
-  ]
+  const pathname = usePathname()
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -87,22 +87,21 @@ export default function PlatformSidebar({ currentPage, onNavigate, userEmail }: 
           <nav className="space-y-2 mb-8">
             {menuItems.map((item) => {
               const Icon = item.icon
+              const isActive = pathname === item.href
               return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    onNavigate(item.id)
-                    setIsOpen(false)
-                  }}
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setIsOpen(false)}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                    currentPage === item.id
+                    isActive
                       ? 'bg-black text-white'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
                 >
                   <Icon size={20} />
                   <span className="font-medium">{item.label}</span>
-                </button>
+                </Link>
               )
             })}
           </nav>
