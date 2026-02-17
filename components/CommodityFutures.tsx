@@ -353,7 +353,7 @@ export default function CommodityFutures() {
   return (
     <div className="bg-gray-50 flex-1 overflow-y-auto">
       <div className="bg-white border-b border-gray-200 px-8 py-6">
-        <h1 className="text-3xl font-bold text-black mb-2">Commodity Futures & Curves</h1>
+        <h1 className="text-3xl font-bold text-black mb-2">Commodity Comparison</h1>
         <p className="text-gray-600">Compare benchmarks across regions, detect contango vs backwardation — powered by <a href="https://fred.stlouisfed.org/" target="_blank" rel="noopener noreferrer" className="underline">FRED</a></p>
       </div>
 
