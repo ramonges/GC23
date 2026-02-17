@@ -74,14 +74,14 @@ export default function Home() {
           </div>
           
           <h1 className="text-7xl md:text-8xl lg:text-9xl font-bold text-white mb-8 leading-tight tracking-tight">
-            Global Oil & Gas Fields<br />
+            Global Commodity<br />
             <span className="bg-gradient-to-r from-blue-200 via-blue-100 to-white bg-clip-text text-transparent">
-              Interactive Map
+              Intelligence
             </span>
           </h1>
           
           <p className="text-2xl md:text-3xl text-gray-300 mb-12 font-light tracking-wide">
-            Explore oil and gas fields worldwide with comprehensive production data
+            Energy, Metals, Agriculture & more — explore markets with real-time data
           </p>
           
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
@@ -90,7 +90,7 @@ export default function Home() {
               className="group px-12 py-5 bg-white text-black text-lg font-semibold rounded-lg hover:bg-opacity-90 transition-all duration-300 shadow-2xl hover:shadow-white/20 hover:scale-105"
             >
               <span className="flex items-center justify-center gap-2">
-                Explore Oil & Gas Fields
+                Explore the Platform
                 <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
@@ -140,43 +140,92 @@ export default function Home() {
         <div className="container mx-auto px-6 relative z-10">
           <div className="text-center mb-20">
             <h2 className="text-5xl md:text-6xl font-bold text-white mb-6">
-              Comprehensive Oil & Gas Data
+              Comprehensive Commodity Data
             </h2>
             <p className="text-xl text-gray-400 font-light max-w-3xl mx-auto">
-              Open access to global oil and gas field information, production data, and infrastructure details
+              From crude oil benchmarks to base metals and agricultural futures — one platform for every major commodity market
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
-            <div className="group p-10 bg-gradient-to-br from-white/5 to-white/[0.02] rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-500 hover:transform hover:scale-105 backdrop-blur-sm">
-              <div className="text-5xl mb-6 group-hover:scale-110 transition-transform duration-300">🛢️</div>
-              <h3 className="text-2xl font-bold text-white mb-4">Oil Fields</h3>
+          {/* Energy — hero row, larger cards */}
+          <div className="grid md:grid-cols-3 gap-6 max-w-7xl mx-auto mb-6">
+            <div className="group md:col-span-2 p-10 bg-gradient-to-br from-orange-500/15 to-orange-900/5 rounded-2xl border border-orange-400/20 hover:border-orange-400/40 transition-all duration-500 hover:transform hover:scale-[1.02] backdrop-blur-sm">
+              <div className="flex items-start gap-5">
+                <div className="text-5xl group-hover:scale-110 transition-transform duration-300">🛢️</div>
+                <div>
+                  <span className="text-xs font-semibold text-orange-400 tracking-widest uppercase mb-2 block">Energy — Crude Oil</span>
+                  <h3 className="text-2xl font-bold text-white mb-3">Oil Fields & Benchmarks</h3>
+                  <p className="text-gray-400 leading-relaxed">
+                    Brent, WTI, Dubai/Oman — track global crude benchmarks, field-level production data, OPEC flows, and physical delivery logistics in real time.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="group p-10 bg-gradient-to-br from-blue-500/15 to-blue-900/5 rounded-2xl border border-blue-400/20 hover:border-blue-400/40 transition-all duration-500 hover:transform hover:scale-[1.02] backdrop-blur-sm">
+              <div className="text-5xl mb-5 group-hover:scale-110 transition-transform duration-300">⛽</div>
+              <span className="text-xs font-semibold text-blue-400 tracking-widest uppercase mb-2 block">Energy — Gas & LNG</span>
+              <h3 className="text-2xl font-bold text-white mb-3">Natural Gas & LNG</h3>
               <p className="text-gray-400 leading-relaxed">
-                Comprehensive database of oil fields worldwide with production data, reserves, and operator information.
+                Henry Hub, TTF, JKM — gas fields, LNG terminals, regasification capacity, and shipping routes.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto mb-6">
+            <div className="group p-10 bg-gradient-to-br from-amber-500/10 to-amber-900/5 rounded-2xl border border-amber-400/15 hover:border-amber-400/30 transition-all duration-500 hover:transform hover:scale-[1.02] backdrop-blur-sm">
+              <div className="text-5xl mb-5 group-hover:scale-110 transition-transform duration-300">⚡</div>
+              <span className="text-xs font-semibold text-amber-400 tracking-widest uppercase mb-2 block">Energy — Power & Coal</span>
+              <h3 className="text-2xl font-bold text-white mb-3">Power & Coal</h3>
+              <p className="text-gray-400 leading-relaxed">
+                Newcastle, API2, Richards Bay — thermal coal, power generation, carbon allowances, and the energy transition.
               </p>
             </div>
 
-            <div className="group p-10 bg-gradient-to-br from-white/5 to-white/[0.02] rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-500 hover:transform hover:scale-105 backdrop-blur-sm">
-              <div className="text-5xl mb-6 group-hover:scale-110 transition-transform duration-300">⛽</div>
-              <h3 className="text-2xl font-bold text-white mb-4">Gas Fields</h3>
+            <div className="group p-10 bg-gradient-to-br from-yellow-500/10 to-yellow-900/5 rounded-2xl border border-yellow-400/15 hover:border-yellow-400/30 transition-all duration-500 hover:transform hover:scale-[1.02] backdrop-blur-sm">
+              <div className="text-5xl mb-5 group-hover:scale-110 transition-transform duration-300">🥇</div>
+              <span className="text-xs font-semibold text-yellow-400 tracking-widest uppercase mb-2 block">Precious Metals</span>
+              <h3 className="text-2xl font-bold text-white mb-3">Gold, Silver & PGMs</h3>
               <p className="text-gray-400 leading-relaxed">
-                Detailed information on natural gas fields including production capacity, reserves, and infrastructure.
+                LBMA, COMEX — spot prices, ETF flows, mine production, central bank reserves, and forward curves.
               </p>
             </div>
 
-            <div className="group p-10 bg-gradient-to-br from-white/5 to-white/[0.02] rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-500 hover:transform hover:scale-105 backdrop-blur-sm">
-              <div className="text-5xl mb-6 group-hover:scale-110 transition-transform duration-300">📍</div>
-              <h3 className="text-2xl font-bold text-white mb-4">Precise Locations</h3>
+            <div className="group p-10 bg-gradient-to-br from-slate-400/10 to-slate-900/5 rounded-2xl border border-slate-400/15 hover:border-slate-400/30 transition-all duration-500 hover:transform hover:scale-[1.02] backdrop-blur-sm">
+              <div className="text-5xl mb-5 group-hover:scale-110 transition-transform duration-300">🔩</div>
+              <span className="text-xs font-semibold text-slate-400 tracking-widest uppercase mb-2 block">Industrial Metals</span>
+              <h3 className="text-2xl font-bold text-white mb-3">Base & Ferrous Metals</h3>
               <p className="text-gray-400 leading-relaxed">
-                Interactive 3D globe with precise coordinates for all oil and gas fields around the world.
+                LME copper, aluminium, zinc, nickel — warehouse stocks, TC/RCs, iron ore indices, and steel margins.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+            <div className="group p-10 bg-gradient-to-br from-green-500/10 to-green-900/5 rounded-2xl border border-green-400/15 hover:border-green-400/30 transition-all duration-500 hover:transform hover:scale-[1.02] backdrop-blur-sm">
+              <div className="text-5xl mb-5 group-hover:scale-110 transition-transform duration-300">🌾</div>
+              <span className="text-xs font-semibold text-green-400 tracking-widest uppercase mb-2 block">Agriculture</span>
+              <h3 className="text-2xl font-bold text-white mb-3">Grains & Softs</h3>
+              <p className="text-gray-400 leading-relaxed">
+                CBOT wheat, corn, soybeans, sugar, coffee, cocoa — crop reports, export flows, and weather impact analysis.
               </p>
             </div>
 
-            <div className="group p-10 bg-gradient-to-br from-white/5 to-white/[0.02] rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-500 hover:transform hover:scale-105 backdrop-blur-sm">
-              <div className="text-5xl mb-6 group-hover:scale-110 transition-transform duration-300">📊</div>
-              <h3 className="text-2xl font-bold text-white mb-4">Production Data</h3>
+            <div className="group p-10 bg-gradient-to-br from-red-500/10 to-red-900/5 rounded-2xl border border-red-400/15 hover:border-red-400/30 transition-all duration-500 hover:transform hover:scale-[1.02] backdrop-blur-sm">
+              <div className="text-5xl mb-5 group-hover:scale-110 transition-transform duration-300">🐄</div>
+              <span className="text-xs font-semibold text-red-400 tracking-widest uppercase mb-2 block">Livestock</span>
+              <h3 className="text-2xl font-bold text-white mb-3">Livestock & Dairy</h3>
               <p className="text-gray-400 leading-relaxed">
-                Monthly and yearly production volumes, reserves estimates, and operational status for each field.
+                Live cattle, lean hogs, feeder cattle — USDA reports, packer margins, and seasonal trade patterns.
+              </p>
+            </div>
+
+            <div className="group p-10 bg-gradient-to-br from-white/5 to-white/[0.02] rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-500 hover:transform hover:scale-[1.02] backdrop-blur-sm">
+              <div className="text-5xl mb-5 group-hover:scale-110 transition-transform duration-300">📊</div>
+              <span className="text-xs font-semibold text-gray-400 tracking-widest uppercase mb-2 block">Platform</span>
+              <h3 className="text-2xl font-bold text-white mb-3">Analytics & Research</h3>
+              <p className="text-gray-400 leading-relaxed">
+                Interactive 3D globe, benchmark comparison, contango/backwardation signals, physical delivery modeling, and curated research.
               </p>
             </div>
           </div>
