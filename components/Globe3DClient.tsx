@@ -23,10 +23,10 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
     onPointSelectRef.current = onPointSelect
   }, [onPointSelect])
 
+  // Initialize globe ONCE on mount - never recreate
   useEffect(() => {
     if (!globeEl.current) return
 
-    // Initialize Globe with high-resolution textures
     const globe = new Globe(globeEl.current)
       .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg') // Higher res day texture
       .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
@@ -190,55 +190,14 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
         globeRef.current.updateCityDisplay = updateCityDisplay
       })
 
-    // Convert markers to globe points - filter out markers with null coordinates
-    const validMarkers = markers.filter(marker => marker.latitude != null && marker.longitude != null)
-    console.log(`Globe3D: Received ${markers.length} markers, ${validMarkers.length} with valid coordinates`)
-    
-    const points = validMarkers.map(marker => ({
-      lat: marker.latitude,
-      lng: marker.longitude,
-      size: 0.05, // Much smaller altitude
-      color: getCommodityColor(marker.commodity_type),
-      label: marker.title,
-      data: marker,
-      type: 'commodity'
-    }))
-
-    // Convert refineries to globe points with different styling
-    const refineryPoints = refineries.map(refinery => {
-      // Determine color based on crude types accepted
-      let color = '#6B7280' // Default gray
-      if (refinery.crude_types_accepted.includes('extra_heavy')) {
-        color = '#EF4444' // Red for extra heavy
-      } else if (refinery.crude_types_accepted.includes('medium')) {
-        color = '#F59E0B' // Orange for medium
-      } else if (refinery.crude_types_accepted.includes('light')) {
-        color = '#10B981' // Green for light only
-      }
-
-      return {
-        lat: refinery.latitude,
-        lng: refinery.longitude,
-        size: 0.08, // Slightly larger than commodity markers
-        color: color,
-        label: refinery.name,
-        data: refinery,
-        type: 'refinery',
-        capacity: refinery.capacity_bpd
-      }
-    })
-
-    // Combine all points
-    const allPoints = [...points, ...refineryPoints]
-    console.log(`Globe3D: Adding ${allPoints.length} total points to globe (${points.length} commodity markers, ${refineryPoints.length} refineries)`)
-
-    // Add points
+    // Configure points layer with empty initial data - will be updated by separate effect
     globe
-      .pointsData(allPoints)
+      .pointsData([])
       .pointAltitude('size')
       .pointColor('color')
       .pointRadius((d: any) => d.type === 'refinery' ? 0.25 : 0.15) // Larger radius for refineries
       .pointsMerge(false)
+      .pointsTransitionDuration(400) // Smooth transition when points change
       .pointLabel((d: any) => `
         <div style="
           background: rgba(0, 0, 0, 0.95);
@@ -310,9 +269,10 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
         }, 1500)
       })
 
-    // Click on globe (not on a point) - find nearest point and zoom to it
+    // Click on globe (not on a point) - find nearest point and show info
     globe.onGlobeClick(({ lat, lng }: { lat: number, lng: number }) => {
-      if (allPoints.length === 0) return
+      const currentPoints = (globe.pointsData() || []) as Array<{ lat: number; lng: number; data: any; type: string }>
+      if (currentPoints.length === 0) return
 
       // Calculate distance to each point using Haversine formula
       const haversineDistance = (lat1: number, lng1: number, lat2: number, lng2: number) => {
@@ -327,10 +287,10 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
       }
 
       // Find the closest point
-      let closestPoint = allPoints[0]
+      let closestPoint = currentPoints[0]
       let closestDistance = haversineDistance(lat, lng, closestPoint.lat, closestPoint.lng)
 
-      for (const point of allPoints) {
+      for (const point of currentPoints) {
         const distance = haversineDistance(lat, lng, point.lat, point.lng)
         if (distance < closestDistance) {
           closestDistance = distance
@@ -355,46 +315,9 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
       }, 1500)
     })
 
-    // Convert routes to arcs with waypoints for maritime paths
-    const arcs: any[] = []
-    routes.forEach(route => {
-      if (route.waypoints && route.waypoints.length > 0) {
-        // Create arcs connecting waypoints sequentially
-        const points = [
-          { lat: route.startLat, lng: route.startLng },
-          ...route.waypoints,
-          { lat: route.endLat, lng: route.endLng }
-        ]
-        
-        // Create arcs between consecutive points
-        for (let i = 0; i < points.length - 1; i++) {
-          arcs.push({
-            startLat: points[i].lat,
-            startLng: points[i].lng,
-            endLat: points[i + 1].lat,
-            endLng: points[i + 1].lng,
-            color: route.color,
-            name: route.name,
-            id: route.id
-          })
-        }
-      } else {
-        // Fallback to direct route if no waypoints
-        arcs.push({
-          startLat: route.startLat,
-          startLng: route.startLng,
-          endLat: route.endLat,
-          endLng: route.endLng,
-          color: route.color,
-          name: route.name,
-          id: route.id
-        })
-      }
-    })
-
-    // Add arcs for shipping routes
+    // Configure arcs layer with empty initial data - will be updated by separate effect
     globe
-      .arcsData(arcs)
+      .arcsData([])
       .arcStartLat((d: any) => d.startLat)
       .arcStartLng((d: any) => d.startLng)
       .arcEndLat((d: any) => d.endLat)
@@ -421,6 +344,77 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
         globeRef.current._destructor()
       }
     }
+  }, []) // Run once on mount - globe is never recreated
+
+  // Update only points and arcs when data changes - smooth transition, no globe reset
+  useEffect(() => {
+    const globe = globeRef.current
+    if (!globe) return
+
+    const validMarkers = markers.filter(m => m.latitude != null && m.longitude != null)
+    const points = validMarkers.map(marker => ({
+      lat: marker.latitude,
+      lng: marker.longitude,
+      size: 0.05,
+      color: getCommodityColor(marker.commodity_type),
+      label: marker.title,
+      data: marker,
+      type: 'commodity'
+    }))
+
+    const refineryPoints = refineries.map(refinery => {
+      let color = '#6B7280'
+      if (refinery.crude_types_accepted.includes('extra_heavy')) color = '#EF4444'
+      else if (refinery.crude_types_accepted.includes('medium')) color = '#F59E0B'
+      else if (refinery.crude_types_accepted.includes('light')) color = '#10B981'
+      return {
+        lat: refinery.latitude,
+        lng: refinery.longitude,
+        size: 0.08,
+        color,
+        label: refinery.name,
+        data: refinery,
+        type: 'refinery',
+        capacity: refinery.capacity_bpd
+      }
+    })
+
+    const allPoints = [...points, ...refineryPoints]
+
+    const arcs: any[] = []
+    routes.forEach(route => {
+      if (route.waypoints && route.waypoints.length > 0) {
+        const pts = [
+          { lat: route.startLat, lng: route.startLng },
+          ...route.waypoints,
+          { lat: route.endLat, lng: route.endLng }
+        ]
+        for (let i = 0; i < pts.length - 1; i++) {
+          arcs.push({
+            startLat: pts[i].lat,
+            startLng: pts[i].lng,
+            endLat: pts[i + 1].lat,
+            endLng: pts[i + 1].lng,
+            color: route.color,
+            name: route.name,
+            id: route.id
+          })
+        }
+      } else {
+        arcs.push({
+          startLat: route.startLat,
+          startLng: route.startLng,
+          endLat: route.endLat,
+          endLng: route.endLng,
+          color: route.color,
+          name: route.name,
+          id: route.id
+        })
+      }
+    })
+
+    globe.pointsData(allPoints)
+    globe.arcsData(arcs)
   }, [markers, routes, refineries])
 
   // Handle showCities toggle

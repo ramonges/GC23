@@ -27,10 +27,10 @@ const commodityCategories = {
 }
 
 const companies = [
-  'Trafigura', 'Glencore', 'Vitol', 'Mercuria', 'Total', 'Chevron', 'BP', 'Shell', 
+  'Trafigura', 'Glencore', 'Vitol', 'Mercuria', 'TotalEnergies', 'Chevron', 'BP', 'Shell', 
   'Cargill', 'Olam',
   // Algeria companies
-  'Sonatrach', 'Cepsa', 'Eni', 'Occidental Petroleum', 'TotalEnergies', 'Repsol', 
+  'Sonatrach', 'Cepsa', 'Eni', 'Occidental Petroleum', 'Repsol', 
   'PTTEP', 'Petrovietnam', 'Wintershall Dea', 'Groupement Berkine', 'Organisation Ourhoud', 
   'Groupement Reggane Nord', 'Groupement Isarene',
   // Angola companies
