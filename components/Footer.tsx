@@ -23,17 +23,17 @@ export default function Footer() {
             <p className="text-gray-400 text-sm">
               116th Broadway, New York, NY
             </p>
+            <Link
+              href="/writer"
+              className="inline-block mt-3 text-gray-500 hover:text-white text-xs transition-colors"
+            >
+              Admin Login
+            </Link>
           </div>
         </div>
 
-        <div className="mt-8 pt-8 border-t border-white border-opacity-10 flex items-center justify-between">
+        <div className="mt-8 pt-8 border-t border-white border-opacity-10 text-center">
           <p className="text-gray-500 text-sm">© {new Date().getFullYear()} Commodities Earth. All rights reserved.</p>
-          <Link
-            href="/writer"
-            className="text-gray-500 hover:text-white text-sm transition-colors"
-          >
-            Writer Login
-          </Link>
         </div>
       </div>
     </footer>
