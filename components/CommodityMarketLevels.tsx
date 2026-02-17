@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { TrendingUp, TrendingDown, Calendar, BarChart3, Loader2 } from 'lucide-react'
+import { TrendingUp, TrendingDown, Calendar, LineChart, Loader2 } from 'lucide-react'
 
 const ALPHA_VANTAGE_API_KEY = '970KAXUCXIOWX55C'
 
@@ -332,7 +332,7 @@ export default function CommodityMarketLevels() {
             <div className="bg-white rounded-lg border border-gray-200 p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-black flex items-center gap-2">
-                  <BarChart3 size={20} />
+                  <LineChart size={20} />
                   Historical Price Data
                 </h2>
                 <div className="text-sm text-gray-600">
@@ -340,25 +340,142 @@ export default function CommodityMarketLevels() {
                 </div>
               </div>
 
-              {/* Simple Bar Chart */}
-              <div className="space-y-2">
-                <div className="flex items-end gap-1 h-64 border-b border-l border-gray-200 pb-2 pl-2">
-                  {marketData.historicalData.slice(-30).map((point, idx) => {
-                    const height = ((point.value - minValue) / (maxValue - minValue || 1)) * 100
+              {/* Line Chart */}
+              <div className="relative h-80 w-full">
+                <svg className="w-full h-full" viewBox="0 0 800 320" preserveAspectRatio="none">
+                  {/* Grid lines */}
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <line
+                      key={`grid-${i}`}
+                      x1="40"
+                      y1={60 + i * 50}
+                      x2="760"
+                      y2={60 + i * 50}
+                      stroke="#e5e7eb"
+                      strokeWidth="1"
+                    />
+                  ))}
+                  
+                  {/* Y-axis labels */}
+                  {[0, 1, 2, 3, 4].map((i) => {
+                    const value = maxValue - (i * (maxValue - minValue) / 4)
                     return (
-                      <div
-                        key={idx}
-                        className="flex-1 bg-black hover:bg-gray-700 transition-colors rounded-t"
-                        style={{ height: `${Math.max(height, 2)}%` }}
-                        title={`${point.date}: $${point.value.toFixed(2)}`}
-                      />
+                      <text
+                        key={`y-label-${i}`}
+                        x="35"
+                        y={65 + i * 50}
+                        textAnchor="end"
+                        className="text-xs fill-gray-500"
+                        fontSize="10"
+                      >
+                        ${value.toFixed(2)}
+                      </text>
                     )
                   })}
-                </div>
-                <div className="flex justify-between text-xs text-gray-500 px-1">
-                  <span>{marketData.historicalData[0]?.date}</span>
-                  <span>{marketData.historicalData[marketData.historicalData.length - 1]?.date}</span>
-                </div>
+
+                  {/* Chart area */}
+                  <defs>
+                    <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                      <stop offset="0%" stopColor="#000000" stopOpacity="0.2" />
+                      <stop offset="100%" stopColor="#000000" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+
+                  {/* Data points and line */}
+                  {(() => {
+                    const chartData = marketData.historicalData.slice(-50) // Show last 50 points
+                    const padding = 40
+                    const chartWidth = 720
+                    const chartHeight = 200
+                    const stepX = chartWidth / (chartData.length - 1 || 1)
+                    
+                    // Generate path for line
+                    const pathData = chartData.map((point, idx) => {
+                      const x = padding + idx * stepX
+                      const y = padding + chartHeight - ((point.value - minValue) / (maxValue - minValue || 1)) * chartHeight
+                      return `${idx === 0 ? 'M' : 'L'} ${x} ${y}`
+                    }).join(' ')
+
+                    // Generate area path (for gradient fill)
+                    const areaPath = `${pathData} L ${padding + (chartData.length - 1) * stepX} ${padding + chartHeight} L ${padding} ${padding + chartHeight} Z`
+
+                    return (
+                      <>
+                        {/* Gradient fill */}
+                        <path
+                          d={areaPath}
+                          fill="url(#gradient)"
+                        />
+                        {/* Main line */}
+                        <path
+                          d={pathData}
+                          fill="none"
+                          stroke="#000000"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        {/* Data points */}
+                        {chartData.map((point, idx) => {
+                          const x = padding + idx * stepX
+                          const y = padding + chartHeight - ((point.value - minValue) / (maxValue - minValue || 1)) * chartHeight
+                          return (
+                            <circle
+                              key={idx}
+                              cx={x}
+                              cy={y}
+                              r="3"
+                              fill="#000000"
+                              className="hover:r-4 transition-all cursor-pointer"
+                            >
+                              <title>{`${point.date}: $${point.value.toFixed(2)}`}</title>
+                            </circle>
+                          )
+                        })}
+                      </>
+                    )
+                  })()}
+
+                  {/* X-axis */}
+                  <line
+                    x1="40"
+                    y1="260"
+                    x2="760"
+                    y2="260"
+                    stroke="#000000"
+                    strokeWidth="2"
+                  />
+
+                  {/* X-axis labels (show first, middle, last) */}
+                  {(() => {
+                    const chartData = marketData.historicalData.slice(-50)
+                    if (chartData.length === 0) return null
+                    
+                    const labels = [
+                      { idx: 0, date: chartData[0].date },
+                      { idx: Math.floor(chartData.length / 2), date: chartData[Math.floor(chartData.length / 2)].date },
+                      { idx: chartData.length - 1, date: chartData[chartData.length - 1].date }
+                    ]
+                    
+                    const stepX = 720 / (chartData.length - 1 || 1)
+                    
+                    return labels.map((label, i) => {
+                      const x = 40 + label.idx * stepX
+                      return (
+                        <text
+                          key={`x-label-${i}`}
+                          x={x}
+                          y="280"
+                          textAnchor="middle"
+                          className="text-xs fill-gray-500"
+                          fontSize="10"
+                        >
+                          {label.date}
+                        </text>
+                      )
+                    })
+                  })()}
+                </svg>
               </div>
 
               {/* Data Table */}
@@ -389,7 +506,7 @@ export default function CommodityMarketLevels() {
           {/* Empty State */}
           {!selectedCommodity && !loading && (
             <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-              <BarChart3 className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+              <LineChart className="w-12 h-12 mx-auto mb-4 text-gray-400" />
               <p className="text-gray-600">Select a commodity to view market data</p>
             </div>
           )}
