@@ -54,7 +54,7 @@ export default function Platform() {
         />
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        <div className={`flex-1 flex flex-col min-h-0 ${currentPage === 'earth-map' ? 'overflow-hidden' : 'overflow-y-auto'}`}>
           {currentPage === 'earth-map' && <EarthMap />}
           
           {currentPage === 'options' && <OptionsDashboard />}
