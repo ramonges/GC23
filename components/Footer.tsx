@@ -1,3 +1,5 @@
+import Link from 'next/link'
+
 export default function Footer() {
   return (
     <footer className="bg-black border-t border-white border-opacity-10 py-12">
@@ -24,8 +26,14 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-8 pt-8 border-t border-white border-opacity-10 text-center text-gray-500 text-sm">
-          <p>© {new Date().getFullYear()} Commodities Earth. All rights reserved.</p>
+        <div className="mt-8 pt-8 border-t border-white border-opacity-10 flex items-center justify-between">
+          <p className="text-gray-500 text-sm">© {new Date().getFullYear()} Commodities Earth. All rights reserved.</p>
+          <Link
+            href="/writer"
+            className="text-gray-500 hover:text-white text-sm transition-colors"
+          >
+            Writer Login
+          </Link>
         </div>
       </div>
     </footer>
