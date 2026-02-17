@@ -286,7 +286,7 @@ export default function VolatilitySurface3D({ points, days, strikes, minIv, maxI
       <canvas
         ref={canvasRef}
         className="w-full rounded-lg cursor-grab active:cursor-grabbing"
-        style={{ height: 360 }}
+        style={{ height: 320 }}
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}

@@ -833,9 +833,18 @@ export default function EarthMap() {
         throw error
       }
 
-      console.log('Raw data from Supabase:', data?.length || 0, 'records')
-      const validMarkers = (data || []).filter(m => m.latitude != null && m.longitude != null)
-      console.log(`Fetched ${data?.length || 0} total locations, ${validMarkers.length} with valid coordinates`)
+      const rawCount = data?.length ?? 0
+      const validMarkers = (data || []).filter((m: any) => {
+        const lat = m.latitude ?? m.lat
+        const lng = m.longitude ?? m.lng
+        return lat != null && lng != null && !isNaN(Number(lat)) && !isNaN(Number(lng))
+      }).map((m: any) => ({
+        ...m,
+        latitude: Number(m.latitude ?? m.lat),
+        longitude: Number(m.longitude ?? m.lng),
+      }))
+
+      console.log(`Fetched ${rawCount} total locations, ${validMarkers.length} with valid coordinates`)
       setMarkers(validMarkers)
     } catch (err) {
       console.error('Error fetching data:', err)

@@ -388,23 +388,22 @@ export default function OptionsDashboard() {
               </div>
             )}
 
-            {/* 3D Volatility Surface - Full Width */}
-            <Card title="3D Volatility Surface">
-              {surfaceData ? (
-                <VolatilitySurface3D
-                  points={surfaceData.points}
-                  days={surfaceData.days}
-                  strikes={surfaceData.strikes}
-                  minIv={surfaceData.minIv}
-                  maxIv={surfaceData.maxIv}
-                />
-              ) : (
-                <p className="text-gray-500 text-sm">Insufficient data for volatility surface.</p>
-              )}
-            </Card>
-
-            {/* Charts Row 1 */}
+            {/* 3D Volatility Surface + Volatility Smile - Side by Side */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card title="3D Volatility Surface">
+                {surfaceData ? (
+                  <VolatilitySurface3D
+                    points={surfaceData.points}
+                    days={surfaceData.days}
+                    strikes={surfaceData.strikes}
+                    minIv={surfaceData.minIv}
+                    maxIv={surfaceData.maxIv}
+                  />
+                ) : (
+                  <p className="text-gray-500 text-sm">Insufficient data for volatility surface.</p>
+                )}
+              </Card>
+
               <Card title="Volatility Smile / Skew">
                 {(smileData.calls.length > 0 || smileData.puts.length > 0) ? (
                   <div>
