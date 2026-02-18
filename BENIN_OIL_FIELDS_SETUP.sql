@@ -174,7 +174,7 @@ INSERT INTO public.commodity_locations (
 ) VALUES
 (
   'Sèmè Field (Block 1)',
-  'Akrake Petroleum Benin S.A. (indirect subsidiary of Rex International Holding via Lime Petroleum Holding)',
+  'Rex International',
   'Littoral Department (offshore Gulf of Guinea, near Sèmè-Kraké / maritime border with Nigeria), Benin',
   'Benin',
   'Littoral Department (offshore Gulf of Guinea, near Sèmè-Kraké / maritime border with Nigeria)',
@@ -184,7 +184,7 @@ INSERT INTO public.commodity_locations (
   'Crude Oil',
   'oil_field',
   'active',
-  'Akrake Petroleum Benin S.A. (indirect subsidiary of Rex International Holding via Lime Petroleum Holding)',
+  'Rex International',
   'PSC (Production Sharing Contract)',
   'Working interests reported: Akrake Petroleum 76%; Government of Benin 15%; Octogone Trading / OCTOGONE E&P S.A. 9% (subject to Benin government entitlements under PSC).',
   450000,

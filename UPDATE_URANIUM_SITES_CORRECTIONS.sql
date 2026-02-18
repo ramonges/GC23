@@ -1,6 +1,7 @@
 -- ============================================================
--- Uranium Sites — Corrections (run AFTER initial insert)
--- Shortens long titles, owner names, removes duplicate, fixes Areva→Orano
+-- Commodity Sites — Corrections (run AFTER initial inserts)
+-- Shortens long titles/owner names, removes duplicate, fixes Areva→Orano
+-- Regroups BP / CNPC / Groupement Berkine company names
 -- ============================================================
 
 BEGIN;
@@ -176,5 +177,75 @@ SET additional_info = jsonb_set(
 WHERE title = 'Shinkolobwe Mine'
   AND country = 'Democratic Republic of Congo'
   AND commodity_name = 'Uranium';
+
+-- =====================
+-- SHORTEN AKRAKE PETROLEUM → Rex International
+-- =====================
+
+UPDATE public.commodity_locations SET company = 'Rex International', updated_at = NOW()
+WHERE company LIKE 'Akrake Petroleum%';
+
+UPDATE public.commodity_locations SET operator = 'Rex International', updated_at = NOW()
+WHERE operator LIKE 'Akrake Petroleum%';
+
+UPDATE public.commodity_locations SET owner = 'Rex International', updated_at = NOW()
+WHERE owner LIKE 'Akrake Petroleum%';
+
+-- =====================
+-- REGROUP BP (all JV variants → 'BP')
+-- =====================
+
+UPDATE public.commodity_locations SET company = 'BP', operator = 'BP', updated_at = NOW()
+WHERE company IN ('Sonatrach/BP', 'Total/BP', 'ExxonMobil/BP', 'Rosneft/BP', 'BP/Shell');
+
+UPDATE public.commodity_locations SET company = 'BP', operator = 'BP', updated_at = NOW()
+WHERE operator IN ('Sonatrach/BP', 'Total/BP', 'ExxonMobil/BP', 'Rosneft/BP', 'BP/Shell');
+
+UPDATE public.commodity_locations SET company = 'BP', operator = 'CNPC', updated_at = NOW()
+WHERE company = 'BP/CNPC' OR operator = 'BP/CNPC';
+
+-- =====================
+-- REGROUP CNPC (all variants → 'CNPC')
+-- =====================
+
+UPDATE public.commodity_locations SET company = 'CNPC', updated_at = NOW()
+WHERE company IN ('Turkmengas/CNPC', 'CNPC International', 'CNPC / CNODC (China National Petroleum / CNPC International)');
+
+UPDATE public.commodity_locations SET operator = 'CNPC', updated_at = NOW()
+WHERE operator IN ('Turkmengas/CNPC', 'CNPC International', 'CNPC / CNODC (China National Petroleum / CNPC International)');
+
+UPDATE public.commodity_locations SET company = 'CNPC', updated_at = NOW()
+WHERE company LIKE '%Daqing Oilfield Company Limited%';
+
+UPDATE public.commodity_locations SET operator = 'CNPC', updated_at = NOW()
+WHERE operator LIKE '%Daqing Oilfield Company Limited%';
+
+UPDATE public.commodity_locations SET company = 'CNPC', updated_at = NOW()
+WHERE company LIKE 'CNPC/%' OR company LIKE '%/CNPC';
+
+UPDATE public.commodity_locations SET operator = 'CNPC', updated_at = NOW()
+WHERE operator LIKE 'CNPC/%' OR operator LIKE '%/CNPC';
+
+-- =====================
+-- SHORTEN GROUPEMENT BERKINE / REGGANE / ISARENE
+-- =====================
+
+UPDATE public.commodity_locations SET company = 'Grpt Berkine', updated_at = NOW()
+WHERE company LIKE 'Groupement Berkine%';
+
+UPDATE public.commodity_locations SET operator = 'Grpt Berkine', updated_at = NOW()
+WHERE operator LIKE 'Groupement Berkine%';
+
+UPDATE public.commodity_locations SET company = 'Grpt Reggane Nord', updated_at = NOW()
+WHERE company LIKE 'Groupement Reggane%';
+
+UPDATE public.commodity_locations SET operator = 'Grpt Reggane Nord', updated_at = NOW()
+WHERE operator LIKE 'Groupement Reggane%';
+
+UPDATE public.commodity_locations SET company = 'Grpt Isarene', updated_at = NOW()
+WHERE company LIKE 'Groupement Isarene%';
+
+UPDATE public.commodity_locations SET operator = 'Grpt Isarene', updated_at = NOW()
+WHERE operator LIKE 'Groupement Isarene%';
 
 COMMIT;
