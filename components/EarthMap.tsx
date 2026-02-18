@@ -27,11 +27,11 @@ const commodityCategories = {
 }
 
 const companies = [
-  'Trafigura', 'Glencore', 'Vitol', 'Mercuria', 'TotalEnergies', 'Chevron', 'BP', 'Shell', 
+  'Trafigura', 'Glencore', 'Vitol', 'Mercuria', 'TotalEnergies', 'Chevron', 'BP', 'Shell',
   'Cargill', 'Olam',
   // Algeria companies
-  'Sonatrach', 'Cepsa', 'Eni', 'Occidental Petroleum', 'Repsol', 
-  'PTTEP', 'Petrovietnam', 'Wintershall Dea', 'Groupement Berkine', 'Organisation Ourhoud', 
+  'Sonatrach', 'Cepsa', 'Eni', 'Occidental Petroleum', 'Repsol',
+  'PTTEP', 'Petrovietnam', 'Wintershall Dea', 'Groupement Berkine', 'Organisation Ourhoud',
   'Groupement Reggane Nord', 'Groupement Isarene',
   // Angola companies
   'ExxonMobil', 'Pluspetrol', 'Sonangol', 'Cobalt International Energy',
@@ -81,7 +81,41 @@ const companies = [
   // Tunisia companies
   'ETAP', 'OMV', 'Panoro Energy', 'Petrofac', 'SEREPT', 'Serinus Energy', 'SITEP',
   // Uganda companies
-  'UNOC'
+  'UNOC',
+  // Uranium — Kazakhstan
+  'Kazatomprom', 'Uranium One', 'Cameco',
+  // Uranium — Uzbekistan
+  'NMMC',
+  // Uranium — China
+  'CNNC',
+  // Uranium — India
+  'UCIL (DAE)',
+  // Uranium — Mongolia
+  'Orano',
+  // Uranium — Iran / Pakistan
+  'AEOI', 'PAEC',
+  // Uranium — Russia
+  'PIMCU (Priargunsky)', 'Khiagda JSC', 'Dalur JSC',
+  // Uranium — Ukraine
+  'VostGOK (SE)',
+  // Uranium — Czech Republic / Europe
+  'DIAMO s.p.', 'Wismut GmbH', 'Berkeley Energia', 'ENUSA', 'EDM',
+  'Energy Transition Minerals',
+  // Uranium — Canada
+  'Orano Canada Inc.',
+  // Uranium — USA
+  'Energy Fuels Inc.', 'Uranium Energy Corp', 'enCore Energy', 'Cameco Resources',
+  'Ur-Energy',
+  // Uranium — Brazil / Argentina
+  'INB', 'CNEA',
+  // Uranium — Australia
+  'BHP', 'ERA', 'Heathgate Resources', 'Boss Energy Ltd',
+  // Uranium — Africa
+  'SOMAÏR', 'COMINAK', 'SOMINA', 'SOMIDA', 'Rössing Uranium Limited',
+  'Swakop Uranium', 'Langer Heinrich Uranium', 'Harmony Gold', 'Sibanye-Stillwater',
+  'Neo Energy Metals', 'Lotus Resources', 'URANEXT', 'Gladiator Resources',
+  'Atomic Eagle', 'Mantra Tanzania', 'Nuclear Materials Authority',
+  'Areva Resources Centrafrique',
 ]
 
 export const shippingRoutes: ShippingRoute[] = [
@@ -812,24 +846,38 @@ export default function EarthMap() {
 
   const fetchAvailableCompanies = useCallback(async () => {
     try {
-      let query = supabase
+      let companyQuery = supabase
         .from('commodity_locations')
         .select('company')
         .not('company', 'is', null)
         .neq('company', '')
 
+      let operatorQuery = supabase
+        .from('commodity_locations')
+        .select('operator')
+        .not('operator', 'is', null)
+        .neq('operator', '')
+
       if (selectedCategory) {
-        query = query.eq('commodity_type', selectedCategory)
+        companyQuery = companyQuery.eq('commodity_type', selectedCategory)
+        operatorQuery = operatorQuery.eq('commodity_type', selectedCategory)
       }
       if (selectedCommodity) {
-        query = query.eq('commodity_name', selectedCommodity)
+        companyQuery = companyQuery.eq('commodity_name', selectedCommodity)
+        operatorQuery = operatorQuery.eq('commodity_name', selectedCommodity)
       }
 
-      const { data, error } = await query.limit(10000)
+      const [companyRes, operatorRes] = await Promise.all([
+        companyQuery.limit(10000),
+        operatorQuery.limit(10000),
+      ])
 
-      if (error) throw error
+      if (companyRes.error) throw companyRes.error
+      if (operatorRes.error) throw operatorRes.error
 
-      const unique = Array.from(new Set((data || []).map((r: { company: string }) => r.company).filter(Boolean))).sort()
+      const companyNames = (companyRes.data || []).map((r: any) => r.company).filter(Boolean)
+      const operatorNames = (operatorRes.data || []).map((r: any) => r.operator).filter(Boolean)
+      const unique = Array.from(new Set([...companyNames, ...operatorNames])).sort()
       setAvailableCompanies(unique)
     } catch (err) {
       console.error('Error fetching companies:', err)
@@ -862,7 +910,7 @@ export default function EarthMap() {
           query = query.eq('commodity_name', selectedCommodity)
         }
         if (!ignoreCompany && selectedCompany) {
-          query = query.eq('company', selectedCompany)
+          query = query.or(`company.eq.${selectedCompany},operator.eq.${selectedCompany}`)
         }
 
         const { data, error } = await query
@@ -1234,6 +1282,11 @@ export default function EarthMap() {
                   pipelines: 'Pipelines',
                   ports: 'Ports',
                   rail_connections: 'Rail Connections',
+                  concentration_level: 'Ore Grade (%)',
+                  current_production: 'Current Production',
+                  reserves_estimate: 'Reserves Estimate',
+                  production_capacity: 'Production Capacity',
+                  sulfur_content: 'Sulfur Content (%)',
                   supply_volume: 'Supply Volume',
                   storage_volume: 'Storage Volume',
                   long_term_contract: 'Long-term Contract',
@@ -1301,10 +1354,23 @@ export default function EarthMap() {
                           {Object.entries(data.additional_info as Record<string, any>).map(([key, val]) => {
                             if (val === null || val === undefined || val === '') return null
                             const label = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+                            if (Array.isArray(val)) {
+                              if (val.length === 0) return null
+                              return (
+                                <div key={key} className="py-1">
+                                  <span className="text-gray-400">{label}:</span>
+                                  <ul className="ml-4 mt-1 text-gray-200">
+                                    {val.map((item, i) => (
+                                      <li key={i} className="text-xs">• {String(item)}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )
+                            }
                             return (
                               <p key={key}>
                                 <span className="text-gray-400">{label}:</span>{' '}
-                                <span className="text-gray-200">{typeof val === 'object' ? JSON.stringify(val) : String(val)}</span>
+                                <span className="text-gray-200">{String(val)}</span>
                               </p>
                             )
                           })}
