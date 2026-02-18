@@ -74,6 +74,79 @@ UPDATE public.commodity_locations SET owner = 'Gov of Gabon', updated_at = NOW()
 WHERE owner = 'Government of Gabon';
 
 -- =====================
+-- SHORTEN OWNER NAMES — GLOBAL
+-- =====================
+
+UPDATE public.commodity_locations SET owner = 'NMMC', updated_at = NOW()
+WHERE owner = 'Navoi Mining & Metallurgical Company (NMMC)';
+
+UPDATE public.commodity_locations SET owner = 'UCIL (DAE)', updated_at = NOW()
+WHERE owner = 'Uranium Corporation of India Ltd (UCIL)';
+
+UPDATE public.commodity_locations SET owner = 'AEOI', updated_at = NOW()
+WHERE owner = 'Atomic Energy Organization of Iran (AEOI)';
+
+UPDATE public.commodity_locations SET owner = 'PAEC', updated_at = NOW()
+WHERE owner = 'Pakistan Atomic Energy Commission (PAEC)';
+
+UPDATE public.commodity_locations SET owner = 'JAEA', updated_at = NOW()
+WHERE owner = 'Japan Atomic Energy Agency (JAEA)';
+
+UPDATE public.commodity_locations SET owner = 'VostGOK', updated_at = NOW()
+WHERE owner = 'Eastern Mining & Processing Plant (VostGOK)';
+
+UPDATE public.commodity_locations SET owner = 'CNU Romania', updated_at = NOW()
+WHERE owner = 'National Uranium Company (CNU Sucursala Feldioara)';
+
+UPDATE public.commodity_locations SET owner = 'Energy Transition Minerals', updated_at = NOW()
+WHERE owner = 'Energy Transition Minerals (formerly Greenland Minerals)';
+
+UPDATE public.commodity_locations SET owner = 'Denison Mines / Rio Algom', updated_at = NOW()
+WHERE owner = 'Denison Mines / Rio Algom (historic)';
+
+UPDATE public.commodity_locations SET owner = 'Eldorado Nuclear / Cameco', updated_at = NOW()
+WHERE owner = 'Eldorado Nuclear / Cameco (historic)';
+
+UPDATE public.commodity_locations SET owner = 'UEC / enCore Energy', updated_at = NOW()
+WHERE owner = 'Uranium Energy Corp / enCore Energy';
+
+UPDATE public.commodity_locations SET owner = 'DOE (legacy)', updated_at = NOW()
+WHERE owner = 'DOE (legacy) / historic private';
+
+UPDATE public.commodity_locations SET owner = 'ININ', updated_at = NOW()
+WHERE owner = 'ININ (Mexican Nuclear Research Institute)';
+
+UPDATE public.commodity_locations SET owner = 'INB', updated_at = NOW()
+WHERE owner = 'INB (Indústrias Nucleares do Brasil)';
+
+UPDATE public.commodity_locations SET owner = 'CNEA', updated_at = NOW()
+WHERE owner = 'CNEA (Comisión Nacional de Energía Atómica)';
+
+UPDATE public.commodity_locations SET owner = 'Plateau Energy Metals', updated_at = NOW()
+WHERE owner = 'Plateau Energy Metals / Macusani Yellowcake';
+
+UPDATE public.commodity_locations SET owner = 'CCHEN', updated_at = NOW()
+WHERE owner = 'CCHEN (Comisión Chilena de Energía Nuclear)';
+
+UPDATE public.commodity_locations SET owner = 'SGC Colombia', updated_at = NOW()
+WHERE owner = 'SGC (Servicio Geológico Colombiano)';
+
+UPDATE public.commodity_locations SET owner = 'Wismut GmbH', updated_at = NOW()
+WHERE owner = 'Wismut GmbH (Federal Germany)';
+
+UPDATE public.commodity_locations SET owner = 'ERA (Rio Tinto)', updated_at = NOW()
+WHERE owner = 'ERA (Energy Resources of Australia)';
+
+UPDATE public.commodity_locations SET owner = 'Heathgate Resources', updated_at = NOW()
+WHERE owner = 'Heathgate Resources (General Atomics)';
+
+UPDATE public.commodity_locations SET owner = 'Cameco Australia', updated_at = NOW()
+WHERE owner = 'Cameco Australia (formerly BHP)';
+
+UPDATE public.commodity_locations SET owner = 'PNG Gov (MRA)', updated_at = NOW()
+WHERE owner = 'PNG Government (Mineral Resources Authority)';
+
+-- =====================
 -- FIX AREVA → ORANO
 -- =====================
 
