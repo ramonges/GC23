@@ -353,7 +353,7 @@ INSERT INTO public.commodity_locations (
   'Energy', 'Crude Oil',
   30.3333, 47.3833, 'Iraq', 'Basra', 'Basra',
   'oil_field', 'operational',
-  'BP (lead) + CNPC + BOC', 'joint_venture',
+  'BP', 'joint_venture',
   29.00, 2.00,
   30000000, 17000000000, 30000000,
   '{"start_year":1953,"production_bpd":1000000,"quality":"Medium sour — Basra Light export blend","note":"Iraq''s single largest producer, one of world''s largest fields","ownership_split":"BP 38%, CNPC 37%, BOC 25%","last_transaction":"ITSC signed 2009, bonus $500M; BP/CNPC contract renewed 2023","contract_duration":"20 years (extended)","pipelines":"Rumaila–SCOP (Strategic Crude Oil Pipeline) → Fao; Basra Oil Pipeline","ports":"Al-Basra Oil Terminal (ABOT) — 1.8M bbl/day capacity; Khor al-Amaya (KAAOT)","rail":"Basra–Baghdad main line (Rumaila junction)"}'::jsonb
@@ -378,7 +378,7 @@ INSERT INTO public.commodity_locations (
   'Energy', 'Crude Oil',
   30.0833, 47.3167, 'Iraq', 'Basra', 'Basra',
   'oil_field', 'operational',
-  'BP + CNPC + BOC', 'joint_venture',
+  'BP', 'joint_venture',
   28.00, 2.20,
   18000000, NULL, 18000000,
   '{"start_year":1953,"production_bpd":600000,"quality":"Medium sour","note":"Combined north+south ~1.6M bbl/day peak. Part of 17B barrel total reserves","ownership_split":"BP, CNPC, BOC (same contract as North)","pipelines":"Rumaila South–SCOP pipeline","ports":"ABOT, KAAOT, Fao SPM buoys","rail":"Basra rail"}'::jsonb
@@ -490,7 +490,7 @@ INSERT INTO public.commodity_locations (
   'Energy', 'Crude Oil',
   31.8333, 47.7500, 'Iraq', 'Missan', 'Amarah',
   'oil_field', 'operational',
-  'CNPC (lead) + TotalEnergies + Petronas + MOC', 'joint_venture',
+  'CNPC', 'joint_venture',
   26.00, 3.20,
   6900000, 4100000000, 6900000,
   '{"start_year":2012,"production_bpd":230000,"quality":"Heavy sour","ownership_split":"CNPC 37.5%, Total 18.75%, Petronas 18.75%, MOC 25%","last_transaction":"ITSC 2010, bonus $150M; TotalEnergies partial exit discussions 2023","contract_duration":"20 years","pipelines":"Halfaya–Missan export pipeline → Basra system","ports":"ABOT (via Basra)","rail":"Amarah rail (indirect)"}'::jsonb
@@ -665,7 +665,7 @@ INSERT INTO public.commodity_locations (
   'Energy', 'Crude Oil',
   32.5000, 45.8333, 'Iraq', 'Wasit', 'Wasit',
   'oil_field', 'operational',
-  'CNPC (lead) + Al-Waha OC', 'joint_venture',
+  'CNPC', 'joint_venture',
   33.00, 1.60,
   900000, 1000000000, 900000,
   '{"start_year":2012,"production_bpd":30000,"quality":"Medium","ownership_split":"CNPC 75%, Al-Waha OC 25%","last_transaction":"ITSC 2008, bonus $150M (first modern contract)","contract_duration":"20 years","pipelines":"Ahdab–Kut pipeline","ports":"ABOT (via Basra southern network)","rail":"Kut–Baghdad line (indirect)"}'::jsonb

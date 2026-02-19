@@ -192,39 +192,135 @@ UPDATE public.commodity_locations SET owner = 'Rex International', updated_at = 
 WHERE owner LIKE 'Akrake Petroleum%';
 
 -- =====================
--- REGROUP BP (all JV variants → 'BP')
+-- REGROUP BP (all variants → 'BP')
 -- =====================
 
-UPDATE public.commodity_locations SET company = 'BP', operator = 'BP', updated_at = NOW()
-WHERE company IN ('Sonatrach/BP', 'Total/BP', 'ExxonMobil/BP', 'Rosneft/BP', 'BP/Shell');
+-- Azerbaijan long names (company column)
+UPDATE public.commodity_locations SET company = 'BP', updated_at = NOW()
+WHERE company ILIKE 'bp (%' AND company != 'BP';
 
-UPDATE public.commodity_locations SET company = 'BP', operator = 'BP', updated_at = NOW()
-WHERE operator IN ('Sonatrach/BP', 'Total/BP', 'ExxonMobil/BP', 'Rosneft/BP', 'BP/Shell');
+UPDATE public.commodity_locations SET company = 'BP', updated_at = NOW()
+WHERE company ILIKE 'bp Exploration%';
 
+UPDATE public.commodity_locations SET company = 'BP', updated_at = NOW()
+WHERE company ILIKE 'bp Trinidad%';
+
+UPDATE public.commodity_locations SET company = 'BP', updated_at = NOW()
+WHERE company = 'Shell Trinidad and Tobago + bp';
+
+UPDATE public.commodity_locations SET company = 'BP', updated_at = NOW()
+WHERE company IN ('BP Exploration (Angola) Limited', 'Sonatrach/BP', 'Total/BP',
+  'ExxonMobil/BP', 'Rosneft/BP', 'BP/Shell', 'SAFER + BP', 'BP / OQ');
+
+UPDATE public.commodity_locations SET company = 'BP', updated_at = NOW()
+WHERE company LIKE 'BP (lead)%' OR company LIKE 'BP + %';
+
+-- Azerbaijan long names (operator column)
+UPDATE public.commodity_locations SET operator = 'BP', updated_at = NOW()
+WHERE operator ILIKE 'bp (%' AND operator != 'BP';
+
+UPDATE public.commodity_locations SET operator = 'BP', updated_at = NOW()
+WHERE operator ILIKE 'bp Exploration%';
+
+UPDATE public.commodity_locations SET operator = 'BP', updated_at = NOW()
+WHERE operator ILIKE 'bp Trinidad%';
+
+UPDATE public.commodity_locations SET operator = 'BP', updated_at = NOW()
+WHERE operator IN ('BP Exploration (Angola) Limited', 'Sonatrach/BP', 'Total/BP',
+  'ExxonMobil/BP', 'Rosneft/BP', 'BP/Shell', 'SAFER + BP',
+  'Shell Trinidad and Tobago', 'BP / OQ', 'BP (operator) + OQ', 'BP + OQ (Oman Oil)');
+
+UPDATE public.commodity_locations SET operator = 'BP', updated_at = NOW()
+WHERE operator LIKE 'BP (lead)%' OR operator LIKE 'BP + %';
+
+-- BP/CNPC joint ventures: company → BP, operator → CNPC
 UPDATE public.commodity_locations SET company = 'BP', operator = 'CNPC', updated_at = NOW()
 WHERE company = 'BP/CNPC' OR operator = 'BP/CNPC';
+
+-- Catch any remaining 'bp' (lowercase exact match) → 'BP'
+UPDATE public.commodity_locations SET company = 'BP', updated_at = NOW()
+WHERE company = 'bp';
+
+UPDATE public.commodity_locations SET operator = 'BP', updated_at = NOW()
+WHERE operator = 'bp';
 
 -- =====================
 -- REGROUP CNPC (all variants → 'CNPC')
 -- =====================
 
+-- Explicit long names
 UPDATE public.commodity_locations SET company = 'CNPC', updated_at = NOW()
-WHERE company IN ('Turkmengas/CNPC', 'CNPC International', 'CNPC / CNODC (China National Petroleum / CNPC International)');
+WHERE company IN ('Turkmengas/CNPC', 'CNPC International',
+  'CNPC / CNODC (China National Petroleum / CNPC International)');
 
 UPDATE public.commodity_locations SET operator = 'CNPC', updated_at = NOW()
-WHERE operator IN ('Turkmengas/CNPC', 'CNPC International', 'CNPC / CNODC (China National Petroleum / CNPC International)');
+WHERE operator IN ('Turkmengas/CNPC', 'CNPC International',
+  'CNPC / CNODC (China National Petroleum / CNPC International)');
 
+-- Daqing Oilfield
 UPDATE public.commodity_locations SET company = 'CNPC', updated_at = NOW()
-WHERE company LIKE '%Daqing Oilfield Company Limited%';
+WHERE company LIKE '%Daqing Oilfield%';
 
 UPDATE public.commodity_locations SET operator = 'CNPC', updated_at = NOW()
-WHERE operator LIKE '%Daqing Oilfield Company Limited%';
+WHERE operator LIKE '%Daqing Oilfield%';
 
+-- PetroChina subsidiaries (Tarim, Tuha, Xinjiang, Changqing, Sulige, Changbei)
 UPDATE public.commodity_locations SET company = 'CNPC', updated_at = NOW()
-WHERE company LIKE 'CNPC/%' OR company LIKE '%/CNPC';
+WHERE company LIKE 'PetroChina %';
 
 UPDATE public.commodity_locations SET operator = 'CNPC', updated_at = NOW()
-WHERE operator LIKE 'CNPC/%' OR operator LIKE '%/CNPC';
+WHERE operator LIKE 'PetroChina %';
+
+-- "China National Petroleum Corporation ..." long form
+UPDATE public.commodity_locations SET company = 'CNPC', updated_at = NOW()
+WHERE company LIKE 'China National Petroleum%';
+
+UPDATE public.commodity_locations SET operator = 'CNPC', updated_at = NOW()
+WHERE operator LIKE 'China National Petroleum%';
+
+-- CNPC/PetroChina combined
+UPDATE public.commodity_locations SET company = 'CNPC', updated_at = NOW()
+WHERE company LIKE 'CNPC/PetroChina%';
+
+UPDATE public.commodity_locations SET operator = 'CNPC', updated_at = NOW()
+WHERE operator LIKE 'CNPC/PetroChina%';
+
+-- CNPC with parenthetical (Tarim, initially, lead, reported...)
+UPDATE public.commodity_locations SET company = 'CNPC', updated_at = NOW()
+WHERE company LIKE 'CNPC (%' AND company != 'CNPC';
+
+UPDATE public.commodity_locations SET operator = 'CNPC', updated_at = NOW()
+WHERE operator LIKE 'CNPC (%' AND operator != 'CNPC';
+
+-- CNPC + partner JVs
+UPDATE public.commodity_locations SET company = 'CNPC', updated_at = NOW()
+WHERE company LIKE 'CNPC + %';
+
+UPDATE public.commodity_locations SET operator = 'CNPC', updated_at = NOW()
+WHERE operator LIKE 'CNPC + %';
+
+-- CNPC / slash patterns
+UPDATE public.commodity_locations SET company = 'CNPC', updated_at = NOW()
+WHERE company LIKE 'CNPC / %' OR company LIKE 'CNPC/%' OR company LIKE '%/CNPC';
+
+UPDATE public.commodity_locations SET operator = 'CNPC', updated_at = NOW()
+WHERE operator LIKE 'CNPC / %' OR operator LIKE 'CNPC/%' OR operator LIKE '%/CNPC';
+
+-- =====================
+-- REGROUP CNOOC (all variants → 'CNOOC')
+-- =====================
+
+UPDATE public.commodity_locations SET company = 'CNOOC', updated_at = NOW()
+WHERE company LIKE 'CNOOC (%' AND company != 'CNOOC';
+
+UPDATE public.commodity_locations SET operator = 'CNOOC', updated_at = NOW()
+WHERE operator LIKE 'CNOOC (%' AND operator != 'CNOOC';
+
+UPDATE public.commodity_locations SET company = 'CNOOC', updated_at = NOW()
+WHERE company LIKE 'CNOOC Limited%';
+
+UPDATE public.commodity_locations SET operator = 'CNOOC', updated_at = NOW()
+WHERE operator LIKE 'CNOOC Limited%';
 
 -- =====================
 -- SHORTEN GROUPEMENT BERKINE / REGGANE / ISARENE

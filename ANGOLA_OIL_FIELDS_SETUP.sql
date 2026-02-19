@@ -1458,7 +1458,7 @@ INSERT INTO public.commodity_locations (
 ),
 (
   'Block 31 - PSVM Development (Plutão, Saturno, Vénus, Marte)',
-  'BP Exploration (Angola) Limited',
+  'BP',
   'Offshore Angola (ultra-deepwater; Lower Congo Basin margin), Angola',
   'Angola',
   'Offshore Angola (ultra-deepwater; Lower Congo Basin margin)',
@@ -1468,7 +1468,7 @@ INSERT INTO public.commodity_locations (
   'Crude Oil',
   'oil_field',
   'active',
-  'BP Exploration (Angola) Limited',
+  'BP',
   'JV / PSC-like deepwater block partnership (Angola concessionaire framework)',
   'BP 26.67% (operator); Sonangol E.P. 25%; Sonangol P&P 20%; Statoil (Equinor) 13.33%; Marathon 10%; SSI Block 31 5% (as stated by BP and Offshore Magazine).',
   0,
