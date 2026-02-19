@@ -755,37 +755,38 @@ export default function EarthMap() {
 
   const fetchAvailableCompanies = useCallback(async () => {
     try {
-      let companyQuery = supabase
-        .from('commodity_locations')
-        .select('company')
-        .not('company', 'is', null)
-        .neq('company', '')
+      const PAGE_SIZE = 1000
+      const companyNames: string[] = []
+      const operatorNames: string[] = []
 
-      let operatorQuery = supabase
-        .from('commodity_locations')
-        .select('operator')
-        .not('operator', 'is', null)
-        .neq('operator', '')
-
-      if (selectedCategory) {
-        companyQuery = companyQuery.eq('commodity_type', selectedCategory)
-        operatorQuery = operatorQuery.eq('commodity_type', selectedCategory)
-      }
-      if (selectedCommodity) {
-        companyQuery = companyQuery.eq('commodity_name', selectedCommodity)
-        operatorQuery = operatorQuery.eq('commodity_name', selectedCommodity)
+      const buildBase = (field: 'company' | 'operator') => {
+        let q = supabase
+          .from('commodity_locations')
+          .select(field)
+          .not(field, 'is', null)
+          .neq(field, '')
+          .not('latitude', 'is', null)
+          .not('longitude', 'is', null)
+        if (selectedCategory) q = q.eq('commodity_type', selectedCategory)
+        if (selectedCommodity) q = q.eq('commodity_name', selectedCommodity)
+        return q
       }
 
-      const [companyRes, operatorRes] = await Promise.all([
-        companyQuery.limit(10000),
-        operatorQuery.limit(10000),
-      ])
+      for (const field of ['company', 'operator'] as const) {
+        let from = 0
+        let keepFetching = true
+        while (keepFetching) {
+          const { data, error } = await buildBase(field).range(from, from + PAGE_SIZE - 1)
+          if (error) throw error
+          const rows = data || []
+          const names = rows.map((r: any) => r[field]).filter(Boolean)
+          if (field === 'company') companyNames.push(...names)
+          else operatorNames.push(...names)
+          from += PAGE_SIZE
+          if (rows.length < PAGE_SIZE) keepFetching = false
+        }
+      }
 
-      if (companyRes.error) throw companyRes.error
-      if (operatorRes.error) throw operatorRes.error
-
-      const companyNames = (companyRes.data || []).map((r: any) => r.company).filter(Boolean)
-      const operatorNames = (operatorRes.data || []).map((r: any) => r.operator).filter(Boolean)
       const unique = Array.from(new Set([...companyNames, ...operatorNames])).sort()
       setAvailableCompanies(unique)
     } catch (err) {
