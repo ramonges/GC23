@@ -210,7 +210,7 @@ INSERT INTO public.commodity_locations (
 ),
 (
   'Sèmè Field (historical production phase, developed by Saga Petroleum)',
-  'Saga Petroleum (historic developer/operator; later evaluation referenced for Addax Petroleum (Benin) in 1997)',
+  'Saga Petroleum',
   'Littoral Department (offshore Gulf of Guinea, near Sèmè-Kraké / Cotonou area), Benin',
   'Benin',
   'Littoral Department (offshore Gulf of Guinea, near Sèmè-Kraké / Cotonou area)',
@@ -220,7 +220,7 @@ INSERT INTO public.commodity_locations (
   'Crude Oil',
   'oil_field',
   'inactive',
-  'Saga Petroleum (historic developer/operator; later evaluation referenced for Addax Petroleum (Benin) in 1997)',
+  'Saga Petroleum',
   'Concession/legacy arrangements (details not reliably available in public sources)',
   'Produced ~22 million barrels between 1982 and 1998; shut-in officially December 1998 (reasons cited include low oil prices and high water production).',
   0,

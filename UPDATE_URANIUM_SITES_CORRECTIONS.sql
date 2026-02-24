@@ -344,4 +344,147 @@ WHERE company LIKE 'Groupement Isarene%';
 UPDATE public.commodity_locations SET operator = 'Grpt Isarene', updated_at = NOW()
 WHERE operator LIKE 'Groupement Isarene%';
 
+-- =====================
+-- REGROUP SOCAR (all variants → 'SOCAR')
+-- =====================
+
+UPDATE public.commodity_locations SET company = 'SOCAR', updated_at = NOW()
+WHERE company LIKE 'SOCAR (%' AND company != 'SOCAR';
+
+UPDATE public.commodity_locations SET operator = 'SOCAR', updated_at = NOW()
+WHERE operator LIKE 'SOCAR (%' AND operator != 'SOCAR';
+
+UPDATE public.commodity_locations SET company = 'SOCAR', updated_at = NOW()
+WHERE company LIKE 'SOCAR Azneft%';
+
+UPDATE public.commodity_locations SET operator = 'SOCAR', updated_at = NOW()
+WHERE operator LIKE 'SOCAR Azneft%';
+
+UPDATE public.commodity_locations SET company = 'SOCAR', updated_at = NOW()
+WHERE company LIKE 'SOCAR (Balakhanineft%';
+
+UPDATE public.commodity_locations SET operator = 'SOCAR', updated_at = NOW()
+WHERE operator LIKE 'SOCAR (Balakhanineft%';
+
+UPDATE public.commodity_locations SET company = 'SOCAR', updated_at = NOW()
+WHERE company LIKE 'SOCAR (with Bahar%';
+
+UPDATE public.commodity_locations SET operator = 'SOCAR', updated_at = NOW()
+WHERE operator LIKE 'SOCAR (with Bahar%';
+
+UPDATE public.commodity_locations SET company = 'SOCAR', updated_at = NOW()
+WHERE company LIKE 'SOCAR (reported)%';
+
+UPDATE public.commodity_locations SET operator = 'SOCAR', updated_at = NOW()
+WHERE operator LIKE 'SOCAR (reported)%';
+
+UPDATE public.commodity_locations SET company = 'SOCAR', updated_at = NOW()
+WHERE company LIKE 'SOCAR (operator not specified%';
+
+UPDATE public.commodity_locations SET operator = 'SOCAR', updated_at = NOW()
+WHERE operator LIKE 'SOCAR (operator not specified%';
+
+UPDATE public.commodity_locations SET company = 'SOCAR', updated_at = NOW()
+WHERE company LIKE 'SOCAR (historically%';
+
+UPDATE public.commodity_locations SET operator = 'SOCAR', updated_at = NOW()
+WHERE operator LIKE 'SOCAR (historically%';
+
+-- =====================
+-- REGROUP SONATRACH (all variants → 'Sonatrach')
+-- =====================
+
+UPDATE public.commodity_locations SET company = 'Sonatrach', updated_at = NOW()
+WHERE company LIKE 'Sonatrach (%' AND company != 'Sonatrach';
+
+UPDATE public.commodity_locations SET operator = 'Sonatrach', updated_at = NOW()
+WHERE operator LIKE 'Sonatrach (%' AND operator != 'Sonatrach';
+
+UPDATE public.commodity_locations SET company = 'Sonatrach', updated_at = NOW()
+WHERE company LIKE 'Sonatrach / %' OR company LIKE 'Sonatrach/%';
+
+UPDATE public.commodity_locations SET operator = 'Sonatrach', updated_at = NOW()
+WHERE operator LIKE 'Sonatrach / %' OR operator LIKE 'Sonatrach/%';
+
+UPDATE public.commodity_locations SET company = 'Sonatrach', updated_at = NOW()
+WHERE company LIKE 'Sonatrach-Cepsa%';
+
+UPDATE public.commodity_locations SET operator = 'Sonatrach', updated_at = NOW()
+WHERE operator LIKE 'Sonatrach-Cepsa%';
+
+UPDATE public.commodity_locations SET company = 'Sonatrach', updated_at = NOW()
+WHERE company LIKE 'Unitized between Block%';
+
+UPDATE public.commodity_locations SET operator = 'Sonatrach', updated_at = NOW()
+WHERE operator LIKE 'Unitized between Block%';
+
+UPDATE public.commodity_locations SET company = 'Sonatrach', updated_at = NOW()
+WHERE company LIKE 'Eni / Sonatrach%' OR company LIKE 'Cepsa / Sonatrach%';
+
+UPDATE public.commodity_locations SET operator = 'Sonatrach', updated_at = NOW()
+WHERE operator LIKE 'Eni / Sonatrach%' OR operator LIKE 'Cepsa / Sonatrach%';
+
+-- Sonatrach (operator/majority), Sonatrach (operator/owner), 100% owned by Sonatrach...
+UPDATE public.commodity_locations SET company = 'Sonatrach', updated_at = NOW()
+WHERE company LIKE 'Sonatrach (operator%' OR company LIKE '100% owned%Sonatrach%';
+
+UPDATE public.commodity_locations SET operator = 'Sonatrach', updated_at = NOW()
+WHERE operator LIKE 'Sonatrach (operator%' OR operator LIKE '100% owned%Sonatrach%';
+
+UPDATE public.commodity_locations SET company = 'Sonatrach', updated_at = NOW()
+WHERE company LIKE 'Sonatrach (NOC)%';
+
+UPDATE public.commodity_locations SET operator = 'Sonatrach', updated_at = NOW()
+WHERE operator LIKE 'Sonatrach (NOC)%';
+
+-- =====================
+-- REGROUP PERENCO (all variants → 'Perenco')
+-- =====================
+
+UPDATE public.commodity_locations SET company = 'Perenco', updated_at = NOW()
+WHERE company LIKE 'Perenco (%' AND company != 'Perenco';
+
+UPDATE public.commodity_locations SET operator = 'Perenco', updated_at = NOW()
+WHERE operator LIKE 'Perenco (%' AND operator != 'Perenco';
+
+UPDATE public.commodity_locations SET company = 'Perenco', updated_at = NOW()
+WHERE company LIKE 'Perenco (Cameroon)%';
+
+UPDATE public.commodity_locations SET operator = 'Perenco', updated_at = NOW()
+WHERE operator LIKE 'Perenco (Cameroon)%';
+
+-- =====================
+-- SHORTEN OTHER LONG COMPANY NAMES
+-- =====================
+
+UPDATE public.commodity_locations SET company = 'EnQuest', updated_at = NOW()
+WHERE company LIKE 'EnQuest EP BV%';
+
+UPDATE public.commodity_locations SET operator = 'EnQuest', updated_at = NOW()
+WHERE operator LIKE 'EnQuest EP BV%';
+
+UPDATE public.commodity_locations SET company = 'Genting', updated_at = NOW()
+WHERE company LIKE 'Genting Oil & Gas%';
+
+UPDATE public.commodity_locations SET operator = 'Genting', updated_at = NOW()
+WHERE operator LIKE 'Genting Oil & Gas%';
+
+UPDATE public.commodity_locations SET company = 'Saga Petroleum', updated_at = NOW()
+WHERE company LIKE 'Saga Petroleum (historic%';
+
+UPDATE public.commodity_locations SET operator = 'Saga Petroleum', updated_at = NOW()
+WHERE operator LIKE 'Saga Petroleum (historic%';
+
+UPDATE public.commodity_locations SET company = 'Sakhalin Energy', updated_at = NOW()
+WHERE company LIKE 'Sakhalin Energy (%';
+
+UPDATE public.commodity_locations SET operator = 'Sakhalin Energy', updated_at = NOW()
+WHERE operator LIKE 'Sakhalin Energy (%';
+
+UPDATE public.commodity_locations SET company = 'UPDC', updated_at = NOW()
+WHERE company = 'United Petroleum Development Co (UPDC)';
+
+UPDATE public.commodity_locations SET operator = 'UPDC', updated_at = NOW()
+WHERE operator = 'United Petroleum Development Co (UPDC)';
+
 COMMIT;

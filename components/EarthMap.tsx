@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
-import { Search, Filter } from 'lucide-react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import { Search, Filter, ChevronDown } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { CommodityData, RefineryData, ShippingRoute } from '@/lib/types'
 import dynamic from 'next/dynamic'
@@ -17,6 +17,107 @@ const Globe3D = dynamic(() => import('./Globe3DClient'), {
     </div>
   ),
 })
+
+function CompanyDropdown({
+  value,
+  options,
+  onChange,
+  placeholder,
+  disabled,
+}: {
+  value: string
+  options: string[]
+  onChange: (v: string) => void
+  placeholder: string
+  disabled?: boolean
+}) {
+  const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState('')
+  const ref = useRef<HTMLDivElement>(null)
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return options
+    const q = search.trim().toLowerCase()
+    return options.filter((o) => o.toLowerCase().includes(q))
+  }, [options, search])
+
+  useEffect(() => {
+    const onOutside = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    if (open) document.addEventListener('click', onOutside)
+    return () => document.removeEventListener('click', onOutside)
+  }, [open])
+
+  const displayLabel = value || placeholder
+  const showSearch = options.length > 15
+
+  return (
+    <div ref={ref} className="relative w-full sm:w-auto sm:min-w-[200px]">
+      <button
+        type="button"
+        onClick={() => !disabled && setOpen((o) => !o)}
+        disabled={disabled}
+        className="h-9 sm:h-10 px-3 sm:px-4 pr-8 text-xs sm:text-sm rounded-xl bg-neutral-900/95 text-white border border-neutral-700 hover:border-neutral-600 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-neutral-500 transition-all w-full text-left flex items-center justify-between gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg min-h-[2.5rem]"
+      >
+        <span className="truncate" title={displayLabel}>
+          {displayLabel}
+        </span>
+        <ChevronDown className={`h-4 w-4 flex-shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div className="absolute top-full left-0 mt-1.5 z-50 rounded-xl bg-neutral-900 border border-neutral-700 shadow-2xl overflow-hidden min-w-[280px] max-w-[min(420px,90vw)]">
+          {showSearch && (
+            <div className="p-2 border-b border-neutral-700">
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search companies..."
+                className="w-full h-8 px-3 text-sm rounded-lg bg-neutral-800 text-white placeholder-neutral-500 border border-neutral-700 focus:outline-none focus:border-neutral-500"
+                autoFocus
+              />
+            </div>
+          )}
+          <div className="max-h-[min(280px,60vh)] overflow-y-auto overscroll-contain">
+            <button
+              type="button"
+              onClick={() => {
+                onChange('')
+                setOpen(false)
+                setSearch('')
+              }}
+              className={`w-full px-3 py-2.5 text-left text-sm hover:bg-neutral-700/80 transition-colors border-b border-neutral-700/50 ${!value ? 'bg-neutral-800/80 text-white' : 'text-neutral-300 bg-neutral-900'}`}
+            >
+              {placeholder}
+            </button>
+            {filtered.map((opt, idx) => (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => {
+                  onChange(opt)
+                  setOpen(false)
+                  setSearch('')
+                }}
+                title={opt}
+                className={`w-full px-3 py-2.5 text-left text-sm transition-colors border-b border-neutral-700/50 last:border-b-0
+                  whitespace-normal break-words hyphens-auto
+                  ${idx % 2 === 0 ? 'bg-neutral-900 hover:bg-neutral-800' : 'bg-neutral-800 hover:bg-neutral-700'}
+                  ${value === opt ? 'text-white font-medium ring-inset ring-1 ring-neutral-600' : 'text-neutral-300'}`}
+              >
+                {opt}
+              </button>
+            ))}
+            {filtered.length === 0 && (
+              <div className="px-3 py-4 text-sm text-neutral-500 bg-neutral-900">No companies match</div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
 
 const commodityCategories = {
   Energy: ['Crude Oil', 'Natural Gas', 'Uranium', 'Coal'],
@@ -933,7 +1034,7 @@ export default function EarthMap() {
               setSelectedCommodity('')
               setSelectedCompany('')
             }}
-            className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm rounded-lg bg-neutral-900 text-white border border-neutral-700 focus:outline-none focus:border-white transition-all w-[calc(50%-4px)] sm:w-auto sm:min-w-[150px] appearance-none cursor-pointer"
+            className="h-9 sm:h-10 px-3 sm:px-4 text-xs sm:text-sm rounded-xl bg-neutral-900/95 text-white border border-neutral-700 hover:border-neutral-600 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-neutral-500 transition-all w-[calc(50%-4px)] sm:w-auto sm:min-w-[150px] appearance-none cursor-pointer shadow-lg"
           >
             <option value="">All Categories</option>
             {Object.keys(commodityCategories).map((category) => (
@@ -948,7 +1049,7 @@ export default function EarthMap() {
               setSelectedCommodity(e.target.value)
               setSelectedCompany('')
             }}
-            className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm rounded-lg bg-neutral-900 text-white border border-neutral-700 focus:outline-none focus:border-white transition-all disabled:opacity-40 disabled:cursor-not-allowed w-[calc(50%-4px)] sm:w-auto sm:min-w-[160px] appearance-none cursor-pointer"
+            className="h-9 sm:h-10 px-3 sm:px-4 text-xs sm:text-sm rounded-xl bg-neutral-900/95 text-white border border-neutral-700 hover:border-neutral-600 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-neutral-500 transition-all disabled:opacity-40 disabled:cursor-not-allowed w-[calc(50%-4px)] sm:w-auto sm:min-w-[160px] appearance-none cursor-pointer shadow-lg"
             disabled={!selectedCategory}
           >
             <option value="">All Commodities</option>
@@ -960,17 +1061,14 @@ export default function EarthMap() {
               )}
           </select>
 
-          {/* Company Select */}
-          <select
+          {/* Company Select — custom dropdown with search */}
+          <CompanyDropdown
             value={selectedCompany}
-            onChange={(e) => setSelectedCompany(e.target.value)}
-            className="h-9 sm:h-10 px-2 sm:px-4 text-xs sm:text-sm rounded-lg bg-neutral-900 text-white border border-neutral-700 focus:outline-none focus:border-white transition-all w-full sm:w-auto sm:min-w-[160px] appearance-none cursor-pointer"
-          >
-            <option value="">All Companies</option>
-            {availableCompanies.map((company) => (
-              <option key={company} value={company}>{company}</option>
-            ))}
-          </select>
+            options={availableCompanies}
+            onChange={setSelectedCompany}
+            placeholder="All Companies"
+            disabled={!selectedCategory}
+          />
 
           <div className="hidden sm:block h-6 w-px bg-neutral-700 mx-1" />
 

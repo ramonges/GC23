@@ -573,7 +573,7 @@ INSERT INTO public.commodity_locations (
 ),
 (
   'Zhuangxi Buried Hill Oil Field (Shengli main producing area; Genting contract)',
-  'Genting Oil & Gas China Ltd. (historical operator under contract with Sinopec)',
+  'Genting',
   'Shandong (Shengli main producing area; North Jiyang Depression, Bohai basin), China',
   'China',
   'Shandong (Shengli main producing area; North Jiyang Depression, Bohai basin)',
@@ -583,7 +583,7 @@ INSERT INTO public.commodity_locations (
   'Crude Oil',
   'oil_field',
   'active',
-  'Genting Oil & Gas China Ltd. (historical operator under contract with Sinopec)',
+  'Genting',
   'PSC / contract with foreign operator',
   'Oil & Gas Journal reports Genting as operator and 100% interest holder in the Zhuangxi Buried Hill field contract signed with Sinopec in 1999; 20-year production period began 2002-10-01.',
   0,
