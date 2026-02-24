@@ -31,15 +31,17 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
   useEffect(() => {
     if (!globeEl.current) return
 
-    const globe = new Globe(globeEl.current)
+    const el = globeEl.current
+    const rect = el.getBoundingClientRect()
+    const globe = new Globe(el)
       .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg') // Higher res day texture
       .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
       .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
       .showAtmosphere(true)
       .atmosphereColor('#3a228a')
       .atmosphereAltitude(0.25)
-      .width(window.innerWidth)
-      .height(window.innerHeight - 150) // Account for header and filters
+      .width(rect.width)
+      .height(rect.height)
 
     globeRef.current = globe
 
@@ -342,17 +344,21 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
         }
       })
 
-    // Handle window resize
-    const handleResize = () => {
-      if (globeRef.current) {
-        globeRef.current.width(window.innerWidth)
-        globeRef.current.height(window.innerHeight - 150)
+    // Use ResizeObserver to fit globe to container (handles mobile, keyboard, etc.)
+    const resizeGlobe = () => {
+      if (!globeRef.current || !el) return
+      const r = el.getBoundingClientRect()
+      if (r.width > 0 && r.height > 0) {
+        globeRef.current.width(r.width)
+        globeRef.current.height(r.height)
       }
     }
-    window.addEventListener('resize', handleResize)
+    const ro = new ResizeObserver(resizeGlobe)
+    ro.observe(el)
+    resizeGlobe()
 
     return () => {
-      window.removeEventListener('resize', handleResize)
+      ro.disconnect()
       if (globeRef.current) {
         globeRef.current._destructor()
       }

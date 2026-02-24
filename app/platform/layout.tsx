@@ -39,8 +39,8 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
       <div className="flex flex-1 min-h-0 pt-[73px]">
         <PlatformSidebar userEmail={userEmail} />
 
-        {/* Main Content - each page fills this */}
-        <div className="flex-1 flex flex-col min-h-0">
+        {/* Main Content - each page fills this; overflow-hidden prevents layout shift */}
+        <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
           {children}
         </div>
       </div>

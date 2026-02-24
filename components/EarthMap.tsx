@@ -1026,9 +1026,9 @@ export default function EarthMap() {
   const [showRoutesModal, setShowRoutesModal] = useState(false)
 
   return (
-    <div className="flex-1 flex flex-col bg-black">
-      {/* Modern Monochrome Filters Bar */}
-      <div className="bg-black border-b border-neutral-800 px-3 sm:px-5 py-3 sm:py-4">
+    <div className="flex-1 flex flex-col min-h-0 overflow-hidden bg-black">
+      {/* Modern Monochrome Filters Bar - flex-shrink-0 keeps it visible */}
+      <div className="flex-shrink-0 bg-black border-b border-neutral-800 px-3 sm:px-5 py-3 sm:py-4">
         <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
           {/* Mobile: Filters button opens bottom sheet */}
           <button
@@ -1329,8 +1329,8 @@ export default function EarthMap() {
         </div>
       )}
 
-      {/* 3D Globe */}
-      <div className="flex-1 relative">
+      {/* 3D Globe - min-h-0 allows flex child to shrink, overflow-hidden prevents spill */}
+      <div className="flex-1 min-h-0 relative overflow-hidden">
         <Globe3D 
           markers={markers} 
           showCities={showCities && !selectedPoint.data} 
