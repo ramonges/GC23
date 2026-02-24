@@ -66,28 +66,28 @@ export default function Home() {
         </div>
 
         {/* Hero Content */}
-        <div className="relative z-20 text-center px-6 max-w-6xl">
-          <div className="mb-8">
-            <span className="inline-block px-6 py-2 bg-white bg-opacity-10 backdrop-blur-sm border border-white border-opacity-20 rounded-full text-white text-sm font-medium tracking-wider uppercase">
+        <div className="relative z-20 text-center px-4 sm:px-6 max-w-6xl">
+          <div className="mb-4 sm:mb-8">
+            <span className="inline-block px-4 sm:px-6 py-1.5 sm:py-2 bg-white bg-opacity-10 backdrop-blur-sm border border-white border-opacity-20 rounded-full text-white text-xs sm:text-sm font-medium tracking-wider uppercase">
               Open Access Platform
             </span>
           </div>
           
-          <h1 className="text-7xl md:text-8xl lg:text-9xl font-bold text-white mb-8 leading-tight tracking-tight">
+          <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-bold text-white mb-4 sm:mb-8 leading-tight tracking-tight">
             Global Commodity<br />
             <span className="bg-gradient-to-r from-blue-200 via-blue-100 to-white bg-clip-text text-transparent">
               Intelligence
             </span>
           </h1>
           
-          <p className="text-2xl md:text-3xl text-gray-300 mb-12 font-light tracking-wide">
+          <p className="text-base sm:text-xl md:text-3xl text-gray-300 mb-8 sm:mb-12 font-light tracking-wide max-w-xl mx-auto">
             Energy, Metals, Agriculture & more — explore markets with real-time data
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-6 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center">
             <Link
               href="/platform"
-              className="group px-12 py-5 bg-white text-black text-lg font-semibold rounded-lg hover:bg-opacity-90 transition-all duration-300 shadow-2xl hover:shadow-white/20 hover:scale-105"
+              className="group px-8 sm:px-12 py-4 sm:py-5 bg-white text-black text-base sm:text-lg font-semibold rounded-lg hover:bg-opacity-90 transition-all duration-300 shadow-2xl hover:shadow-white/20 hover:scale-105"
             >
               <span className="flex items-center justify-center gap-2">
                 Explore the Platform
@@ -99,7 +99,7 @@ export default function Home() {
           </div>
 
           {/* Trust indicators */}
-          <div className="mt-16 flex items-center justify-center gap-12 text-white text-opacity-60 text-sm">
+          <div className="mt-10 sm:mt-16 flex flex-wrap items-center justify-center gap-4 sm:gap-8 md:gap-12 text-white text-opacity-60 text-xs sm:text-sm">
             <div className="flex items-center gap-2">
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
@@ -130,101 +130,101 @@ export default function Home() {
       </section>
 
       {/* Added Value Section */}
-      <section className="py-32 bg-gradient-to-b from-black via-gray-900 to-black relative">
+      <section className="py-16 sm:py-24 md:py-32 bg-gradient-to-b from-black via-gray-900 to-black relative">
         {/* Subtle grid pattern */}
         <div className="absolute inset-0 opacity-5" style={{
           backgroundImage: 'linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)',
           backgroundSize: '50px 50px'
         }}></div>
         
-        <div className="container mx-auto px-6 relative z-10">
-          <div className="text-center mb-20">
-            <h2 className="text-5xl md:text-6xl font-bold text-white mb-6">
+        <div className="container mx-auto px-4 sm:px-6 relative z-10">
+          <div className="text-center mb-12 sm:mb-20">
+            <h2 className="text-3xl sm:text-4xl md:text-6xl font-bold text-white mb-4 sm:mb-6">
               Comprehensive Commodity Data
             </h2>
-            <p className="text-xl text-gray-400 font-light max-w-3xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-gray-400 font-light max-w-3xl mx-auto px-2">
               From crude oil benchmarks to base metals and agricultural futures — one platform for every major commodity market
             </p>
           </div>
 
           {/* Energy — hero row, larger cards */}
-          <div className="grid md:grid-cols-3 gap-6 max-w-7xl mx-auto mb-6">
-            <div className="group md:col-span-2 p-10 bg-gradient-to-br from-orange-500/15 to-orange-900/5 rounded-2xl border border-orange-400/20 hover:border-orange-400/40 transition-all duration-500 hover:transform hover:scale-[1.02] backdrop-blur-sm">
-              <div className="flex items-start gap-5">
-                <div className="text-5xl group-hover:scale-110 transition-transform duration-300">🛢️</div>
-                <div>
+          <div className="grid md:grid-cols-3 gap-4 sm:gap-6 max-w-7xl mx-auto mb-4 sm:mb-6">
+            <div className="group md:col-span-2 p-6 sm:p-8 md:p-10 bg-gradient-to-br from-orange-500/15 to-orange-900/5 rounded-2xl border border-orange-400/20 hover:border-orange-400/40 transition-all duration-500 hover:transform hover:scale-[1.02] backdrop-blur-sm">
+              <div className="flex items-start gap-4 sm:gap-5">
+                <div className="text-4xl sm:text-5xl group-hover:scale-110 transition-transform duration-300">🛢️</div>
+                <div className="min-w-0">
                   <span className="text-xs font-semibold text-orange-400 tracking-widest uppercase mb-2 block">Energy — Crude Oil</span>
-                  <h3 className="text-2xl font-bold text-white mb-3">Oil Fields & Benchmarks</h3>
-                  <p className="text-gray-400 leading-relaxed">
+                  <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 sm:mb-3">Oil Fields & Benchmarks</h3>
+                  <p className="text-gray-400 leading-relaxed text-sm sm:text-base">
                     Brent, WTI, Dubai/Oman — track global crude benchmarks, field-level production data, OPEC flows, and physical delivery logistics in real time.
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="group p-10 bg-gradient-to-br from-blue-500/15 to-blue-900/5 rounded-2xl border border-blue-400/20 hover:border-blue-400/40 transition-all duration-500 hover:transform hover:scale-[1.02] backdrop-blur-sm">
-              <div className="text-5xl mb-5 group-hover:scale-110 transition-transform duration-300">⛽</div>
+            <div className="group p-6 sm:p-8 md:p-10 bg-gradient-to-br from-blue-500/15 to-blue-900/5 rounded-2xl border border-blue-400/20 hover:border-blue-400/40 transition-all duration-500 hover:transform hover:scale-[1.02] backdrop-blur-sm">
+              <div className="text-4xl sm:text-5xl mb-4 sm:mb-5 group-hover:scale-110 transition-transform duration-300">⛽</div>
               <span className="text-xs font-semibold text-blue-400 tracking-widest uppercase mb-2 block">Energy — Gas & LNG</span>
-              <h3 className="text-2xl font-bold text-white mb-3">Natural Gas & LNG</h3>
-              <p className="text-gray-400 leading-relaxed">
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 sm:mb-3">Natural Gas & LNG</h3>
+              <p className="text-gray-400 leading-relaxed text-sm sm:text-base">
                 Henry Hub, TTF, JKM — gas fields, LNG terminals, regasification capacity, and shipping routes.
               </p>
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto mb-6">
-            <div className="group p-10 bg-gradient-to-br from-amber-500/10 to-amber-900/5 rounded-2xl border border-amber-400/15 hover:border-amber-400/30 transition-all duration-500 hover:transform hover:scale-[1.02] backdrop-blur-sm">
-              <div className="text-5xl mb-5 group-hover:scale-110 transition-transform duration-300">⚡</div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-7xl mx-auto mb-4 sm:mb-6">
+            <div className="group p-6 sm:p-8 md:p-10 bg-gradient-to-br from-amber-500/10 to-amber-900/5 rounded-2xl border border-amber-400/15 hover:border-amber-400/30 transition-all duration-500 hover:transform hover:scale-[1.02] backdrop-blur-sm">
+              <div className="text-4xl sm:text-5xl mb-4 sm:mb-5 group-hover:scale-110 transition-transform duration-300">⚡</div>
               <span className="text-xs font-semibold text-amber-400 tracking-widest uppercase mb-2 block">Energy — Power & Coal</span>
-              <h3 className="text-2xl font-bold text-white mb-3">Power & Coal</h3>
-              <p className="text-gray-400 leading-relaxed">
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 sm:mb-3">Power & Coal</h3>
+              <p className="text-gray-400 leading-relaxed text-sm sm:text-base">
                 Newcastle, API2, Richards Bay — thermal coal, power generation, carbon allowances, and the energy transition.
               </p>
             </div>
 
-            <div className="group p-10 bg-gradient-to-br from-yellow-500/10 to-yellow-900/5 rounded-2xl border border-yellow-400/15 hover:border-yellow-400/30 transition-all duration-500 hover:transform hover:scale-[1.02] backdrop-blur-sm">
-              <div className="text-5xl mb-5 group-hover:scale-110 transition-transform duration-300">🥇</div>
+            <div className="group p-6 sm:p-8 md:p-10 bg-gradient-to-br from-yellow-500/10 to-yellow-900/5 rounded-2xl border border-yellow-400/15 hover:border-yellow-400/30 transition-all duration-500 hover:transform hover:scale-[1.02] backdrop-blur-sm">
+              <div className="text-4xl sm:text-5xl mb-4 sm:mb-5 group-hover:scale-110 transition-transform duration-300">🥇</div>
               <span className="text-xs font-semibold text-yellow-400 tracking-widest uppercase mb-2 block">Precious Metals</span>
-              <h3 className="text-2xl font-bold text-white mb-3">Gold, Silver & PGMs</h3>
-              <p className="text-gray-400 leading-relaxed">
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 sm:mb-3">Gold, Silver & PGMs</h3>
+              <p className="text-gray-400 leading-relaxed text-sm sm:text-base">
                 LBMA, COMEX — spot prices, ETF flows, mine production, central bank reserves, and forward curves.
               </p>
             </div>
 
-            <div className="group p-10 bg-gradient-to-br from-slate-400/10 to-slate-900/5 rounded-2xl border border-slate-400/15 hover:border-slate-400/30 transition-all duration-500 hover:transform hover:scale-[1.02] backdrop-blur-sm">
-              <div className="text-5xl mb-5 group-hover:scale-110 transition-transform duration-300">🔩</div>
+            <div className="group p-6 sm:p-8 md:p-10 bg-gradient-to-br from-slate-400/10 to-slate-900/5 rounded-2xl border border-slate-400/15 hover:border-slate-400/30 transition-all duration-500 hover:transform hover:scale-[1.02] backdrop-blur-sm">
+              <div className="text-4xl sm:text-5xl mb-4 sm:mb-5 group-hover:scale-110 transition-transform duration-300">🔩</div>
               <span className="text-xs font-semibold text-slate-400 tracking-widest uppercase mb-2 block">Industrial Metals</span>
-              <h3 className="text-2xl font-bold text-white mb-3">Base & Ferrous Metals</h3>
-              <p className="text-gray-400 leading-relaxed">
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 sm:mb-3">Base & Ferrous Metals</h3>
+              <p className="text-gray-400 leading-relaxed text-sm sm:text-base">
                 LME copper, aluminium, zinc, nickel — warehouse stocks, TC/RCs, iron ore indices, and steel margins.
               </p>
             </div>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-            <div className="group p-10 bg-gradient-to-br from-green-500/10 to-green-900/5 rounded-2xl border border-green-400/15 hover:border-green-400/30 transition-all duration-500 hover:transform hover:scale-[1.02] backdrop-blur-sm">
-              <div className="text-5xl mb-5 group-hover:scale-110 transition-transform duration-300">🌾</div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-7xl mx-auto">
+            <div className="group p-6 sm:p-8 md:p-10 bg-gradient-to-br from-green-500/10 to-green-900/5 rounded-2xl border border-green-400/15 hover:border-green-400/30 transition-all duration-500 hover:transform hover:scale-[1.02] backdrop-blur-sm">
+              <div className="text-4xl sm:text-5xl mb-4 sm:mb-5 group-hover:scale-110 transition-transform duration-300">🌾</div>
               <span className="text-xs font-semibold text-green-400 tracking-widest uppercase mb-2 block">Agriculture</span>
-              <h3 className="text-2xl font-bold text-white mb-3">Grains & Softs</h3>
-              <p className="text-gray-400 leading-relaxed">
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 sm:mb-3">Grains & Softs</h3>
+              <p className="text-gray-400 leading-relaxed text-sm sm:text-base">
                 CBOT wheat, corn, soybeans, sugar, coffee, cocoa — crop reports, export flows, and weather impact analysis.
               </p>
             </div>
 
-            <div className="group p-10 bg-gradient-to-br from-red-500/10 to-red-900/5 rounded-2xl border border-red-400/15 hover:border-red-400/30 transition-all duration-500 hover:transform hover:scale-[1.02] backdrop-blur-sm">
-              <div className="text-5xl mb-5 group-hover:scale-110 transition-transform duration-300">🐄</div>
+            <div className="group p-6 sm:p-8 md:p-10 bg-gradient-to-br from-red-500/10 to-red-900/5 rounded-2xl border border-red-400/15 hover:border-red-400/30 transition-all duration-500 hover:transform hover:scale-[1.02] backdrop-blur-sm">
+              <div className="text-4xl sm:text-5xl mb-4 sm:mb-5 group-hover:scale-110 transition-transform duration-300">🐄</div>
               <span className="text-xs font-semibold text-red-400 tracking-widest uppercase mb-2 block">Livestock</span>
-              <h3 className="text-2xl font-bold text-white mb-3">Livestock & Dairy</h3>
-              <p className="text-gray-400 leading-relaxed">
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 sm:mb-3">Livestock & Dairy</h3>
+              <p className="text-gray-400 leading-relaxed text-sm sm:text-base">
                 Live cattle, lean hogs, feeder cattle — USDA reports, packer margins, and seasonal trade patterns.
               </p>
             </div>
 
-            <div className="group p-10 bg-gradient-to-br from-white/5 to-white/[0.02] rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-500 hover:transform hover:scale-[1.02] backdrop-blur-sm">
-              <div className="text-5xl mb-5 group-hover:scale-110 transition-transform duration-300">📊</div>
+            <div className="group p-6 sm:p-8 md:p-10 bg-gradient-to-br from-white/5 to-white/[0.02] rounded-2xl border border-white/10 hover:border-white/20 transition-all duration-500 hover:transform hover:scale-[1.02] backdrop-blur-sm">
+              <div className="text-4xl sm:text-5xl mb-4 sm:mb-5 group-hover:scale-110 transition-transform duration-300">📊</div>
               <span className="text-xs font-semibold text-gray-400 tracking-widest uppercase mb-2 block">Platform</span>
-              <h3 className="text-2xl font-bold text-white mb-3">Analytics & Research</h3>
-              <p className="text-gray-400 leading-relaxed">
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 sm:mb-3">Analytics & Research</h3>
+              <p className="text-gray-400 leading-relaxed text-sm sm:text-base">
                 Interactive 3D globe, benchmark comparison, contango/backwardation signals, physical delivery modeling, and curated research.
               </p>
             </div>

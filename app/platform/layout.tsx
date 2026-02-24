@@ -21,16 +21,16 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
     <div className="h-screen flex flex-col bg-white overflow-hidden">
       {/* Top Header Bar */}
       <div className="fixed top-0 left-0 right-0 z-40 bg-white border-b border-gray-200 shadow-sm">
-        <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-4">
-            <div className="w-12"></div>
-            <div>
-              <h1 className="text-2xl font-bold text-black">Commodities Earth</h1>
-              <p className="text-xs text-gray-500">Professional Platform</p>
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+            <div className="w-10 sm:w-12 flex-shrink-0"></div>
+            <div className="min-w-0">
+              <h1 className="text-lg sm:text-2xl font-bold text-black truncate">Commodities Earth</h1>
+              <p className="text-xs text-gray-500 hidden sm:block">Professional Platform</p>
             </div>
           </div>
-          <div className="text-right">
-            <p className="text-sm text-gray-600">{userEmail || 'Guest Access'}</p>
+          <div className="text-right flex-shrink-0">
+            <p className="text-xs sm:text-sm text-gray-600 truncate max-w-[120px] sm:max-w-none" title={userEmail || 'Guest Access'}>{userEmail || 'Guest Access'}</p>
           </div>
         </div>
       </div>

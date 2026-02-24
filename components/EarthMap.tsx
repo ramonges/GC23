@@ -853,6 +853,9 @@ export default function EarthMap() {
   const [refineryFilter, setRefineryFilter] = useState<Set<string>>(new Set(['light', 'medium', 'extra_heavy']))
   const [selectedPoint, setSelectedPoint] = useState<{ data: CommodityData | RefineryData | null, type: 'commodity' | 'refinery' | null }>({ data: null, type: null })
   const [availableCompanies, setAvailableCompanies] = useState<string[]>([])
+  const [showFiltersSheet, setShowFiltersSheet] = useState(false)
+
+  const activeFiltersCount = [selectedCategory, selectedCommodity, selectedCompany].filter(Boolean).length
 
   const fetchAvailableCompanies = useCallback(async () => {
     try {
@@ -1027,7 +1030,21 @@ export default function EarthMap() {
       {/* Modern Monochrome Filters Bar */}
       <div className="bg-black border-b border-neutral-800 px-3 sm:px-5 py-3 sm:py-4">
         <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
-          {/* Category Select */}
+          {/* Mobile: Filters button opens bottom sheet */}
+          <button
+            onClick={() => setShowFiltersSheet(true)}
+            className="sm:hidden h-9 px-4 flex items-center gap-2 rounded-xl bg-neutral-900 text-white border border-neutral-700 hover:border-neutral-600 transition-all"
+          >
+            <Filter size={16} />
+            <span className="text-sm font-medium">Filters</span>
+            {activeFiltersCount > 0 && (
+              <span className="bg-white text-black text-xs font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1">
+                {activeFiltersCount}
+              </span>
+            )}
+          </button>
+
+          {/* Desktop: Category, Commodity, Company inline */}
           <select
             value={selectedCategory}
             onChange={(e) => {
@@ -1035,7 +1052,7 @@ export default function EarthMap() {
               setSelectedCommodity('')
               setSelectedCompany('')
             }}
-            className="h-9 sm:h-10 px-3 sm:px-4 text-xs sm:text-sm rounded-xl bg-neutral-900/95 text-white border border-neutral-700 hover:border-neutral-600 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-neutral-500 transition-all w-[calc(50%-4px)] sm:w-auto sm:min-w-[150px] appearance-none cursor-pointer shadow-lg"
+            className="hidden sm:block h-10 px-4 text-sm rounded-xl bg-neutral-900/95 text-white border border-neutral-700 hover:border-neutral-600 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-neutral-500 transition-all min-w-[150px] appearance-none cursor-pointer shadow-lg"
           >
             <option value="">All Categories</option>
             {Object.keys(commodityCategories).map((category) => (
@@ -1043,14 +1060,13 @@ export default function EarthMap() {
             ))}
           </select>
 
-          {/* Commodity Select */}
           <select
             value={selectedCommodity}
             onChange={(e) => {
               setSelectedCommodity(e.target.value)
               setSelectedCompany('')
             }}
-            className="h-9 sm:h-10 px-3 sm:px-4 text-xs sm:text-sm rounded-xl bg-neutral-900/95 text-white border border-neutral-700 hover:border-neutral-600 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-neutral-500 transition-all disabled:opacity-40 disabled:cursor-not-allowed w-[calc(50%-4px)] sm:w-auto sm:min-w-[160px] appearance-none cursor-pointer shadow-lg"
+            className="hidden sm:block h-10 px-4 text-sm rounded-xl bg-neutral-900/95 text-white border border-neutral-700 hover:border-neutral-600 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-neutral-500 transition-all disabled:opacity-40 disabled:cursor-not-allowed min-w-[160px] appearance-none cursor-pointer shadow-lg"
             disabled={!selectedCategory}
           >
             <option value="">All Commodities</option>
@@ -1062,14 +1078,15 @@ export default function EarthMap() {
               )}
           </select>
 
-          {/* Company Select — custom dropdown with search */}
-          <CompanyDropdown
-            value={selectedCompany}
-            options={availableCompanies}
-            onChange={setSelectedCompany}
-            placeholder="All Companies"
-            disabled={!selectedCategory}
-          />
+          <div className="hidden sm:block">
+            <CompanyDropdown
+              value={selectedCompany}
+              options={availableCompanies}
+              onChange={setSelectedCompany}
+              placeholder="All Companies"
+              disabled={!selectedCategory}
+            />
+          </div>
 
           <div className="hidden sm:block h-6 w-px bg-neutral-700 mx-1" />
 
@@ -1115,6 +1132,90 @@ export default function EarthMap() {
           </button>
         </div>
       </div>
+
+      {/* Mobile Filters Bottom Sheet */}
+      {showFiltersSheet && (
+        <div
+          className="sm:hidden fixed inset-0 z-[9999] flex flex-col justify-end"
+          onClick={() => setShowFiltersSheet(false)}
+        >
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" aria-hidden="true" />
+          <div
+            className="relative bg-neutral-950 border-t border-neutral-800 rounded-t-2xl shadow-2xl max-h-[85vh] overflow-y-auto animate-slide-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sticky top-0 bg-neutral-950 border-b border-neutral-800 px-4 py-4 flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                <Filter size={20} />
+                Filters
+              </h3>
+              <button
+                onClick={() => setShowFiltersSheet(false)}
+                className="p-2 text-neutral-500 hover:text-white rounded-lg transition-colors"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-4 space-y-4 pb-8">
+              <div>
+                <label className="block text-xs font-medium text-neutral-400 uppercase tracking-wider mb-2">Category</label>
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => {
+                    setSelectedCategory(e.target.value)
+                    setSelectedCommodity('')
+                    setSelectedCompany('')
+                  }}
+                  className="w-full h-11 px-4 text-base rounded-xl bg-neutral-900 text-white border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-white/30 appearance-none cursor-pointer"
+                >
+                  <option value="">All Categories</option>
+                  {Object.keys(commodityCategories).map((category) => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-neutral-400 uppercase tracking-wider mb-2">Commodity</label>
+                <select
+                  value={selectedCommodity}
+                  onChange={(e) => {
+                    setSelectedCommodity(e.target.value)
+                    setSelectedCompany('')
+                  }}
+                  className="w-full h-11 px-4 text-base rounded-xl bg-neutral-900 text-white border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-white/30 disabled:opacity-50 appearance-none cursor-pointer"
+                  disabled={!selectedCategory}
+                >
+                  <option value="">All Commodities</option>
+                  {selectedCategory &&
+                    commodityCategories[selectedCategory as keyof typeof commodityCategories]?.map(
+                      (commodity) => (
+                        <option key={commodity} value={commodity}>{commodity}</option>
+                      )
+                    )}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-neutral-400 uppercase tracking-wider mb-2">Company</label>
+                <CompanyDropdown
+                  value={selectedCompany}
+                  options={availableCompanies}
+                  onChange={setSelectedCompany}
+                  placeholder="All Companies"
+                  disabled={!selectedCategory}
+                />
+              </div>
+              <button
+                onClick={() => setShowFiltersSheet(false)}
+                className="w-full py-3.5 bg-white text-black font-semibold rounded-xl hover:bg-neutral-200 transition-all"
+              >
+                Apply Filters
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Shipping Routes Modal */}
       {showRoutesModal && (
