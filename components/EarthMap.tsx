@@ -53,14 +53,14 @@ function CompanyDropdown({
   const showSearch = options.length > 15
 
   return (
-    <div ref={ref} className="relative w-full sm:w-auto sm:min-w-[200px]">
+    <div ref={ref} className="relative w-full sm:w-[200px]">
       <button
         type="button"
         onClick={() => !disabled && setOpen((o) => !o)}
         disabled={disabled}
-        className="h-9 sm:h-10 px-3 sm:px-4 pr-8 text-xs sm:text-sm rounded-xl bg-neutral-900/95 text-white border border-neutral-700 hover:border-neutral-600 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-neutral-500 transition-all w-full text-left flex items-center justify-between gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg min-h-[2.5rem]"
+        className="h-9 sm:h-10 px-3 sm:px-4 pr-8 text-xs sm:text-sm rounded-xl bg-neutral-900/95 text-white border border-neutral-700 hover:border-neutral-600 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-neutral-500 transition-all w-full text-left flex items-center justify-between gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg min-h-[2.5rem] overflow-hidden"
       >
-        <span className="truncate" title={displayLabel}>
+        <span className="truncate min-w-0 flex-1" title={displayLabel}>
           {displayLabel}
         </span>
         <ChevronDown className={`h-4 w-4 flex-shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
