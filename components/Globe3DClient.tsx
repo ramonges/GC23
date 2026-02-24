@@ -170,6 +170,8 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
                     padding: 2px 4px;
                     border-radius: 3px;
                     border: ${d.isCapital ? '1px solid rgba(0, 102, 255, 0.6)' : 'none'};
+                    position: relative;
+                    z-index: 0;
                   ">
                     ${d.isCapital ? '★ ' : ''}${d.name}
                   </div>
@@ -211,6 +213,8 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
           color: white;
           min-width: 300px;
           box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+          position: relative;
+          z-index: 9999;
         ">
           <div style="font-size: 18px; font-weight: bold; margin-bottom: 10px; color: ${d.color};">
             ${d.type === 'refinery' ? d.data.name : d.data.title}

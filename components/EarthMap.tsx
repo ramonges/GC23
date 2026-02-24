@@ -1000,6 +1000,7 @@ export default function EarthMap() {
   }, [showRefineries, refineryFilter, fetchRefineries])
 
   const handleSearch = async () => {
+    setShowCities(false) // Hide cities when searching so results are readable
     await fetchData(false) // Apply all filters including company
   }
 
@@ -1231,7 +1232,7 @@ export default function EarthMap() {
       <div className="flex-1 relative">
         <Globe3D 
           markers={markers} 
-          showCities={showCities} 
+          showCities={showCities && !selectedPoint.data} 
           routes={filteredRoutes}
           refineries={displayedRefineries}
           onPointSelect={handlePointSelect}
@@ -1240,7 +1241,7 @@ export default function EarthMap() {
         {/* Selected Point Info Panel - Left Side (desktop) / Bottom sheet (mobile) */}
         {selectedPoint.data && (
           <div 
-            className="absolute z-30 bg-black bg-opacity-95 border border-gray-500 rounded-xl p-4 sm:p-6 shadow-2xl backdrop-blur-sm overflow-y-auto
+            className="absolute z-[9999] bg-black bg-opacity-95 border border-gray-500 rounded-xl p-4 sm:p-6 shadow-2xl backdrop-blur-sm overflow-y-auto
               inset-x-2 bottom-2 max-h-[60vh]
               sm:inset-x-auto sm:bottom-auto sm:left-4 sm:top-1/2 sm:-translate-y-1/2 sm:w-80 sm:max-h-[80vh]"
             onClick={(e) => e.stopPropagation()}
