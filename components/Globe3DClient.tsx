@@ -19,6 +19,7 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
   const currentAltitudeRef = useRef<number>(2.5)
   const onPointSelectRef = useRef(onPointSelect)
   const onRouteClickRef = useRef(onRouteClick)
+  const showCitiesRef = useRef(showCities)
 
   useEffect(() => {
     onPointSelectRef.current = onPointSelect
@@ -26,6 +27,9 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
   useEffect(() => {
     onRouteClickRef.current = onRouteClick
   }, [onRouteClick])
+  useEffect(() => {
+    showCitiesRef.current = showCities
+  }, [showCities])
 
   // Initialize globe ONCE on mount - never recreate
   useEffect(() => {
@@ -132,10 +136,10 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
         const mediumCities = allCities.filter((c: any) => c.population > 1000000) // 1M+
         const allMajor = allCities.filter((c: any) => c.population > 500000) // 500K+
 
-        // Store city update function
+        // Store city update function - uses ref so it always reads current showCities value
         const updateCityDisplay = (altitude: number) => {
           // Check if cities should be shown at all
-          if (!showCities) {
+          if (!showCitiesRef.current) {
             globe.htmlElementsData([])
             return
           }
