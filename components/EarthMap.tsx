@@ -891,6 +891,20 @@ export default function EarthMap() {
         }
       }
 
+      // Add gold_mines operators when Metals/Gold is selected
+      const showGold = !selectedCategory || (selectedCategory === 'Metals' && (!selectedCommodity || selectedCommodity === 'Gold'))
+      if (showGold) {
+        try {
+          const { data: goldRows } = await supabase.from('gold_mines').select('operator')
+          if (goldRows) {
+            goldRows.forEach((r: any) => {
+              const op = r.operator ?? r.owner ?? r.company
+              if (op) operatorNames.push(op)
+            })
+          }
+        } catch (_) {}
+      }
+
       const unique = Array.from(new Set([...companyNames, ...operatorNames])).sort()
       setAvailableCompanies(unique)
     } catch (err) {
@@ -940,6 +954,44 @@ export default function EarthMap() {
 
         if (rows.length < PAGE_SIZE) {
           keepFetching = false
+        }
+      }
+
+      // Fetch gold_mines and merge as Gold (Metals) — appears in yellow (#FFD700)
+      const showGold = !selectedCategory || (selectedCategory === 'Metals' && (!selectedCommodity || selectedCommodity === 'Gold'))
+      if (showGold) {
+        try {
+          let goldQuery = supabase.from('gold_mines').select('*')
+          if (!ignoreCompany && selectedCompany) {
+            goldQuery = goldQuery.eq('operator', selectedCompany)
+          }
+          const { data: goldRows, error: goldErr } = await goldQuery
+
+          if (!goldErr && goldRows && goldRows.length > 0) {
+            const goldAsCommodity = goldRows.map((g: any) => {
+              const lat = g.latitude ?? g.lat
+              const lng = g.longitude ?? g.lng
+              const name = g.mine_name ?? g.name ?? g.title ?? 'Gold Mine'
+              return {
+                id: g.id ?? `gold-${name}-${g.country ?? ''}`,
+                title: name,
+                owner: g.operator ?? g.owner ?? g.company ?? '',
+                address: g.address ?? g.region ?? g.country ?? '',
+                latitude: Number(lat),
+                longitude: Number(lng),
+                commodity_type: 'Metals',
+                commodity_name: 'Gold',
+                company: g.operator ?? g.company,
+                operator: g.operator,
+                country: g.country,
+                region: g.region,
+                ...g,
+              }
+            }).filter((m: any) => !isNaN(m.latitude) && !isNaN(m.longitude))
+            allData = allData.concat(goldAsCommodity)
+          }
+        } catch (_) {
+          // gold_mines table may not exist yet
         }
       }
 
