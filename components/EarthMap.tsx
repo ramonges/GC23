@@ -957,7 +957,9 @@ export default function EarthMap() {
         }
       }
 
-      // Fetch gold_mines and merge as Gold (Metals) — appears in yellow (#FFD700)
+      // gold_mines: data appears via sync to commodity_locations (run GOLD_MINES_TABLE_SETUP.sql)
+      // The sync trigger copies gold_mines → commodity_locations with commodity_type='Metals', commodity_name='Gold'
+      // Direct fetch as fallback when sync not yet run (supports various column names)
       const showGold = !selectedCategory || (selectedCategory === 'Metals' && (!selectedCommodity || selectedCommodity === 'Gold'))
       if (showGold) {
         try {
@@ -967,18 +969,22 @@ export default function EarthMap() {
           }
           const { data: goldRows, error: goldErr } = await goldQuery
 
-          if (!goldErr && goldRows && goldRows.length > 0) {
+          if (goldErr) {
+            console.warn('gold_mines: run GOLD_MINES_TABLE_SETUP.sql for RLS. Error:', goldErr.message)
+          } else if (goldRows && goldRows.length > 0) {
             const goldAsCommodity = goldRows.map((g: any) => {
-              const lat = g.latitude ?? g.lat
-              const lng = g.longitude ?? g.lng
-              const name = g.mine_name ?? g.name ?? g.title ?? 'Gold Mine'
+              const lat = g.latitude ?? g.lat ?? g.lat_deg
+              const lng = g.longitude ?? g.lng ?? g.lon ?? g.lng_deg
+              const name = g.mine_name ?? g.name ?? g.title ?? g.site_name ?? 'Gold Mine'
+              const numLat = typeof lat === 'number' ? lat : parseFloat(lat)
+              const numLng = typeof lng === 'number' ? lng : parseFloat(lng)
               return {
-                id: g.id ?? `gold-${name}-${g.country ?? ''}`,
+                id: g.id ?? `gold-${String(name).replace(/\s/g, '-')}-${g.country ?? ''}`,
                 title: name,
                 owner: g.operator ?? g.owner ?? g.company ?? '',
                 address: g.address ?? g.region ?? g.country ?? '',
-                latitude: Number(lat),
-                longitude: Number(lng),
+                latitude: numLat,
+                longitude: numLng,
                 commodity_type: 'Metals',
                 commodity_name: 'Gold',
                 company: g.operator ?? g.company,
@@ -987,11 +993,14 @@ export default function EarthMap() {
                 region: g.region,
                 ...g,
               }
-            }).filter((m: any) => !isNaN(m.latitude) && !isNaN(m.longitude))
-            allData = allData.concat(goldAsCommodity)
+            }).filter((m: any) => !isNaN(m.latitude) && !isNaN(m.longitude) && m.latitude >= -90 && m.latitude <= 90 && m.longitude >= -180 && m.longitude <= 180)
+            // Dedupe: avoid adding if already in commodity_locations from sync (match by lat/lng + Gold)
+            const existingKeys = new Set(allData.filter((d: any) => d.commodity_name === 'Gold').map((d: any) => `${d.latitude?.toFixed(5)}_${d.longitude?.toFixed(5)}`))
+            const toAdd = goldAsCommodity.filter((m: any) => !existingKeys.has(`${m.latitude.toFixed(5)}_${m.longitude.toFixed(5)}`))
+            allData = allData.concat(toAdd)
           }
-        } catch (_) {
-          // gold_mines table may not exist yet
+        } catch (e) {
+          console.warn('gold_mines fetch failed:', e)
         }
       }
 
@@ -1455,6 +1464,36 @@ export default function EarthMap() {
                   storage_volume: 'Storage Volume',
                   long_term_contract: 'Long-term Contract',
                   contract_with: 'Contract With',
+                  // Gold mines (gold_mines table)
+                  annual_capacity_troy_oz: 'Annual Capacity (troy oz)',
+                  available_stock_kg: 'Available Stock (kg)',
+                  gold_form: 'Gold Form',
+                  purity_fineness: 'Purity (fineness)',
+                  mining_method: 'Mining Method',
+                  nearest_port: 'Nearest Port',
+                  nearest_railway: 'Nearest Railway',
+                  nearest_airport: 'Nearest Airport',
+                  founded_year: 'Founded Year',
+                  years_in_operation: 'Years in Operation',
+                  estimated_mine_life_remaining_years: 'Mine Life Remaining (years)',
+                  lbma_certified: 'LBMA Certified',
+                  conflict_free_gold_standard: 'Conflict-Free Gold',
+                  security_level: 'Security Level',
+                  vaulting_facilities: 'Vaulting Facilities',
+                  price_basis: 'Price Basis',
+                  premium_discount_per_oz: 'Premium/Discount per oz',
+                  minimum_order_troy_oz: 'Minimum Order (troy oz)',
+                  payment_terms: 'Payment Terms',
+                  contract_types: 'Contract Types',
+                  export_license_number: 'Export License',
+                  environmental_impact_rating: 'Environmental Impact',
+                  license_number: 'License Number',
+                  contact_email: 'Contact Email',
+                  contact_phone: 'Contact Phone',
+                  certifications: 'Certifications',
+                  major_milestones: 'Major Milestones',
+                  ownership_changes: 'Ownership Changes',
+                  associated_metals: 'Associated Metals',
                 }
                 
                 return (
@@ -1469,15 +1508,23 @@ export default function EarthMap() {
                         if (key === 'title') return null // Already shown as header
                         if (key === 'latitude' || key === 'longitude' || key === 'id') return null
                         
-                        // Format arrays
+                        // Format arrays (including JSONB like certifications, major_milestones)
                         if (Array.isArray(value)) {
                           if (value.length === 0) return null
+                          const fmtItem = (item: any) => {
+                            if (item && typeof item === 'object') {
+                              if (item.event && item.year) return `${item.year}: ${item.event}`
+                              if (item.name) return item.name
+                              return JSON.stringify(item)
+                            }
+                            return String(item)
+                          }
                           return (
                             <div key={key} className="py-1">
                               <span className="text-gray-400">{label}:</span>
                               <ul className="ml-4 mt-1 text-gray-200">
                                 {value.map((item, i) => (
-                                  <li key={i} className="text-xs">• {item}</li>
+                                  <li key={i} className="text-xs">• {fmtItem(item)}</li>
                                 ))}
                               </ul>
                             </div>
