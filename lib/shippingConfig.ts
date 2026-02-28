@@ -190,6 +190,25 @@ export function findNearestPort(assetLat: number, assetLng: number): { port: Por
   return { port: nearest, distanceKm: minDist }
 }
 
+// Baltic dry index route benchmarks (mock 30-day avg rates — replace with live API if available)
+export interface BalticRoute {
+  id: string
+  name: string
+  origin: string
+  destination: string
+  vesselClass: string
+  rateUsdPerMt: number
+  avg30dUsdPerMt: number
+}
+
+export const balticRoutes: BalticRoute[] = [
+  { id: 'C5', name: 'C5 Newcastle → Qingdao', origin: 'Newcastle', destination: 'Qingdao', vesselClass: 'Capesize', rateUsdPerMt: 12.85, avg30dUsdPerMt: 12.2 },
+  { id: 'C10', name: 'C10 Aus → Rotterdam', origin: 'Australia', destination: 'Rotterdam', vesselClass: 'Capesize', rateUsdPerMt: 18.4, avg30dUsdPerMt: 17.8 },
+  { id: 'C3', name: 'C3 Tubarao → Qingdao', origin: 'Tubarao', destination: 'Qingdao', vesselClass: 'Capesize', rateUsdPerMt: 24.1, avg30dUsdPerMt: 23.5 },
+  { id: 'P1A', name: 'P1A US Gulf → Rotterdam', origin: 'Houston', destination: 'Rotterdam', vesselClass: 'Panamax', rateUsdPerMt: 28.5, avg30dUsdPerMt: 27.2 },
+  { id: 'S5', name: 'S5 W. Australia → China', origin: 'Dampier', destination: 'Ningbo', vesselClass: 'Supramax', rateUsdPerMt: 14.2, avg30dUsdPerMt: 13.8 },
+]
+
 export function generateSeaWaypoints(lat1: number, lng1: number, lat2: number, lng2: number): Array<{ lat: number; lng: number }> {
   const toRad = (x: number) => x * Math.PI / 180
   const toDeg = (x: number) => x * 180 / Math.PI
