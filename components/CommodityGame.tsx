@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import { supabase } from '@/lib/supabase'
 import { matchCountry } from '@/lib/countries'
@@ -15,7 +15,15 @@ const GameGlobe3D = dynamic(() => import('./GameGlobe3D'), {
   ),
 })
 
-// Default colors by commodity type
+// Same commodity categories as EarthMap (map with commodities)
+const commodityCategories = {
+  Energy: ['Crude Oil', 'Natural Gas', 'Uranium', 'Coal'],
+  Metals: ['Gold', 'Silver', 'Copper', 'Steel', 'Lithium', 'Iron Ore', 'Platinum', 'Silicon', 'Titanium'],
+  Agricultural: ['Soybeans', 'Wheat', 'Coffee', 'Cotton', 'Rice', 'Sugar', 'Cocoa', 'Corn'],
+  Industrial: ['Cobalt', 'Aluminium', 'Zinc', 'Nickel', 'Rhodium', 'Palladium', 'Magnesium'],
+  Livestock: ['Beef', 'Poultry', 'Eggs', 'Salmon', 'Live Cattle', 'Feeder Cattle', 'Lean Hogs'],
+}
+
 const COMMODITY_COLORS: Record<string, string> = {
   'Crude Oil': '#FF6B35',
   'Natural Gas': '#3B82F6',
@@ -24,8 +32,34 @@ const COMMODITY_COLORS: Record<string, string> = {
   'Gold': '#FFD700',
   'Silver': '#C0C0C0',
   'Copper': '#B87333',
+  'Steel': '#6B7280',
   'Lithium': '#8B5CF6',
   'Iron Ore': '#6B7280',
+  'Platinum': '#E5E4E2',
+  'Silicon': '#4B5563',
+  'Titanium': '#A8A8A8',
+  'Soybeans': '#90EE90',
+  'Wheat': '#F5DEB3',
+  'Coffee': '#6F4E37',
+  'Cotton': '#F5F5F5',
+  'Rice': '#FFF8DC',
+  'Sugar': '#FFE4E1',
+  'Cocoa': '#8B4513',
+  'Corn': '#FFD700',
+  'Cobalt': '#0047AB',
+  'Aluminium': '#C0C0C0',
+  'Zinc': '#7F8B8B',
+  'Nickel': '#7285A5',
+  'Rhodium': '#E8E8E8',
+  'Palladium': '#CED0DD',
+  'Magnesium': '#B8860B',
+  'Beef': '#8B4513',
+  'Poultry': '#FFD700',
+  'Eggs': '#FFF8DC',
+  'Salmon': '#FA8072',
+  'Live Cattle': '#8B4513',
+  'Feeder Cattle': '#A0522D',
+  'Lean Hogs': '#DEB887',
 }
 
 const GAME_DURATION_SEC = 15 * 60 // 15 minutes
@@ -60,12 +94,31 @@ function canonicalForDb(dbCountry: string): string {
   return dbCountryToCanonical[dbCountry?.trim() || ''] ?? (dbCountry?.trim() || '')
 }
 
+// Flatten commodityCategories (same as map) into game options
+const GAME_COMMODITIES = (() => {
+  const list: { id: string; label: string; color: string; commodityType: string; commodityName: string; source: 'commodity_locations' | 'gold_mines' }[] = []
+  for (const [cat, names] of Object.entries(commodityCategories)) {
+    for (const name of names) {
+      list.push({
+        id: `${cat}-${name}`,
+        label: name,
+        color: COMMODITY_COLORS[name] || '#6B7280',
+        commodityType: cat,
+        commodityName: name,
+        source: name === 'Gold' ? 'gold_mines' : 'commodity_locations',
+      })
+    }
+  }
+  return list
+})()
+
 export interface GameCommodity {
   id: string
   label: string
   color: string
-  source: 'commodity_locations' | 'coal_mines' | 'gold_mines'
-  commodityName?: string
+  commodityType: string
+  commodityName: string
+  source: 'commodity_locations' | 'gold_mines'
 }
 
 interface Site {
@@ -78,8 +131,7 @@ interface Site {
 }
 
 export default function CommodityGame() {
-  const [commodities, setCommodities] = useState<GameCommodity[]>([])
-  const [commodity, setCommodity] = useState<GameCommodity | null>(null)
+  const [commodity, setCommodity] = useState<GameCommodity | null>(GAME_COMMODITIES[0] ?? null)
   const [gameStarted, setGameStarted] = useState(false)
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION_SEC)
   const [countryInput, setCountryInput] = useState('')
@@ -87,69 +139,8 @@ export default function CommodityGame() {
   const [sites, setSites] = useState<Site[]>([])
   const [selectedSite, setSelectedSite] = useState<Site | null>(null)
   const [message, setMessage] = useState<string | null>(null)
-
-  // Fetch available commodities from DB (commodity_locations + coal_mines + gold_mines)
-  useEffect(() => {
-    async function loadCommodities() {
-      const list: GameCommodity[] = []
-
-      // From commodity_locations: distinct commodity_name
-      const { data: clData } = await supabase
-        .from('commodity_locations')
-        .select('commodity_name')
-        .not('latitude', 'is', null)
-        .not('longitude', 'is', null)
-
-      const names = [...new Set((clData || []).map((r: any) => r.commodity_name).filter(Boolean))]
-      for (const name of names.sort()) {
-        list.push({
-          id: `cl-${name}`,
-          label: name,
-          color: COMMODITY_COLORS[name] || '#6B7280',
-          source: 'commodity_locations',
-          commodityName: name,
-        })
-      }
-
-      // Coal from coal_mines
-      const { count: coalCount } = await supabase
-        .from('coal_mines')
-        .select('*', { count: 'exact', head: true })
-        .not('latitude', 'is', null)
-        .not('longitude', 'is', null)
-
-      if ((coalCount ?? 0) > 0) {
-        list.push({
-          id: 'coal_mines',
-          label: 'Coal',
-          color: COMMODITY_COLORS['Coal'] || '#F59E0B',
-          source: 'coal_mines',
-        })
-      }
-
-      // Gold from gold_mines
-      const { count: goldCount } = await supabase
-        .from('gold_mines')
-        .select('*', { count: 'exact', head: true })
-        .not('latitude', 'is', null)
-        .not('longitude', 'is', null)
-
-      if ((goldCount ?? 0) > 0) {
-        list.push({
-          id: 'gold_mines',
-          label: 'Gold',
-          color: COMMODITY_COLORS['Gold'] || '#FFD700',
-          source: 'gold_mines',
-        })
-      }
-
-      setCommodities(list)
-      if (list.length > 0 && !commodity) {
-        setCommodity(list[0])
-      }
-    }
-    loadCommodities()
-  }, [])
+  const [gameOverPopup, setGameOverPopup] = useState<{ score: number; topPercent: number | null } | null>(null)
+  const gameOverHandledRef = useRef(false)
 
   // Timer
   useEffect(() => {
@@ -158,7 +149,46 @@ export default function CommodityGame() {
     return () => clearInterval(t)
   }, [gameStarted, timeLeft])
 
-  // Fetch sites when commodity + unlocked countries change
+  // When clock reaches 0: save score, compute percentile, show popup
+  useEffect(() => {
+    if (!gameStarted || timeLeft !== 0 || !commodity || gameOverHandledRef.current) return
+    gameOverHandledRef.current = true
+
+    const score = unlockedCountries.size
+    const commodityLabel = commodity.commodityName
+
+    async function finishGame() {
+      try {
+        await supabase.from('commodity_game_scores').insert({
+          commodity: commodityLabel,
+          score,
+        })
+      } catch (e) {
+        console.warn('Could not save score:', e)
+      }
+
+      try {
+        const { data: allScores } = await supabase
+          .from('commodity_game_scores')
+          .select('score')
+          .eq('commodity', commodityLabel)
+
+        const scores = (allScores || []).map((r: any) => r.score)
+        const total = scores.length
+        const betterOrEqual = scores.filter((s) => s >= score).length
+        const topPercent = total > 0 ? Math.round((betterOrEqual / total) * 100) : 100
+
+        setGameOverPopup({ score, topPercent })
+      } catch (e) {
+        console.warn('Could not compute percentile:', e)
+        setGameOverPopup({ score, topPercent: null })
+      }
+    }
+
+    finishGame()
+  }, [gameStarted, timeLeft, commodity, unlockedCountries.size])
+
+  // Fetch sites when commodity + unlocked countries change (same logic as EarthMap)
   const fetchSites = useCallback(async () => {
     if (!commodity || unlockedCountries.size === 0) {
       setSites([])
@@ -184,34 +214,12 @@ export default function CommodityGame() {
             ...r,
           }))
         )
-      } else if (commodity.source === 'coal_mines') {
-        const { data, error } = await supabase.from('coal_mines').select('*')
-        if (error) throw error
-        const rows = (data || []).filter((r: any) => {
-          const dbC = r.country?.trim() || ''
-          const canon = canonicalForDb(dbC) || dbC
-          return canonicals.some((u) => u === canon || u === dbC)
-        })
-        setSites(
-          rows.map((r: any) => ({
-            id: r.id,
-            title: r.mine_name || 'Coal Mine',
-            latitude: Number(r.latitude ?? r.lat),
-            longitude: Number(r.longitude ?? r.lng),
-            country: r.country,
-            ...r,
-          }))
-        )
       } else {
-        const name = commodity.commodityName
-        if (!name) {
-          setSites([])
-          return
-        }
         const { data, error } = await supabase
           .from('commodity_locations')
           .select('*')
-          .eq('commodity_name', name)
+          .eq('commodity_type', commodity.commodityType)
+          .eq('commodity_name', commodity.commodityName)
         if (error) throw error
         const rows = (data || []).filter((r: any) => {
           const dbC = r.country?.trim() || ''
@@ -260,6 +268,7 @@ export default function CommodityGame() {
 
   const startGame = () => {
     if (!commodity) return
+    gameOverHandledRef.current = false
     setGameStarted(true)
     setTimeLeft(GAME_DURATION_SEC)
     setUnlockedCountries(new Set())
@@ -274,6 +283,7 @@ export default function CommodityGame() {
     setCountryInput('')
     setSites([])
     setSelectedSite(null)
+    setGameOverPopup(null)
   }
 
   const formatTime = (s: number) => {
@@ -298,7 +308,7 @@ export default function CommodityGame() {
             <select
               value={commodity?.id ?? ''}
               onChange={(e) => {
-                const c = commodities.find((x) => x.id === e.target.value)
+                const c = GAME_COMMODITIES.find((x) => x.id === e.target.value)
                 setCommodity(c ?? null)
                 resetGame()
               }}
@@ -306,7 +316,7 @@ export default function CommodityGame() {
               className="px-3 py-1.5 rounded-lg border border-gray-300 text-sm font-medium"
             >
               <option value="">Select...</option>
-              {commodities.map((c) => (
+              {GAME_COMMODITIES.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.label}
                 </option>
@@ -364,9 +374,7 @@ export default function CommodityGame() {
       <div className="flex-1 min-h-0 relative">
         {!commodity ? (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
-            <p className="text-gray-500 text-lg">
-              {commodities.length === 0 ? 'Loading commodities...' : 'Select a commodity and start the game'}
-            </p>
+            <p className="text-gray-500 text-lg">Select a commodity and start the game</p>
           </div>
         ) : !gameStarted ? (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
@@ -380,6 +388,31 @@ export default function CommodityGame() {
               color={color}
               onSiteSelect={setSelectedSite}
             />
+          </div>
+        )}
+
+        {/* End-of-game popup (when clock reaches 0) */}
+        {gameOverPopup && (
+          <div className="absolute inset-0 z-[2000] flex items-center justify-center bg-black/60">
+            <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md mx-4 text-center">
+              <h2 className="text-2xl font-bold text-black mb-4">Time&apos;s up!</h2>
+              <p className="text-lg text-gray-700 mb-2">
+                You unlocked <strong>{gameOverPopup.score}</strong> countries.
+              </p>
+              {gameOverPopup.topPercent != null ? (
+                <p className="text-xl font-bold text-green-600 mb-6">
+                  You&apos;re in the <strong>Top {gameOverPopup.topPercent}%</strong> of players!
+                </p>
+              ) : (
+                <p className="text-gray-500 mb-6">Ranking will be available once more players have played.</p>
+              )}
+              <button
+                onClick={resetGame}
+                className="px-6 py-3 bg-black text-white rounded-xl font-medium hover:bg-gray-800"
+              >
+                Play Again
+              </button>
+            </div>
           </div>
         )}
 
