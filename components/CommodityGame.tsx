@@ -1,20 +1,32 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { MapContainer, TileLayer, GeoJSON, Marker, Popup, useMap } from 'react-leaflet'
-import L from 'leaflet'
+import dynamic from 'next/dynamic'
 import { supabase } from '@/lib/supabase'
 import { matchCountry } from '@/lib/countries'
-import { Clock, Gamepad2, ChevronDown } from 'lucide-react'
-import 'leaflet/dist/leaflet.css'
+import { Clock, Gamepad2 } from 'lucide-react'
 
-const COMMODITIES = [
-  { id: 'oil', label: 'Oil', color: '#FF6B35' },
-  { id: 'gas', label: 'Natural Gas', color: '#3B82F6' },
-  { id: 'uranium', label: 'Uranium', color: '#10B981' },
-  { id: 'coal', label: 'Coal', color: '#F59E0B' },
-  { id: 'gold', label: 'Gold', color: '#FFD700' },
-] as const
+const GameGlobe3D = dynamic(() => import('./GameGlobe3D'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full flex items-center justify-center bg-black">
+      <div className="text-white">Loading 3D globe...</div>
+    </div>
+  ),
+})
+
+// Default colors by commodity type
+const COMMODITY_COLORS: Record<string, string> = {
+  'Crude Oil': '#FF6B35',
+  'Natural Gas': '#3B82F6',
+  'Uranium': '#10B981',
+  'Coal': '#F59E0B',
+  'Gold': '#FFD700',
+  'Silver': '#C0C0C0',
+  'Copper': '#B87333',
+  'Lithium': '#8B5CF6',
+  'Iron Ore': '#6B7280',
+}
 
 const GAME_DURATION_SEC = 15 * 60 // 15 minutes
 
@@ -48,6 +60,14 @@ function canonicalForDb(dbCountry: string): string {
   return dbCountryToCanonical[dbCountry?.trim() || ''] ?? (dbCountry?.trim() || '')
 }
 
+export interface GameCommodity {
+  id: string
+  label: string
+  color: string
+  source: 'commodity_locations' | 'coal_mines' | 'gold_mines'
+  commodityName?: string
+}
+
 interface Site {
   id: string
   title: string
@@ -57,32 +77,78 @@ interface Site {
   [key: string]: any
 }
 
-function MapStyle({ unlocked, geoData }: { unlocked: Set<string>; geoData: any }) {
-  const map = useMap()
-  useEffect(() => {
-    if (!geoData) return
-    map.fitBounds(L.geoJSON(geoData).getBounds(), { padding: [20, 20] })
-  }, [map, geoData])
-  return null
-}
-
 export default function CommodityGame() {
-  const [commodity, setCommodity] = useState<(typeof COMMODITIES)[number]['id'] | null>(null)
+  const [commodities, setCommodities] = useState<GameCommodity[]>([])
+  const [commodity, setCommodity] = useState<GameCommodity | null>(null)
   const [gameStarted, setGameStarted] = useState(false)
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION_SEC)
   const [countryInput, setCountryInput] = useState('')
   const [unlockedCountries, setUnlockedCountries] = useState<Set<string>>(new Set())
   const [sites, setSites] = useState<Site[]>([])
-  const [geoData, setGeoData] = useState<any>(null)
   const [selectedSite, setSelectedSite] = useState<Site | null>(null)
   const [message, setMessage] = useState<string | null>(null)
 
-  // Load world countries GeoJSON
+  // Fetch available commodities from DB (commodity_locations + coal_mines + gold_mines)
   useEffect(() => {
-    fetch('https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_admin_0_countries.geojson')
-      .then((r) => r.json())
-      .then(setGeoData)
-      .catch(console.error)
+    async function loadCommodities() {
+      const list: GameCommodity[] = []
+
+      // From commodity_locations: distinct commodity_name
+      const { data: clData } = await supabase
+        .from('commodity_locations')
+        .select('commodity_name')
+        .not('latitude', 'is', null)
+        .not('longitude', 'is', null)
+
+      const names = [...new Set((clData || []).map((r: any) => r.commodity_name).filter(Boolean))]
+      for (const name of names.sort()) {
+        list.push({
+          id: `cl-${name}`,
+          label: name,
+          color: COMMODITY_COLORS[name] || '#6B7280',
+          source: 'commodity_locations',
+          commodityName: name,
+        })
+      }
+
+      // Coal from coal_mines
+      const { count: coalCount } = await supabase
+        .from('coal_mines')
+        .select('*', { count: 'exact', head: true })
+        .not('latitude', 'is', null)
+        .not('longitude', 'is', null)
+
+      if ((coalCount ?? 0) > 0) {
+        list.push({
+          id: 'coal_mines',
+          label: 'Coal',
+          color: COMMODITY_COLORS['Coal'] || '#F59E0B',
+          source: 'coal_mines',
+        })
+      }
+
+      // Gold from gold_mines
+      const { count: goldCount } = await supabase
+        .from('gold_mines')
+        .select('*', { count: 'exact', head: true })
+        .not('latitude', 'is', null)
+        .not('longitude', 'is', null)
+
+      if ((goldCount ?? 0) > 0) {
+        list.push({
+          id: 'gold_mines',
+          label: 'Gold',
+          color: COMMODITY_COLORS['Gold'] || '#FFD700',
+          source: 'gold_mines',
+        })
+      }
+
+      setCommodities(list)
+      if (list.length > 0 && !commodity) {
+        setCommodity(list[0])
+      }
+    }
+    loadCommodities()
   }, [])
 
   // Timer
@@ -100,7 +166,7 @@ export default function CommodityGame() {
     }
     const canonicals = Array.from(unlockedCountries)
     try {
-      if (commodity === 'gold') {
+      if (commodity.source === 'gold_mines') {
         const { data, error } = await supabase.from('gold_mines').select('*')
         if (error) throw error
         const rows = (data || []).filter((r: any) => {
@@ -118,7 +184,7 @@ export default function CommodityGame() {
             ...r,
           }))
         )
-      } else if (commodity === 'coal') {
+      } else if (commodity.source === 'coal_mines') {
         const { data, error } = await supabase.from('coal_mines').select('*')
         if (error) throw error
         const rows = (data || []).filter((r: any) => {
@@ -137,10 +203,15 @@ export default function CommodityGame() {
           }))
         )
       } else {
-        const commodityMap = { oil: 'Crude Oil', gas: 'Natural Gas', uranium: 'Uranium' }
-        const name = commodityMap[commodity as keyof typeof commodityMap]
-        let q = supabase.from('commodity_locations').select('*').eq('commodity_name', name)
-        const { data, error } = await q
+        const name = commodity.commodityName
+        if (!name) {
+          setSites([])
+          return
+        }
+        const { data, error } = await supabase
+          .from('commodity_locations')
+          .select('*')
+          .eq('commodity_name', name)
         if (error) throw error
         const rows = (data || []).filter((r: any) => {
           const dbC = r.country?.trim() || ''
@@ -211,7 +282,7 @@ export default function CommodityGame() {
     return `${m}:${sec.toString().padStart(2, '0')}`
   }
 
-  const color = commodity ? COMMODITIES.find((c) => c.id === commodity)?.color : '#666'
+  const color = commodity?.color ?? '#666'
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-gray-100">
@@ -225,16 +296,17 @@ export default function CommodityGame() {
           <div className="flex items-center gap-2">
             <label className="text-sm font-medium text-gray-600">Commodity:</label>
             <select
-              value={commodity || ''}
+              value={commodity?.id ?? ''}
               onChange={(e) => {
-                setCommodity((e.target.value || null) as any)
+                const c = commodities.find((x) => x.id === e.target.value)
+                setCommodity(c ?? null)
                 resetGame()
               }}
               disabled={gameStarted}
               className="px-3 py-1.5 rounded-lg border border-gray-300 text-sm font-medium"
             >
               <option value="">Select...</option>
-              {COMMODITIES.map((c) => (
+              {commodities.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.label}
                 </option>
@@ -288,70 +360,27 @@ export default function CommodityGame() {
         </div>
       )}
 
-      {/* Map area */}
+      {/* 3D Globe */}
       <div className="flex-1 min-h-0 relative">
         {!commodity ? (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
-            <p className="text-gray-500 text-lg">Select a commodity and start the game</p>
+            <p className="text-gray-500 text-lg">
+              {commodities.length === 0 ? 'Loading commodities...' : 'Select a commodity and start the game'}
+            </p>
           </div>
         ) : !gameStarted ? (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
             <p className="text-gray-500 text-lg">Click &quot;Start Game&quot; to begin</p>
           </div>
         ) : (
-          <MapContainer
-            center={[20, 0]}
-            zoom={2}
-            className="w-full h-full"
-            style={{ minHeight: 400 }}
-          >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          <div className="w-full h-full min-h-[400px]">
+            <GameGlobe3D
+              unlockedCountries={unlockedCountries}
+              sites={sites}
+              color={color}
+              onSiteSelect={setSelectedSite}
             />
-            {geoData && (
-              <GeoJSON
-                key={`${unlockedCountries.size}-${commodity}`}
-                data={geoData}
-                style={(feature) => {
-                  const admin = feature?.properties?.ADMIN || feature?.properties?.NAME || ''
-                  const isUnlocked = unlockedCountries.has(admin)
-                  return {
-                    fillColor: isUnlocked ? color : '#1a1a1a',
-                    fillOpacity: isUnlocked ? 0.6 : 0.85,
-                    color: isUnlocked ? color : '#333',
-                    weight: 1,
-                  }
-                }}
-              />
-            )}
-            {sites.map((site) => (
-              <Marker
-                key={site.id}
-                position={[site.latitude, site.longitude]}
-                eventHandlers={{ click: () => setSelectedSite(site) }}
-                icon={L.divIcon({
-                  className: 'custom-marker',
-                  html: `<div style="width:12px;height:12px;border-radius:50%;background:${color};border:2px solid white;box-shadow:0 1px 3px rgba(0,0,0,0.3)"></div>`,
-                  iconSize: [12, 12],
-                  iconAnchor: [6, 6],
-                })}
-              >
-                <Popup>
-                  <div className="min-w-[200px]">
-                    <p className="font-bold text-base mb-1">{site.title}</p>
-                    <p className="text-sm text-gray-600">{site.country}</p>
-                    {site.operator && (
-                      <p className="text-sm mt-1">
-                        <strong>Operator:</strong> {site.operator}
-                      </p>
-                    )}
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
-            <MapStyle unlocked={unlockedCountries} geoData={geoData} />
-          </MapContainer>
+          </div>
         )}
 
         {/* Selected site panel */}
@@ -359,7 +388,7 @@ export default function CommodityGame() {
           <div className="absolute bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-96 bg-white rounded-xl shadow-xl border border-gray-200 p-4 max-h-64 overflow-y-auto z-[1000]">
             <button
               onClick={() => setSelectedSite(null)}
-              className="absolute top-2 right-2 text-gray-400 hover:text-black"
+              className="absolute top-2 right-2 text-gray-400 hover:text-black text-xl"
             >
               ×
             </button>
@@ -378,13 +407,13 @@ export default function CommodityGame() {
                   <span className="text-gray-500">Address:</span> {selectedSite.address}
                 </p>
               )}
-              {selectedSite.annual_capacity_troy_oz && (
+              {selectedSite.annual_capacity_troy_oz != null && (
                 <p>
                   <span className="text-gray-500">Annual capacity:</span>{' '}
                   {selectedSite.annual_capacity_troy_oz.toLocaleString()} troy oz
                 </p>
               )}
-              {selectedSite.annual_capacity_tonnes && (
+              {selectedSite.annual_capacity_tonnes != null && (
                 <p>
                   <span className="text-gray-500">Annual capacity:</span>{' '}
                   {selectedSite.annual_capacity_tonnes?.toLocaleString()} tonnes
