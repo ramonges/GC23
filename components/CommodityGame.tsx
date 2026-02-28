@@ -95,8 +95,9 @@ function canonicalForDb(dbCountry: string): string {
 }
 
 // Flatten commodityCategories (same as map) into game options
+// All data from commodity_locations (big table used by EarthMap)
 const GAME_COMMODITIES = (() => {
-  const list: { id: string; label: string; color: string; commodityType: string; commodityName: string; source: 'commodity_locations' | 'gold_mines' }[] = []
+  const list: { id: string; label: string; color: string; commodityType: string; commodityName: string }[] = []
   for (const [cat, names] of Object.entries(commodityCategories)) {
     for (const name of names) {
       list.push({
@@ -105,7 +106,6 @@ const GAME_COMMODITIES = (() => {
         color: COMMODITY_COLORS[name] || '#6B7280',
         commodityType: cat,
         commodityName: name,
-        source: name === 'Gold' ? 'gold_mines' : 'commodity_locations',
       })
     }
   }
@@ -118,7 +118,6 @@ export interface GameCommodity {
   color: string
   commodityType: string
   commodityName: string
-  source: 'commodity_locations' | 'gold_mines'
 }
 
 interface Site {
@@ -139,7 +138,11 @@ export default function CommodityGame() {
   const [sites, setSites] = useState<Site[]>([])
   const [selectedSite, setSelectedSite] = useState<Site | null>(null)
   const [message, setMessage] = useState<string | null>(null)
-  const [gameOverPopup, setGameOverPopup] = useState<{ score: number; topPercent: number | null } | null>(null)
+  const [gameOverPopup, setGameOverPopup] = useState<{
+    score: number
+    topPercent: number | null
+    countries: string[]
+  } | null>(null)
   const gameOverHandledRef = useRef(false)
 
   // Timer
@@ -149,46 +152,48 @@ export default function CommodityGame() {
     return () => clearInterval(t)
   }, [gameStarted, timeLeft])
 
-  // When clock reaches 0: save score, compute percentile, show popup
-  useEffect(() => {
-    if (!gameStarted || timeLeft !== 0 || !commodity || gameOverHandledRef.current) return
+  const handleFinishGame = useCallback(async () => {
+    if (!commodity || gameOverHandledRef.current) return
     gameOverHandledRef.current = true
 
     const score = unlockedCountries.size
+    const countries = Array.from(unlockedCountries).sort()
     const commodityLabel = commodity.commodityName
 
-    async function finishGame() {
-      try {
-        await supabase.from('commodity_game_scores').insert({
-          commodity: commodityLabel,
-          score,
-        })
-      } catch (e) {
-        console.warn('Could not save score:', e)
-      }
-
-      try {
-        const { data: allScores } = await supabase
-          .from('commodity_game_scores')
-          .select('score')
-          .eq('commodity', commodityLabel)
-
-        const scores = (allScores || []).map((r: any) => r.score)
-        const total = scores.length
-        const betterOrEqual = scores.filter((s) => s >= score).length
-        const topPercent = total > 0 ? Math.round((betterOrEqual / total) * 100) : 100
-
-        setGameOverPopup({ score, topPercent })
-      } catch (e) {
-        console.warn('Could not compute percentile:', e)
-        setGameOverPopup({ score, topPercent: null })
-      }
+    try {
+      await supabase.from('commodity_game_scores').insert({
+        commodity: commodityLabel,
+        score,
+      })
+    } catch (e) {
+      console.warn('Could not save score:', e)
     }
 
-    finishGame()
-  }, [gameStarted, timeLeft, commodity, unlockedCountries.size])
+    try {
+      const { data: allScores } = await supabase
+        .from('commodity_game_scores')
+        .select('score')
+        .eq('commodity', commodityLabel)
 
-  // Fetch sites when commodity + unlocked countries change (same logic as EarthMap)
+      const scores = (allScores || []).map((r: any) => r.score)
+      const total = scores.length
+      const betterOrEqual = scores.filter((s) => s >= score).length
+      const topPercent = total > 0 ? Math.round((betterOrEqual / total) * 100) : 100
+
+      setGameOverPopup({ score, topPercent, countries })
+    } catch (e) {
+      console.warn('Could not compute percentile:', e)
+      setGameOverPopup({ score, topPercent: null, countries })
+    }
+  }, [commodity, unlockedCountries])
+
+  // When clock reaches 0: trigger finish
+  useEffect(() => {
+    if (!gameStarted || timeLeft !== 0 || !commodity || gameOverHandledRef.current) return
+    handleFinishGame()
+  }, [gameStarted, timeLeft, commodity, handleFinishGame])
+
+  // Fetch sites from commodity_locations only (big table used by EarthMap)
   const fetchSites = useCallback(async () => {
     if (!commodity || unlockedCountries.size === 0) {
       setSites([])
@@ -196,47 +201,44 @@ export default function CommodityGame() {
     }
     const canonicals = Array.from(unlockedCountries)
     try {
-      if (commodity.source === 'gold_mines') {
-        const { data, error } = await supabase.from('gold_mines').select('*')
-        if (error) throw error
-        const rows = (data || []).filter((r: any) => {
-          const dbC = r.country?.trim() || ''
-          const canon = canonicalForDb(dbC) || dbC
-          return canonicals.some((u) => u === canon || u === dbC)
-        })
-        setSites(
-          rows.map((r: any) => ({
-            id: r.id,
-            title: r.mine_name || r.name || 'Gold Mine',
-            latitude: Number(r.latitude ?? r.lat),
-            longitude: Number(r.longitude ?? r.lng),
-            country: r.country,
-            ...r,
-          }))
-        )
-      } else {
+      const PAGE_SIZE = 1000
+      let allData: any[] = []
+      let from = 0
+      let keepFetching = true
+
+      while (keepFetching) {
         const { data, error } = await supabase
           .from('commodity_locations')
           .select('*')
           .eq('commodity_type', commodity.commodityType)
           .eq('commodity_name', commodity.commodityName)
+          .not('latitude', 'is', null)
+          .not('longitude', 'is', null)
+          .range(from, from + PAGE_SIZE - 1)
+
         if (error) throw error
-        const rows = (data || []).filter((r: any) => {
-          const dbC = r.country?.trim() || ''
-          const canon = canonicalForDb(dbC) || dbC
-          return canonicals.some((u) => u === canon || u === dbC)
-        })
-        setSites(
-          rows.map((r: any) => ({
-            id: r.id,
-            title: r.title || 'Site',
-            latitude: Number(r.latitude ?? r.lat),
-            longitude: Number(r.longitude ?? r.lng),
-            country: r.country,
-            ...r,
-          }))
-        )
+        const rows = data || []
+        allData = allData.concat(rows)
+        from += PAGE_SIZE
+        if (rows.length < PAGE_SIZE) keepFetching = false
       }
+
+      const filtered = allData.filter((r: any) => {
+        const dbC = r.country?.trim() || ''
+        const canon = canonicalForDb(dbC) || dbC
+        return canonicals.some((u) => u === canon || u === dbC)
+      })
+
+      setSites(
+        filtered.map((r: any) => ({
+          id: r.id,
+          title: r.title || 'Site',
+          latitude: Number(r.latitude ?? r.lat),
+          longitude: Number(r.longitude ?? r.lng),
+          country: r.country,
+          ...r,
+        }))
+      )
     } catch (e) {
       console.error(e)
       setSites([])
@@ -347,14 +349,14 @@ export default function CommodityGame() {
 
       {/* Input bar (when game started) */}
       {gameStarted && (
-        <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3">
+        <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3 flex-wrap">
           <input
             type="text"
             value={countryInput}
             onChange={(e) => setCountryInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleUnlock()}
             placeholder="Type a country name..."
-            className="flex-1 max-w-md px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
+            className="flex-1 min-w-[200px] max-w-md px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
             disabled={timeLeft <= 0}
           />
           <button
@@ -363,6 +365,13 @@ export default function CommodityGame() {
             className="px-4 py-2 bg-black text-white rounded-lg font-medium disabled:opacity-50"
           >
             Unlock
+          </button>
+          <button
+            onClick={() => handleFinishGame()}
+            disabled={!!gameOverPopup}
+            className="px-4 py-2 bg-gray-700 text-white rounded-lg font-medium hover:bg-gray-600 disabled:opacity-50"
+          >
+            Finish
           </button>
           {message && (
             <span className="text-sm font-medium text-green-600 animate-pulse">{message}</span>
@@ -391,24 +400,32 @@ export default function CommodityGame() {
           </div>
         )}
 
-        {/* End-of-game popup (when clock reaches 0) */}
+        {/* End-of-game popup (when clock reaches 0 or Finish clicked) */}
         {gameOverPopup && (
-          <div className="absolute inset-0 z-[2000] flex items-center justify-center bg-black/60">
-            <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md mx-4 text-center">
-              <h2 className="text-2xl font-bold text-black mb-4">Time&apos;s up!</h2>
-              <p className="text-lg text-gray-700 mb-2">
+          <div className="absolute inset-0 z-[2000] flex items-center justify-center bg-black/60 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-lg w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+              <h2 className="text-2xl font-bold text-black mb-4 text-center">Results</h2>
+              <p className="text-lg text-gray-700 mb-2 text-center">
                 You unlocked <strong>{gameOverPopup.score}</strong> countries.
               </p>
               {gameOverPopup.topPercent != null ? (
-                <p className="text-xl font-bold text-green-600 mb-6">
+                <p className="text-xl font-bold text-green-600 mb-4 text-center">
                   You&apos;re in the <strong>Top {gameOverPopup.topPercent}%</strong> of players!
                 </p>
               ) : (
-                <p className="text-gray-500 mb-6">Ranking will be available once more players have played.</p>
+                <p className="text-gray-500 mb-4 text-center">Ranking will be available once more players have played.</p>
+              )}
+              {gameOverPopup.countries.length > 0 && (
+                <div className="mb-6 flex-1 min-h-0 overflow-hidden">
+                  <p className="text-sm font-medium text-gray-600 mb-2">Countries unlocked:</p>
+                  <div className="bg-gray-50 rounded-lg p-3 max-h-40 overflow-y-auto text-sm text-gray-700">
+                    {gameOverPopup.countries.join(', ')}
+                  </div>
+                </div>
               )}
               <button
                 onClick={resetGame}
-                className="px-6 py-3 bg-black text-white rounded-xl font-medium hover:bg-gray-800"
+                className="px-6 py-3 bg-black text-white rounded-xl font-medium hover:bg-gray-800 w-full"
               >
                 Play Again
               </button>
