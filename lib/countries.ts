@@ -269,6 +269,8 @@ export const countryMatches: Record<string, string> = {
   'zimbabwe': 'Zimbabwe',
 }
 
+export const allCountries = [...new Set(Object.values(countryMatches))].sort()
+
 export function matchCountry(input: string): string | null {
   const normalized = input.trim().toLowerCase()
   if (!normalized) return null

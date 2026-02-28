@@ -10,6 +10,18 @@ interface GameGlobe3DProps {
   onSiteSelect?: (site: any) => void
 }
 
+function getCountryCentroid(feature: any): [number, number] {
+  const coords = feature?.geometry?.coordinates
+  if (!coords) return [0, 0]
+  const ring = feature.geometry.type === 'Polygon' ? coords[0] : coords[0]?.[0]
+  if (!ring || ring.length === 0) return [0, 0]
+  const sum = ring.reduce(
+    (acc: [number, number], c: number[]) => [acc[0] + c[0], acc[1] + c[1]],
+    [0, 0]
+  )
+  return [sum[0] / ring.length, sum[1] / ring.length]
+}
+
 function hexToRgba(hex: string, alpha: number): string {
   const m = hex.match(/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i)
   if (!m) return `rgba(255,255,255,${alpha})`
@@ -22,6 +34,7 @@ function hexToRgba(hex: string, alpha: number): string {
 function GameGlobe3D({ unlockedCountries, sites, color, onSiteSelect }: GameGlobe3DProps) {
   const globeEl = useRef<HTMLDivElement>(null)
   const globeRef = useRef<any>(null)
+  const countriesRef = useRef<any[]>([])
   const onSiteSelectRef = useRef(onSiteSelect)
 
   useEffect(() => {
@@ -50,12 +63,23 @@ function GameGlobe3D({ unlockedCountries, sites, color, onSiteSelect }: GameGlob
 
     fetch('https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_admin_0_countries.geojson')
       .then((res) => res.json())
-      .then((countries) => {
+      .then((geo) => {
+        const features = geo.features || []
+        countriesRef.current = features
         globe
-          .polygonsData(countries.features)
+          .polygonsData(features)
           .polygonSideColor(() => 'rgba(255,255,255,0.02)')
           .polygonStrokeColor(() => '#444')
           .polygonAltitude(0.01)
+        globe
+          .labelsData([])
+          .labelLat((d: any) => d.lat)
+          .labelLng((d: any) => d.lng)
+          .labelText((d: any) => d.name)
+          .labelSize(0.35)
+          .labelAltitude(0.02)
+          .labelColor(() => 'rgba(255,255,255,0.95)')
+          .labelResolution(3)
       })
 
     globe
@@ -108,7 +132,7 @@ function GameGlobe3D({ unlockedCountries, sites, color, onSiteSelect }: GameGlob
     }
   }, [])
 
-  // Update polygon colors when unlocked countries change
+  // Update polygon colors and country labels when unlocked countries change
   useEffect(() => {
     const globe = globeRef.current
     if (!globe) return
@@ -121,6 +145,18 @@ function GameGlobe3D({ unlockedCountries, sites, color, onSiteSelect }: GameGlob
       }
       return 'rgba(20, 20, 20, 0.92)'
     })
+
+    const features = countriesRef.current
+    const labelData = features
+      .filter((f: any) => unlockedCountries.has(f?.properties?.ADMIN || ''))
+      .map((f: any) => {
+        const admin = f?.properties?.ADMIN || ''
+        const [lng, lat] = f?.properties?.LABEL_X != null && f?.properties?.LABEL_Y != null
+          ? [f.properties.LABEL_X, f.properties.LABEL_Y]
+          : getCountryCentroid(f)
+        return { lat, lng, name: admin }
+      })
+    globe.labelsData(labelData)
   }, [unlockedCountries, color])
 
   // Update points when sites change

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import { supabase } from '@/lib/supabase'
-import { matchCountry } from '@/lib/countries'
+import { matchCountry, allCountries } from '@/lib/countries'
 import { Clock, Gamepad2 } from 'lucide-react'
 
 const GameGlobe3D = dynamic(() => import('./GameGlobe3D'), {
@@ -143,9 +143,10 @@ export default function CommodityGame() {
     topPercent: number | null
     countries: string[]
   } | null>(null)
+  const [showAllCountriesTable, setShowAllCountriesTable] = useState(false)
   const gameOverHandledRef = useRef(false)
 
-  // Timer
+  // Timer starts when user unlocks first country
   useEffect(() => {
     if (!gameStarted || timeLeft <= 0) return
     const t = setInterval(() => setTimeLeft((s) => Math.max(0, s - 1)), 1000)
@@ -153,12 +154,12 @@ export default function CommodityGame() {
   }, [gameStarted, timeLeft])
 
   const handleFinishGame = useCallback(async () => {
-    if (!commodity || gameOverHandledRef.current) return
+    if (unlockedCountries.size === 0 || gameOverHandledRef.current) return
     gameOverHandledRef.current = true
 
     const score = unlockedCountries.size
     const countries = Array.from(unlockedCountries).sort()
-    const commodityLabel = commodity.commodityName
+    const commodityLabel = (commodity ?? GAME_COMMODITIES[0])?.commodityName ?? 'Crude Oil'
 
     try {
       await supabase.from('commodity_game_scores').insert({
@@ -266,16 +267,12 @@ export default function CommodityGame() {
     setMessage(`✓ ${matched} unlocked!`)
     setTimeout(() => setMessage(null), 1500)
     setCountryInput('')
-  }
-
-  const startGame = () => {
-    if (!commodity) return
-    gameOverHandledRef.current = false
-    setGameStarted(true)
-    setTimeLeft(GAME_DURATION_SEC)
-    setUnlockedCountries(new Set())
-    setSites([])
-    setSelectedSite(null)
+    // Start timer on first unlock
+    if (!gameStarted) {
+      gameOverHandledRef.current = false
+      setGameStarted(true)
+      setTimeLeft(GAME_DURATION_SEC)
+    }
   }
 
   const resetGame = () => {
@@ -286,6 +283,7 @@ export default function CommodityGame() {
     setSites([])
     setSelectedSite(null)
     setGameOverPopup(null)
+    setShowAllCountriesTable(false)
   }
 
   const formatTime = (s: number) => {
@@ -294,7 +292,7 @@ export default function CommodityGame() {
     return `${m}:${sec.toString().padStart(2, '0')}`
   }
 
-  const color = commodity?.color ?? '#666'
+  const color = (commodity ?? GAME_COMMODITIES[0])?.color ?? '#666'
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-gray-100">
@@ -306,18 +304,16 @@ export default function CommodityGame() {
             Commodity Game
           </h1>
           <div className="flex items-center gap-2">
-            <label className="text-sm font-medium text-gray-600">Commodity:</label>
+            <label className="text-sm font-medium text-gray-600">Show:</label>
             <select
               value={commodity?.id ?? ''}
               onChange={(e) => {
                 const c = GAME_COMMODITIES.find((x) => x.id === e.target.value)
                 setCommodity(c ?? null)
-                resetGame()
               }}
-              disabled={gameStarted}
               className="px-3 py-1.5 rounded-lg border border-gray-300 text-sm font-medium"
             >
-              <option value="">Select...</option>
+              <option value="">Select commodity...</option>
               {GAME_COMMODITIES.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.label}
@@ -325,50 +321,40 @@ export default function CommodityGame() {
               ))}
             </select>
           </div>
-          {commodity && !gameStarted && (
-            <button
-              onClick={startGame}
-              className="px-4 py-2 bg-black text-white rounded-lg font-medium hover:bg-gray-800"
-            >
-              Start Game (15 min)
-            </button>
-          )}
           {gameStarted && (
-            <>
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg">
-                <Clock size={18} />
-                <span className="font-mono font-bold text-lg">{formatTime(timeLeft)}</span>
-              </div>
-              <span className="text-sm text-gray-500">
-                {unlockedCountries.size} countries unlocked
-              </span>
-            </>
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg">
+              <Clock size={18} />
+              <span className="font-mono font-bold text-lg">{formatTime(timeLeft)}</span>
+            </div>
           )}
+          <span className="text-sm text-gray-500">
+            {unlockedCountries.size} / {allCountries.length} countries unlocked
+          </span>
         </div>
       </div>
 
-      {/* Input bar (when game started) */}
-      {gameStarted && (
+      {/* Input bar - always visible */}
+      {!gameOverPopup && (
         <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3 flex-wrap">
           <input
             type="text"
             value={countryInput}
             onChange={(e) => setCountryInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleUnlock()}
-            placeholder="Type a country name..."
+            placeholder="Type a country name to unlock it..."
             className="flex-1 min-w-[200px] max-w-md px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
-            disabled={timeLeft <= 0}
+            disabled={timeLeft <= 0 && gameStarted}
           />
           <button
             onClick={handleUnlock}
-            disabled={timeLeft <= 0}
+            disabled={timeLeft <= 0 && gameStarted}
             className="px-4 py-2 bg-black text-white rounded-lg font-medium disabled:opacity-50"
           >
             Unlock
           </button>
           <button
             onClick={() => handleFinishGame()}
-            disabled={!!gameOverPopup}
+            disabled={unlockedCountries.size === 0}
             className="px-4 py-2 bg-gray-700 text-white rounded-lg font-medium hover:bg-gray-600 disabled:opacity-50"
           >
             Finish
@@ -379,26 +365,16 @@ export default function CommodityGame() {
         </div>
       )}
 
-      {/* 3D Globe */}
+      {/* 3D Globe - always visible */}
       <div className="flex-1 min-h-0 relative">
-        {!commodity ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
-            <p className="text-gray-500 text-lg">Select a commodity and start the game</p>
-          </div>
-        ) : !gameStarted ? (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-200">
-            <p className="text-gray-500 text-lg">Click &quot;Start Game&quot; to begin</p>
-          </div>
-        ) : (
-          <div className="w-full h-full min-h-[400px]">
-            <GameGlobe3D
-              unlockedCountries={unlockedCountries}
-              sites={sites}
-              color={color}
-              onSiteSelect={setSelectedSite}
-            />
-          </div>
-        )}
+        <div className="w-full h-full min-h-[400px]">
+          <GameGlobe3D
+            unlockedCountries={unlockedCountries}
+            sites={sites}
+            color={color}
+            onSiteSelect={setSelectedSite}
+          />
+        </div>
 
         {/* End-of-game popup (when clock reaches 0 or Finish clicked) */}
         {gameOverPopup && (
@@ -406,7 +382,7 @@ export default function CommodityGame() {
             <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-lg w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
               <h2 className="text-2xl font-bold text-black mb-4 text-center">Results</h2>
               <p className="text-lg text-gray-700 mb-2 text-center">
-                You unlocked <strong>{gameOverPopup.score}</strong> countries.
+                You unlocked <strong>{gameOverPopup.score}</strong> / {allCountries.length} countries.
               </p>
               {gameOverPopup.topPercent != null ? (
                 <p className="text-xl font-bold text-green-600 mb-4 text-center">
@@ -416,19 +392,57 @@ export default function CommodityGame() {
                 <p className="text-gray-500 mb-4 text-center">Ranking will be available once more players have played.</p>
               )}
               {gameOverPopup.countries.length > 0 && (
-                <div className="mb-6 flex-1 min-h-0 overflow-hidden">
+                <div className="mb-4 flex-1 min-h-0 overflow-hidden">
                   <p className="text-sm font-medium text-gray-600 mb-2">Countries unlocked:</p>
-                  <div className="bg-gray-50 rounded-lg p-3 max-h-40 overflow-y-auto text-sm text-gray-700">
+                  <div className="bg-gray-50 rounded-lg p-3 max-h-32 overflow-y-auto text-sm text-gray-700">
                     {gameOverPopup.countries.join(', ')}
                   </div>
                 </div>
               )}
+              <button
+                onClick={() => setShowAllCountriesTable(true)}
+                className="px-6 py-2 mb-3 bg-gray-200 text-gray-800 rounded-xl font-medium hover:bg-gray-300 w-full"
+              >
+                View all countries (found / missed)
+              </button>
               <button
                 onClick={resetGame}
                 className="px-6 py-3 bg-black text-white rounded-xl font-medium hover:bg-gray-800 w-full"
               >
                 Play Again
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* All countries table overlay */}
+        {gameOverPopup && showAllCountriesTable && (
+          <div className="absolute inset-0 z-[3000] flex items-center justify-center bg-black/70 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold text-black">All countries — black = found, red = missed</h3>
+                <button
+                  onClick={() => setShowAllCountriesTable(false)}
+                  className="text-gray-500 hover:text-black text-2xl leading-none"
+                >
+                  ×
+                </button>
+              </div>
+              <div className="overflow-y-auto flex-1 border border-gray-200 rounded-lg">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 p-4">
+                  {allCountries.map((c) => {
+                    const found = gameOverPopup!.countries.includes(c)
+                    return (
+                      <div
+                        key={c}
+                        className={`text-sm py-1 ${found ? 'text-black font-medium' : 'text-red-600'}`}
+                      >
+                        {c}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
             </div>
           </div>
         )}
