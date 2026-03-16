@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { Search, Filter, ChevronDown } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-import { CommodityData, RefineryData, ShippingRoute } from '@/lib/types'
+import { CommodityData, RefineryData, ShippingRoute, VesselData } from '@/lib/types'
 import dynamic from 'next/dynamic'
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ''
@@ -861,6 +861,15 @@ export default function EarthMap() {
   const [satelliteFullscreen, setSatelliteFullscreen] = useState(false)
   const [fullscreenZoom, setFullscreenZoom] = useState(15)
 
+  // Vessel tracking state
+  const [showVessels, setShowVessels] = useState(false)
+  const [vessels, setVessels] = useState<VesselData[]>([])
+  const [vesselCount, setVesselCount] = useState(0)
+  const [vesselCategoryFilter, setVesselCategoryFilter] = useState<Set<string>>(new Set(['tanker', 'oil_tanker', 'bulk_carrier']))
+  const [showVesselFilters, setShowVesselFilters] = useState(false)
+  const vesselsRef = useRef<Map<string, VesselData>>(new Map())
+  const vesselEventSourceRef = useRef<EventSource | null>(null)
+
   const activeFiltersCount = [selectedCategory, selectedCommodity, selectedCompany].filter(Boolean).length
 
   useEffect(() => {
@@ -870,6 +879,91 @@ export default function EarthMap() {
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [satelliteFullscreen])
+
+  // AIS Stream SSE connection for vessel tracking
+  useEffect(() => {
+    if (!showVessels) {
+      if (vesselEventSourceRef.current) {
+        vesselEventSourceRef.current.close()
+        vesselEventSourceRef.current = null
+      }
+      vesselsRef.current.clear()
+      setVessels([])
+      setVesselCount(0)
+      return
+    }
+
+    const categories = Array.from(vesselCategoryFilter).join(',')
+    const url = `/api/ais-stream${categories ? `?categories=${categories}` : ''}`
+    const es = new EventSource(url)
+    vesselEventSourceRef.current = es
+
+    let batchTimeout: ReturnType<typeof setTimeout> | null = null
+    const pendingUpdates = new Map<string, VesselData>()
+
+    const flushUpdates = () => {
+      if (pendingUpdates.size === 0) return
+      const map = vesselsRef.current
+      pendingUpdates.forEach((v, mmsi) => map.set(mmsi, v))
+      pendingUpdates.clear()
+      const arr = Array.from(map.values())
+      setVessels(arr)
+      setVesselCount(arr.length)
+    }
+
+    es.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data)
+        if (data.type === 'position' && data.latitude && data.longitude) {
+          const existing = vesselsRef.current.get(data.mmsi)
+          pendingUpdates.set(data.mmsi, {
+            ...existing,
+            mmsi: data.mmsi,
+            vessel_name: data.vessel_name || existing?.vessel_name,
+            latitude: data.latitude,
+            longitude: data.longitude,
+            speed_knots: data.speed_knots,
+            course: data.course,
+            heading: data.heading,
+            ship_type: data.ship_type,
+            ship_category: data.ship_category || existing?.ship_category,
+            navigation_status: data.navigation_status,
+          })
+          if (!batchTimeout) {
+            batchTimeout = setTimeout(() => {
+              flushUpdates()
+              batchTimeout = null
+            }, 2000)
+          }
+        }
+        if (data.type === 'static') {
+          const existing = vesselsRef.current.get(data.mmsi)
+          if (existing) {
+            vesselsRef.current.set(data.mmsi, {
+              ...existing,
+              vessel_name: data.vessel_name || existing.vessel_name,
+              ship_type: data.ship_type ?? existing.ship_type,
+              ship_category: data.ship_category || existing.ship_category,
+              destination: data.destination,
+              length_meters: data.length_meters,
+              width_meters: data.width_meters,
+            })
+          }
+        }
+      } catch { /* skip */ }
+    }
+
+    es.onerror = () => {
+      es.close()
+      vesselEventSourceRef.current = null
+    }
+
+    return () => {
+      if (batchTimeout) clearTimeout(batchTimeout)
+      es.close()
+      vesselEventSourceRef.current = null
+    }
+  }, [showVessels, vesselCategoryFilter])
 
   const fetchAvailableCompanies = useCallback(async () => {
     try {
@@ -1210,6 +1304,33 @@ export default function EarthMap() {
             <span className="hidden sm:inline">Satellite</span>
           </button>
 
+          {/* Vessels Toggle */}
+          <button
+            onClick={() => setShowVessels(!showVessels)}
+            className={`h-9 sm:h-10 px-3 sm:px-5 text-xs sm:text-sm font-medium rounded-lg transition-all flex items-center gap-1.5 sm:gap-2 ${
+              showVessels
+                ? 'bg-blue-600 text-white hover:bg-blue-500'
+                : 'bg-neutral-900 text-neutral-300 border border-neutral-700 hover:border-neutral-500 hover:text-white'
+            }`}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M5 12l4-4m-4 4l4 4M19 12l-4-4m4 4l-4 4" />
+            </svg>
+            <span className="hidden sm:inline">Vessels</span>
+            {showVessels && vesselCount > 0 && <span className="bg-black/30 px-1.5 py-0.5 rounded text-xs">{vesselCount}</span>}
+          </button>
+
+          {/* Vessel Filter Button */}
+          {showVessels && (
+            <button
+              onClick={() => setShowVesselFilters(true)}
+              className="h-9 sm:h-10 px-3 text-xs sm:text-sm font-medium rounded-lg bg-neutral-900 text-neutral-300 border border-neutral-700 hover:border-neutral-500 hover:text-white transition-all flex items-center gap-1.5"
+            >
+              <Filter size={14} />
+              <span className="hidden sm:inline">Type</span>
+            </button>
+          )}
+
           <div className="flex-1" />
 
           {/* Search Button */}
@@ -1419,6 +1540,88 @@ export default function EarthMap() {
         </div>
       )}
 
+      {/* Vessel Type Filter Modal */}
+      {showVesselFilters && (
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] flex items-center justify-center"
+          onClick={() => setShowVesselFilters(false)}
+        >
+          <div
+            className="bg-neutral-950 border border-neutral-800 rounded-xl p-4 sm:p-6 max-w-md w-full mx-2 sm:mx-4 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                Vessel Types
+              </h3>
+              <button onClick={() => setShowVesselFilters(false)} className="text-neutral-500 hover:text-white transition-colors p-1">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              {[
+                { key: 'tanker', label: 'Tanker', color: '#EF4444' },
+                { key: 'oil_tanker', label: 'Oil Tanker', color: '#DC2626' },
+                { key: 'chemical_tanker', label: 'Chemical Tanker', color: '#F97316' },
+                { key: 'bulk_carrier', label: 'Dry Bulk Carrier', color: '#3B82F6' },
+                { key: 'container', label: 'Container Ship', color: '#8B5CF6' },
+                { key: 'general_cargo', label: 'General Cargo', color: '#6B7280' },
+                { key: 'lng_carrier', label: 'LNG Carrier', color: '#06B6D4' },
+                { key: 'lpg_carrier', label: 'LPG Carrier', color: '#14B8A6' },
+              ].map(({ key, label, color }) => (
+                <label
+                  key={key}
+                  className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all ${
+                    vesselCategoryFilter.has(key)
+                      ? 'bg-neutral-900 border border-white/20'
+                      : 'bg-neutral-900/50 border border-transparent hover:bg-neutral-900'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={vesselCategoryFilter.has(key)}
+                    onChange={(e) => {
+                      const next = new Set(vesselCategoryFilter)
+                      if (e.target.checked) next.add(key)
+                      else next.delete(key)
+                      setVesselCategoryFilter(next)
+                    }}
+                    className="sr-only"
+                  />
+                  <div className={`w-5 h-5 rounded flex items-center justify-center border-2 transition-all ${
+                    vesselCategoryFilter.has(key) ? 'border-white bg-white' : 'border-neutral-600 bg-transparent'
+                  }`}>
+                    {vesselCategoryFilter.has(key) && (
+                      <svg className="w-3 h-3 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </div>
+                  <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
+                  <span className="text-white text-sm font-medium">{label}</span>
+                </label>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-between mt-5 pt-4 border-t border-neutral-800">
+              <p className="text-neutral-500 text-sm">{vesselCategoryFilter.size} types selected</p>
+              <button
+                onClick={() => setShowVesselFilters(false)}
+                className="px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-500 transition-all"
+              >
+                Apply
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 3D Globe - min-h-0 allows flex child to shrink, overflow-hidden prevents spill */}
       <div className="flex-1 min-h-0 relative overflow-hidden">
         <Globe3D 
@@ -1426,6 +1629,7 @@ export default function EarthMap() {
           showCities={showCities && !selectedPoint.data} 
           routes={filteredRoutes}
           refineries={displayedRefineries}
+          vessels={showVessels ? vessels : []}
           satelliteMode={satelliteMode}
           onPointSelect={handlePointSelect}
         />

@@ -2,19 +2,32 @@
 
 import { useEffect, useRef, memo } from 'react'
 import Globe from 'globe.gl'
-import { CommodityData, RefineryData, ShippingRoute } from '@/lib/types'
+import { CommodityData, RefineryData, ShippingRoute, VesselData } from '@/lib/types'
 
 interface Globe3DClientProps {
   markers: CommodityData[]
   showCities?: boolean
   routes?: ShippingRoute[]
   refineries?: RefineryData[]
+  vessels?: VesselData[]
   satelliteMode?: boolean
   onPointSelect?: (point: CommodityData | RefineryData | null, type: 'commodity' | 'refinery') => void
   onRouteClick?: (route: ShippingRoute) => void
 }
 
-function Globe3DClient({ markers, showCities = true, routes = [], refineries = [], satelliteMode = false, onPointSelect, onRouteClick }: Globe3DClientProps) {
+const VESSEL_COLORS: Record<string, string> = {
+  tanker: '#EF4444',
+  oil_tanker: '#DC2626',
+  chemical_tanker: '#F97316',
+  bulk_carrier: '#3B82F6',
+  container: '#8B5CF6',
+  general_cargo: '#6B7280',
+  lng_carrier: '#06B6D4',
+  lpg_carrier: '#14B8A6',
+  other: '#9CA3AF',
+}
+
+function Globe3DClient({ markers, showCities = true, routes = [], refineries = [], vessels = [], satelliteMode = false, onPointSelect, onRouteClick }: Globe3DClientProps) {
   const globeEl = useRef<HTMLDivElement>(null)
   const globeRef = useRef<any>(null)
   const currentAltitudeRef = useRef<number>(2.5)
@@ -444,6 +457,61 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
     globe.arcsData(arcs)
   }, [markers, routes, refineries])
 
+  // Render vessels as custom HTML elements on the globe
+  useEffect(() => {
+    const globe = globeRef.current
+    if (!globe) return
+
+    if (vessels.length === 0) {
+      globe.customLayerData([])
+      return
+    }
+
+    const vesselPoints = vessels.map(v => ({
+      lat: v.latitude,
+      lng: v.longitude,
+      heading: v.course ?? v.heading ?? 0,
+      data: v,
+    }))
+
+    globe
+      .customLayerData(vesselPoints)
+      .customThreeObject((d: any) => {
+        const THREE = (window as any).THREE || globe.scene().constructor
+        const group = new THREE.Group()
+
+        const color = VESSEL_COLORS[d.data.ship_category] || VESSEL_COLORS.other
+        const shape = new THREE.Shape()
+        shape.moveTo(0, 0.6)
+        shape.lineTo(-0.3, -0.3)
+        shape.lineTo(0, -0.1)
+        shape.lineTo(0.3, -0.3)
+        shape.closePath()
+
+        const geometry = new THREE.ShapeGeometry(shape)
+        const material = new THREE.MeshBasicMaterial({
+          color: new THREE.Color(color),
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.9,
+        })
+        const mesh = new THREE.Mesh(geometry, material)
+
+        const scale = 0.35
+        mesh.scale.set(scale, scale, scale)
+        mesh.rotation.z = -(d.heading * Math.PI) / 180
+
+        group.add(mesh)
+        return group
+      })
+      .customThreeObjectUpdate((obj: any, d: any) => {
+        const mesh = obj.children[0]
+        if (mesh) {
+          mesh.rotation.z = -(d.heading * Math.PI) / 180
+        }
+      })
+  }, [vessels])
+
   // Handle showCities toggle
   useEffect(() => {
     if (globeRef.current && globeRef.current.updateCityDisplay) {
@@ -543,6 +611,7 @@ export default memo(Globe3DClient, (prevProps, nextProps) => {
     prevProps.showCities === nextProps.showCities &&
     prevProps.routes === nextProps.routes &&
     prevProps.refineries === nextProps.refineries &&
+    prevProps.vessels === nextProps.vessels &&
     prevProps.satelliteMode === nextProps.satelliteMode
   )
 })

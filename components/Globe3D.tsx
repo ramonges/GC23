@@ -3,13 +3,14 @@
 import { useEffect, useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { supabase } from '@/lib/supabase'
-import { CommodityData, RefineryData, ShippingRoute } from '@/lib/types'
+import { CommodityData, RefineryData, ShippingRoute, VesselData } from '@/lib/types'
 
 interface Globe3DProps {
   markers: CommodityData[]
   showCities?: boolean
   routes?: ShippingRoute[]
   refineries?: RefineryData[]
+  vessels?: VesselData[]
   satelliteMode?: boolean
 }
 
@@ -25,6 +26,6 @@ const Globe3DClient = dynamic(() => import('./Globe3DClient'), {
   ),
 })
 
-export default function Globe3D({ markers, showCities, routes, refineries = [], satelliteMode = false }: Globe3DProps) {
-  return <Globe3DClient markers={markers} showCities={showCities} routes={routes} refineries={refineries} satelliteMode={satelliteMode} />
+export default function Globe3D({ markers, showCities, routes, refineries = [], vessels = [], satelliteMode = false }: Globe3DProps) {
+  return <Globe3DClient markers={markers} showCities={showCities} routes={routes} refineries={refineries} vessels={vessels} satelliteMode={satelliteMode} />
 }

@@ -67,3 +67,22 @@ export interface ShippingRoute {
   /** Custom data passed to onRouteClick (e.g. voyage result) */
   data?: any
 }
+
+export interface VesselData {
+  mmsi: string
+  vessel_name?: string
+  latitude: number
+  longitude: number
+  speed_knots?: number
+  course?: number
+  heading?: number
+  ship_type?: number
+  ship_category?: string
+  size_category?: string
+  destination?: string
+  navigation_status?: string
+  flag_country?: string
+  length_meters?: number
+  width_meters?: number
+  dwt?: number
+}
