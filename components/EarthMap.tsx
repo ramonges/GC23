@@ -6,6 +6,8 @@ import { supabase } from '@/lib/supabase'
 import { CommodityData, RefineryData, ShippingRoute } from '@/lib/types'
 import dynamic from 'next/dynamic'
 
+const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ''
+
 const Globe3D = dynamic(() => import('./Globe3DClient'), {
   ssr: false,
   loading: () => (
@@ -1472,7 +1474,7 @@ export default function EarthMap() {
                   </div>
                   <div className="relative rounded-lg overflow-hidden bg-neutral-900 border border-neutral-700/50">
                     <img
-                      src={`https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/${selectedPoint.data.longitude},${selectedPoint.data.latitude},${satelliteZoom},0/320x200@2x?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`}
+                      src={`https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/${selectedPoint.data.longitude},${selectedPoint.data.latitude},${satelliteZoom},0/320x200@2x?access_token=${MAPBOX_TOKEN}`}
                       alt="Satellite view of site"
                       className="w-full h-[200px] object-cover"
                       loading="eager"
