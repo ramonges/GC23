@@ -38,6 +38,7 @@ const COMMODITY_SOURCES = [
   { name: 'Gold', source: 'gold_mines' as const },
   { name: 'Iron Ore', source: 'commodity_locations' as const, type: 'Metals' },
   { name: 'Copper', source: 'commodity_locations' as const, type: 'Metals' },
+  { name: 'Sugar', source: 'sugar_plants' as const, type: 'Agricultural' },
 ]
 
 interface Asset {
@@ -77,6 +78,7 @@ const INLAND_MODES_BY_COMMODITY: Record<string, InlandModeOption[]> = {
   'Iron Ore': ['truck', 'rail', 'conveyor'],
   'Copper': ['truck', 'rail'],
   'Uranium': ['truck', 'rail'],
+  'Sugar': ['truck', 'rail', 'conveyor'],
   'Crude Oil': ['truck', 'rail', 'pipeline'],
   'Natural Gas': ['truck', 'rail', 'pipeline'],
 }
@@ -176,6 +178,11 @@ export default function ShippingDeliveryWizard() {
       if ((coalCount ?? 0) > 0) list.push({ name: 'Coal', source: 'coal_mines' })
       const { count: goldCount } = await supabase.from('gold_mines').select('*', { count: 'exact', head: true }).not('latitude', 'is', null)
       if ((goldCount ?? 0) > 0) list.push({ name: 'Gold', source: 'gold_mines' })
+      const { count: sugarCount } = await supabase.from('sugar_plants').select('*', { count: 'exact', head: true }).not('latitude', 'is', null)
+      if ((sugarCount ?? 0) > 0) list.push({ name: 'Sugar', source: 'sugar_plants' })
+      for (const n of ['Sugar']) {
+        if (names.includes(n) && !list.some(x => x.name === n)) list.push({ name: n, source: 'commodity_locations' })
+      }
       setCommodities(list)
     }
     load()
@@ -229,10 +236,30 @@ export default function ShippingDeliveryWizard() {
             production_capacity: r.annual_capacity_troy_oz,
           })
         }
+      } else if (src === 'sugar_plants') {
+        const { data } = await supabase.from('sugar_plants').select('*').eq('country', originCountry).not('latitude', 'is', null)
+        for (const r of data || []) {
+          list.push({
+            id: r.id,
+            title: r.mill_name || 'Sugar Mill',
+            latitude: Number(r.latitude),
+            longitude: Number(r.longitude),
+            country: r.country,
+            region: r.region,
+            operator: r.operator,
+            grade: r.primary_grade,
+            production_capacity: r.annual_output_tonnes,
+            current_production: r.annual_output_tonnes,
+          })
+        }
       } else {
         const typeMap: Record<string, string> = {
-          'Crude Oil': 'Energy', 'Natural Gas': 'Energy', 'Uranium': 'Energy',
-          'Iron Ore': 'Metals', 'Copper': 'Metals',
+          'Crude Oil': 'Energy',
+          'Natural Gas': 'Energy',
+          'Uranium': 'Energy',
+          'Iron Ore': 'Metals',
+          'Copper': 'Metals',
+          'Sugar': 'Agricultural',
         }
         const type = typeMap[selectedCommodity] || 'Energy'
         const { data } = await supabase.from('commodity_locations').select('*')
@@ -300,10 +327,17 @@ export default function ShippingDeliveryWizard() {
       } else if (src === 'gold_mines') {
         const { data } = await supabase.from('gold_mines').select('country').not('latitude', 'is', null)
         countries = [...new Set((data || []).map((r: any) => r.country))]
+      } else if (src === 'sugar_plants') {
+        const { data } = await supabase.from('sugar_plants').select('country').not('latitude', 'is', null)
+        countries = [...new Set((data || []).map((r: any) => r.country))]
       } else {
         const typeMap: Record<string, string> = {
-          'Crude Oil': 'Energy', 'Natural Gas': 'Energy', 'Uranium': 'Energy',
-          'Iron Ore': 'Metals', 'Copper': 'Metals',
+          'Crude Oil': 'Energy',
+          'Natural Gas': 'Energy',
+          'Uranium': 'Energy',
+          'Iron Ore': 'Metals',
+          'Copper': 'Metals',
+          'Sugar': 'Agricultural',
         }
         const type = typeMap[selectedCommodity] || 'Energy'
         const { data } = await supabase.from('commodity_locations').select('country')

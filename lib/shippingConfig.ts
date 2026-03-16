@@ -129,6 +129,17 @@ export const commoditySpecs: Record<string, CommoditySpec> = {
     loadingRateMtHr: 1500,
     dischargeRateMtHr: 1200,
   },
+  'Sugar': {
+    unit: 'MT',
+    parcels: [
+      { size: 60000, label: '60k MT (Panamax)' },
+      { size: 45000, label: '45k MT (Supramax)' },
+      { size: 30000, label: '30k MT (Handymax)' },
+    ],
+    vesselTypes: ['Panamax', 'Supramax', 'Handymax', 'Handysize'],
+    loadingRateMtHr: 2200,
+    dischargeRateMtHr: 1800,
+  },
   'Grain': {
     unit: 'MT',
     parcels: [
@@ -162,10 +173,10 @@ export const vesselClasses: Record<string, VesselConfig> = {
   'Aframax': { dwtMin: 80000, dwtMax: 120000, speed: 14, fuelAtSea: 47, fuelInPort: 5, tceRate: 22000, portCostPerCall: 62500, demurrageRate: 35000, canalPanama: false, canalSuez: true, commodities: ['Crude Oil'] },
   'LNG Carrier': { dwtMin: 145000, dwtMax: 217000, speed: 19, fuelAtSea: 145, fuelInPort: 12, tceRate: 75000, portCostPerCall: 120000, demurrageRate: 95000, canalPanama: false, canalSuez: true, commodities: ['Natural Gas'] },
   'Capesize': { dwtMin: 100000, dwtMax: 400000, speed: 14, fuelAtSea: 60, fuelInPort: 5, tceRate: 18000, portCostPerCall: 70000, demurrageRate: 30000, canalPanama: false, canalSuez: true, commodities: ['Iron Ore', 'Coal'] },
-  'Panamax': { dwtMin: 65000, dwtMax: 90000, speed: 13.5, fuelAtSea: 35, fuelInPort: 4, tceRate: 12000, portCostPerCall: 45000, demurrageRate: 18500, canalPanama: true, canalSuez: true, commodities: ['Iron Ore', 'Coal', 'Grain'] },
-  'Supramax': { dwtMin: 50000, dwtMax: 65000, speed: 13, fuelAtSea: 26, fuelInPort: 3, tceRate: 10000, portCostPerCall: 32500, demurrageRate: 13000, canalPanama: true, canalSuez: true, commodities: ['Iron Ore', 'Coal', 'Grain', 'Copper', 'Uranium', 'Gold'] },
-  'Handymax': { dwtMin: 35000, dwtMax: 50000, speed: 12.5, fuelAtSea: 21, fuelInPort: 2.5, tceRate: 8500, portCostPerCall: 25000, demurrageRate: 9500, canalPanama: true, canalSuez: true, commodities: ['Coal', 'Grain', 'Copper', 'Gold'] },
-  'Handysize': { dwtMin: 25000, dwtMax: 50000, speed: 12, fuelAtSea: 21, fuelInPort: 2.5, tceRate: 8000, portCostPerCall: 25000, demurrageRate: 9000, canalPanama: true, canalSuez: true, commodities: ['Grain', 'Copper', 'Gold'] },
+  'Panamax': { dwtMin: 65000, dwtMax: 90000, speed: 13.5, fuelAtSea: 35, fuelInPort: 4, tceRate: 12000, portCostPerCall: 45000, demurrageRate: 18500, canalPanama: true, canalSuez: true, commodities: ['Iron Ore', 'Coal', 'Grain', 'Sugar'] },
+  'Supramax': { dwtMin: 50000, dwtMax: 65000, speed: 13, fuelAtSea: 26, fuelInPort: 3, tceRate: 10000, portCostPerCall: 32500, demurrageRate: 13000, canalPanama: true, canalSuez: true, commodities: ['Iron Ore', 'Coal', 'Grain', 'Sugar', 'Copper', 'Uranium', 'Gold'] },
+  'Handymax': { dwtMin: 35000, dwtMax: 50000, speed: 12.5, fuelAtSea: 21, fuelInPort: 2.5, tceRate: 8500, portCostPerCall: 25000, demurrageRate: 9500, canalPanama: true, canalSuez: true, commodities: ['Coal', 'Grain', 'Sugar', 'Copper', 'Gold'] },
+  'Handysize': { dwtMin: 25000, dwtMax: 50000, speed: 12, fuelAtSea: 21, fuelInPort: 2.5, tceRate: 8000, portCostPerCall: 25000, demurrageRate: 9000, canalPanama: true, canalSuez: true, commodities: ['Grain', 'Sugar', 'Copper', 'Gold'] },
 }
 
 export function haversineDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {

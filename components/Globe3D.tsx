@@ -10,6 +10,7 @@ interface Globe3DProps {
   showCities?: boolean
   routes?: ShippingRoute[]
   refineries?: RefineryData[]
+  satelliteMode?: boolean
 }
 
 const Globe3DClient = dynamic(() => import('./Globe3DClient'), {
@@ -24,6 +25,6 @@ const Globe3DClient = dynamic(() => import('./Globe3DClient'), {
   ),
 })
 
-export default function Globe3D({ markers, showCities, routes, refineries = [] }: Globe3DProps) {
-  return <Globe3DClient markers={markers} showCities={showCities} routes={routes} refineries={refineries} />
+export default function Globe3D({ markers, showCities, routes, refineries = [], satelliteMode = false }: Globe3DProps) {
+  return <Globe3DClient markers={markers} showCities={showCities} routes={routes} refineries={refineries} satelliteMode={satelliteMode} />
 }

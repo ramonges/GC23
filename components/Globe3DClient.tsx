@@ -9,11 +9,12 @@ interface Globe3DClientProps {
   showCities?: boolean
   routes?: ShippingRoute[]
   refineries?: RefineryData[]
+  satelliteMode?: boolean
   onPointSelect?: (point: CommodityData | RefineryData | null, type: 'commodity' | 'refinery') => void
   onRouteClick?: (route: ShippingRoute) => void
 }
 
-function Globe3DClient({ markers, showCities = true, routes = [], refineries = [], onPointSelect, onRouteClick }: Globe3DClientProps) {
+function Globe3DClient({ markers, showCities = true, routes = [], refineries = [], satelliteMode = false, onPointSelect, onRouteClick }: Globe3DClientProps) {
   const globeEl = useRef<HTMLDivElement>(null)
   const globeRef = useRef<any>(null)
   const currentAltitudeRef = useRef<number>(2.5)
@@ -38,7 +39,7 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
     const el = globeEl.current
     const rect = el.getBoundingClientRect()
     const globe = new Globe(el)
-      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg') // Higher res day texture
+      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
       .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
       .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
       .showAtmosphere(true)
@@ -450,6 +451,28 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
     }
   }, [showCities])
 
+  // Handle satellite mode toggle
+  useEffect(() => {
+    const globe = globeRef.current
+    if (!globe) return
+
+    if (satelliteMode) {
+      globe.bumpImageUrl('')
+      globe.atmosphereColor('#1a3a5c')
+      globe.atmosphereAltitude(0.12)
+      globe.polygonCapColor(() => 'rgba(100, 200, 255, 0.03)')
+      globe.polygonSideColor(() => 'rgba(100, 200, 255, 0.01)')
+      globe.polygonStrokeColor(() => 'rgba(100, 200, 255, 0.2)')
+    } else {
+      globe.bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
+      globe.atmosphereColor('#3a228a')
+      globe.atmosphereAltitude(0.25)
+      globe.polygonCapColor(() => 'rgba(255, 255, 255, 0.05)')
+      globe.polygonSideColor(() => 'rgba(255, 255, 255, 0.02)')
+      globe.polygonStrokeColor(() => '#555')
+    }
+  }, [satelliteMode])
+
   const getCommodityColor = (type: string) => {
     const colors: Record<string, string> = {
       'Energy': '#FF6B35',
@@ -515,12 +538,11 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
 
 // Memoize to prevent re-renders when parent state changes (like selectedPoint)
 export default memo(Globe3DClient, (prevProps, nextProps) => {
-  // Only re-render if these specific props change
   return (
     prevProps.markers === nextProps.markers &&
     prevProps.showCities === nextProps.showCities &&
     prevProps.routes === nextProps.routes &&
-    prevProps.refineries === nextProps.refineries
-    // Intentionally NOT comparing onPointSelect - we use a ref for that
+    prevProps.refineries === nextProps.refineries &&
+    prevProps.satelliteMode === nextProps.satelliteMode
   )
 })

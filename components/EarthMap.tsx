@@ -854,6 +854,8 @@ export default function EarthMap() {
   const [selectedPoint, setSelectedPoint] = useState<{ data: CommodityData | RefineryData | null, type: 'commodity' | 'refinery' | null }>({ data: null, type: null })
   const [availableCompanies, setAvailableCompanies] = useState<string[]>([])
   const [showFiltersSheet, setShowFiltersSheet] = useState(false)
+  const [satelliteMode, setSatelliteMode] = useState(false)
+  const [satelliteZoom, setSatelliteZoom] = useState(15)
 
   const activeFiltersCount = [selectedCategory, selectedCommodity, selectedCompany].filter(Boolean).length
 
@@ -1181,6 +1183,21 @@ export default function EarthMap() {
             <span className="hidden sm:inline">Cities</span>
           </button>
 
+          {/* Satellite Images Toggle */}
+          <button
+            onClick={() => setSatelliteMode(!satelliteMode)}
+            className={`h-9 sm:h-10 px-3 sm:px-5 text-xs sm:text-sm font-medium rounded-lg transition-all flex items-center gap-1.5 sm:gap-2 ${
+              satelliteMode 
+                ? 'bg-emerald-600 text-white hover:bg-emerald-500' 
+                : 'bg-neutral-900 text-neutral-300 border border-neutral-700 hover:border-neutral-500 hover:text-white'
+            }`}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span className="hidden sm:inline">Satellite</span>
+          </button>
+
           <div className="flex-1" />
 
           {/* Search Button */}
@@ -1397,6 +1414,7 @@ export default function EarthMap() {
           showCities={showCities && !selectedPoint.data} 
           routes={filteredRoutes}
           refineries={displayedRefineries}
+          satelliteMode={satelliteMode}
           onPointSelect={handlePointSelect}
         />
 
@@ -1421,6 +1439,53 @@ export default function EarthMap() {
                 </svg>
               </button>
               
+              {/* Satellite Image Section */}
+              {satelliteMode && selectedPoint.data && 'latitude' in selectedPoint.data && selectedPoint.data.latitude && selectedPoint.data.longitude && (
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-emerald-400 text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Satellite View
+                    </p>
+                    <div className="flex gap-0.5">
+                      {[
+                        { label: 'Area', zoom: 12 },
+                        { label: 'Mid', zoom: 14 },
+                        { label: 'Close', zoom: 16 },
+                        { label: 'Detail', zoom: 18 },
+                      ].map(({ label, zoom }) => (
+                        <button
+                          key={zoom}
+                          onClick={(e) => { e.stopPropagation(); setSatelliteZoom(zoom) }}
+                          className={`px-1.5 py-0.5 text-[9px] rounded font-medium transition-all ${
+                            satelliteZoom === zoom
+                              ? 'bg-emerald-600 text-white'
+                              : 'bg-neutral-800 text-neutral-500 hover:bg-neutral-700 hover:text-neutral-300'
+                          }`}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="relative rounded-lg overflow-hidden bg-neutral-900 border border-neutral-700/50">
+                    <img
+                      src={`https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/${selectedPoint.data.longitude},${selectedPoint.data.latitude},${satelliteZoom},0/320x200@2x?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`}
+                      alt="Satellite view of site"
+                      className="w-full h-[200px] object-cover"
+                      loading="eager"
+                    />
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent px-2 py-1.5">
+                      <p className="text-[10px] text-neutral-300">
+                        {selectedPoint.data.latitude.toFixed(4)}, {selectedPoint.data.longitude.toFixed(4)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {selectedPoint.type === 'commodity' && (() => {
                 const data = selectedPoint.data as CommodityData
                 const fieldLabels: Record<string, string> = {
