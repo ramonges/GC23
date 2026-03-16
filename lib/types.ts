@@ -70,7 +70,9 @@ export interface ShippingRoute {
 
 export interface VesselData {
   mmsi: string
+  imo_number?: string
   vessel_name?: string
+  call_sign?: string
   latitude: number
   longitude: number
   speed_knots?: number
@@ -80,9 +82,13 @@ export interface VesselData {
   ship_category?: string
   size_category?: string
   destination?: string
+  eta?: string
+  cargo_type?: string
   navigation_status?: string
   flag_country?: string
   length_meters?: number
   width_meters?: number
+  draught?: number
   dwt?: number
+  last_position_update?: string
 }

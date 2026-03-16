@@ -12,6 +12,7 @@ interface Globe3DClientProps {
   vessels?: VesselData[]
   satelliteMode?: boolean
   onPointSelect?: (point: CommodityData | RefineryData | null, type: 'commodity' | 'refinery') => void
+  onVesselClick?: (vessel: VesselData) => void
   onRouteClick?: (route: ShippingRoute) => void
 }
 
@@ -27,17 +28,22 @@ const VESSEL_COLORS: Record<string, string> = {
   other: '#9CA3AF',
 }
 
-function Globe3DClient({ markers, showCities = true, routes = [], refineries = [], vessels = [], satelliteMode = false, onPointSelect, onRouteClick }: Globe3DClientProps) {
+function Globe3DClient({ markers, showCities = true, routes = [], refineries = [], vessels = [], satelliteMode = false, onPointSelect, onVesselClick, onRouteClick }: Globe3DClientProps) {
   const globeEl = useRef<HTMLDivElement>(null)
   const globeRef = useRef<any>(null)
   const currentAltitudeRef = useRef<number>(2.5)
   const onPointSelectRef = useRef(onPointSelect)
+  const onVesselClickRef = useRef(onVesselClick)
   const onRouteClickRef = useRef(onRouteClick)
   const showCitiesRef = useRef(showCities)
+  const vesselsRef = useRef<VesselData[]>([])
 
   useEffect(() => {
     onPointSelectRef.current = onPointSelect
   }, [onPointSelect])
+  useEffect(() => {
+    onVesselClickRef.current = onVesselClick
+  }, [onVesselClick])
   useEffect(() => {
     onRouteClickRef.current = onRouteClick
   }, [onRouteClick])
@@ -150,60 +156,75 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
         const mediumCities = allCities.filter((c: any) => c.population > 1000000) // 1M+
         const allMajor = allCities.filter((c: any) => c.population > 500000) // 500K+
 
-        // Store city update function - uses ref so it always reads current showCities value
         const updateCityDisplay = (altitude: number) => {
-          // Check if cities should be shown at all
-          if (!showCitiesRef.current) {
-            globe.htmlElementsData([])
-            return
-          }
-
           let citiesToShow: any[] = []
 
-          // Progressive city display based on zoom
-          if (altitude < 0.5) {
-            citiesToShow = allMajor
-          } else if (altitude < 0.8) {
-            citiesToShow = mediumCities
-          } else if (altitude < 1.2) {
-            citiesToShow = majorCities
-          } else if (altitude < 1.5) {
-            citiesToShow = megaCities
-          } else {
-            citiesToShow = []
+          if (showCitiesRef.current) {
+            if (altitude < 0.5) citiesToShow = allMajor
+            else if (altitude < 0.8) citiesToShow = mediumCities
+            else if (altitude < 1.2) citiesToShow = majorCities
+            else if (altitude < 1.5) citiesToShow = megaCities
           }
 
-          if (citiesToShow.length > 0) {
-            globe
-              .htmlElementsData(citiesToShow)
-              .htmlElement((d: any) => {
+          const cityItems = citiesToShow.map((c: any) => ({ ...c, _type: 'city' }))
+          const vesselItems = vesselsRef.current.map(v => ({
+            lat: v.latitude,
+            lng: v.longitude,
+            altitude: 0.01,
+            _type: 'vessel',
+            _data: v,
+            _color: VESSEL_COLORS[v.ship_category || 'other'] || VESSEL_COLORS.other,
+            _course: v.course ?? v.heading ?? 0,
+          }))
+
+          const allItems = [...cityItems, ...vesselItems]
+
+          globe
+            .htmlElementsData(allItems)
+            .htmlElement((d: any) => {
+              if (d._type === 'vessel') {
                 const el = document.createElement('div')
+                const color = d._color
+                const rotation = d._course || 0
+                el.style.cursor = 'pointer'
+                el.style.pointerEvents = 'auto'
                 el.innerHTML = `
-                  <div style="
-                    color: rgba(255, 255, 255, 0.9);
-                    font-size: ${d.isCapital ? '10px' : '8px'};
-                    font-weight: ${d.isCapital ? 'bold' : 'normal'};
-                    text-shadow: 0 0 3px rgba(0,0,0,0.9), 0 0 6px rgba(0,0,0,0.7);
-                    pointer-events: none;
-                    white-space: nowrap;
-                    background: ${d.isCapital ? 'rgba(0, 102, 255, 0.3)' : 'rgba(0, 0, 0, 0.4)'};
-                    padding: 2px 4px;
-                    border-radius: 3px;
-                    border: ${d.isCapital ? '1px solid rgba(0, 102, 255, 0.6)' : 'none'};
-                    position: relative;
-                    z-index: 0;
-                  ">
-                    ${d.isCapital ? '★ ' : ''}${d.name}
+                  <div style="position: relative; display: flex; flex-direction: column; align-items: center;">
+                    <svg viewBox="0 0 24 24" width="18" height="18" style="filter: drop-shadow(0 0 3px rgba(0,0,0,0.8)); transform: rotate(${rotation}deg);">
+                      <path d="M12 2 L16 10 L20 18 L12 15 L4 18 L8 10 Z" fill="${color}" stroke="white" stroke-width="1"/>
+                    </svg>
                   </div>
                 `
+                el.onclick = (e) => {
+                  e.stopPropagation()
+                  if (onVesselClickRef.current) onVesselClickRef.current(d._data)
+                }
                 return el
-              })
-              .htmlLat((d: any) => d.lat)
-              .htmlLng((d: any) => d.lng)
-              .htmlAltitude((d: any) => d.altitude)
-          } else {
-            globe.htmlElementsData([])
-          }
+              }
+              const el = document.createElement('div')
+              el.innerHTML = `
+                <div style="
+                  color: rgba(255, 255, 255, 0.9);
+                  font-size: ${d.isCapital ? '10px' : '8px'};
+                  font-weight: ${d.isCapital ? 'bold' : 'normal'};
+                  text-shadow: 0 0 3px rgba(0,0,0,0.9), 0 0 6px rgba(0,0,0,0.7);
+                  pointer-events: none;
+                  white-space: nowrap;
+                  background: ${d.isCapital ? 'rgba(0, 102, 255, 0.3)' : 'rgba(0, 0, 0, 0.4)'};
+                  padding: 2px 4px;
+                  border-radius: 3px;
+                  border: ${d.isCapital ? '1px solid rgba(0, 102, 255, 0.6)' : 'none'};
+                  position: relative;
+                  z-index: 0;
+                ">
+                  ${d.isCapital ? '★ ' : ''}${d.name}
+                </div>
+              `
+              return el
+            })
+            .htmlLat((d: any) => d.lat)
+            .htmlLng((d: any) => d.lng)
+            .htmlAltitude((d: any) => d.altitude || 0.01)
         }
 
         // Update cities visibility based on zoom level
@@ -221,7 +242,7 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
       .pointsData([])
       .pointAltitude('size')
       .pointColor('color')
-      .pointRadius((d: any) => d.type === 'refinery' ? 0.25 : 0.15) // Larger radius for refineries
+      .pointRadius((d: any) => d.type === 'refinery' ? 0.25 : 0.15)
       .pointsMerge(false)
       .pointsTransitionDuration(400) // Smooth transition when points change
       .pointLabel((d: any) => `
@@ -231,7 +252,7 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
           padding: 15px;
           border-radius: 12px;
           color: white;
-          min-width: 300px;
+          min-width: 280px;
           box-shadow: 0 10px 40px rgba(0,0,0,0.5);
           position: relative;
           z-index: 9999;
@@ -339,7 +360,7 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
 
       // Reset after animation
       setTimeout(() => {
-        globe.pointRadius((d: any) => d.type === 'refinery' ? 0.25 : 0.15)
+        globe.pointRadius((d: any) => d.type === 'vessel' ? 0.2 : d.type === 'refinery' ? 0.25 : 0.15)
       }, 1500)
     })
 
@@ -383,7 +404,7 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
     }
   }, []) // Run once on mount - globe is never recreated
 
-  // Update only points and arcs when data changes - smooth transition, no globe reset
+  // Update points (commodities + refineries) and arcs
   useEffect(() => {
     const globe = globeRef.current
     if (!globe) return
@@ -457,67 +478,20 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
     globe.arcsData(arcs)
   }, [markers, routes, refineries])
 
-  // Render vessels as custom HTML elements on the globe
-  useEffect(() => {
-    const globe = globeRef.current
-    if (!globe) return
-
-    if (vessels.length === 0) {
-      globe.customLayerData([])
-      return
-    }
-
-    const vesselPoints = vessels.map(v => ({
-      lat: v.latitude,
-      lng: v.longitude,
-      heading: v.course ?? v.heading ?? 0,
-      data: v,
-    }))
-
-    globe
-      .customLayerData(vesselPoints)
-      .customThreeObject((d: any) => {
-        const THREE = (window as any).THREE || globe.scene().constructor
-        const group = new THREE.Group()
-
-        const color = VESSEL_COLORS[d.data.ship_category] || VESSEL_COLORS.other
-        const shape = new THREE.Shape()
-        shape.moveTo(0, 0.6)
-        shape.lineTo(-0.3, -0.3)
-        shape.lineTo(0, -0.1)
-        shape.lineTo(0.3, -0.3)
-        shape.closePath()
-
-        const geometry = new THREE.ShapeGeometry(shape)
-        const material = new THREE.MeshBasicMaterial({
-          color: new THREE.Color(color),
-          side: THREE.DoubleSide,
-          transparent: true,
-          opacity: 0.9,
-        })
-        const mesh = new THREE.Mesh(geometry, material)
-
-        const scale = 0.35
-        mesh.scale.set(scale, scale, scale)
-        mesh.rotation.z = -(d.heading * Math.PI) / 180
-
-        group.add(mesh)
-        return group
-      })
-      .customThreeObjectUpdate((obj: any, d: any) => {
-        const mesh = obj.children[0]
-        if (mesh) {
-          mesh.rotation.z = -(d.heading * Math.PI) / 180
-        }
-      })
-  }, [vessels])
-
   // Handle showCities toggle
   useEffect(() => {
     if (globeRef.current && globeRef.current.updateCityDisplay) {
       globeRef.current.updateCityDisplay(currentAltitudeRef.current)
     }
   }, [showCities])
+
+  // Handle vessel data updates - refresh the HTML layer
+  useEffect(() => {
+    vesselsRef.current = vessels
+    if (globeRef.current && globeRef.current.updateCityDisplay) {
+      globeRef.current.updateCityDisplay(currentAltitudeRef.current)
+    }
+  }, [vessels])
 
   // Handle satellite mode toggle
   useEffect(() => {

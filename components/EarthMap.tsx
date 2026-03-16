@@ -867,6 +867,7 @@ export default function EarthMap() {
   const [vesselCount, setVesselCount] = useState(0)
   const [vesselCategoryFilter, setVesselCategoryFilter] = useState<Set<string>>(new Set(['tanker', 'oil_tanker', 'bulk_carrier']))
   const [showVesselFilters, setShowVesselFilters] = useState(false)
+  const [selectedVessel, setSelectedVessel] = useState<VesselData | null>(null)
   const vesselsRef = useRef<Map<string, VesselData>>(new Map())
   const vesselEventSourceRef = useRef<EventSource | null>(null)
 
@@ -874,13 +875,17 @@ export default function EarthMap() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && satelliteFullscreen) setSatelliteFullscreen(false)
+      if (e.key === 'Escape') {
+        if (satelliteFullscreen) setSatelliteFullscreen(false)
+        else if (selectedVessel) setSelectedVessel(null)
+      }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [satelliteFullscreen])
+  }, [satelliteFullscreen, selectedVessel])
 
-  // AIS Stream SSE connection for vessel tracking
+  // Demo vessel data (shown immediately while AIS stream connects)
+  // Load vessels from Supabase + connect to AIS Stream for real-time updates
   useEffect(() => {
     if (!showVessels) {
       if (vesselEventSourceRef.current) {
@@ -893,6 +898,63 @@ export default function EarthMap() {
       return
     }
 
+    let cancelled = false
+
+    // Step 1: Load existing vessels from Supabase
+    const loadFromSupabase = async () => {
+      try {
+        const categoryArr = Array.from(vesselCategoryFilter)
+        const { data: rows, error } = await supabase
+          .from('vessels')
+          .select('*')
+          .in('ship_category', categoryArr)
+          .not('latitude', 'is', null)
+          .not('longitude', 'is', null)
+          .order('last_position_update', { ascending: false })
+          .limit(2000)
+
+        if (error || cancelled) return
+
+        const map = vesselsRef.current
+        for (const row of rows || []) {
+          const v: VesselData = {
+            mmsi: row.mmsi,
+            imo_number: row.imo_number,
+            vessel_name: row.vessel_name,
+            call_sign: row.call_sign,
+            latitude: Number(row.latitude),
+            longitude: Number(row.longitude),
+            speed_knots: row.speed_knots != null ? Number(row.speed_knots) : undefined,
+            course: row.course != null ? Number(row.course) : undefined,
+            heading: row.heading,
+            ship_type: row.ship_type,
+            ship_category: row.ship_category,
+            size_category: row.size_category,
+            destination: row.destination,
+            eta: row.eta,
+            cargo_type: row.cargo_type,
+            navigation_status: row.navigation_status,
+            flag_country: row.flag_country,
+            length_meters: row.length_meters != null ? Number(row.length_meters) : undefined,
+            width_meters: row.width_meters != null ? Number(row.width_meters) : undefined,
+            draught: row.draught != null ? Number(row.draught) : undefined,
+            dwt: row.dwt,
+            last_position_update: row.last_position_update,
+          }
+          map.set(v.mmsi, v)
+        }
+
+        if (!cancelled) {
+          const arr = Array.from(map.values())
+          setVessels(arr)
+          setVesselCount(arr.length)
+        }
+      } catch { /* supabase fetch failed, SSE will still work */ }
+    }
+
+    loadFromSupabase()
+
+    // Step 2: Connect to AIS Stream SSE for real-time position updates
     const categories = Array.from(vesselCategoryFilter).join(',')
     const url = `/api/ais-stream${categories ? `?categories=${categories}` : ''}`
     const es = new EventSource(url)
@@ -928,6 +990,12 @@ export default function EarthMap() {
             ship_type: data.ship_type,
             ship_category: data.ship_category || existing?.ship_category,
             navigation_status: data.navigation_status,
+            destination: existing?.destination,
+            size_category: existing?.size_category,
+            flag_country: existing?.flag_country,
+            length_meters: existing?.length_meters,
+            width_meters: existing?.width_meters,
+            dwt: existing?.dwt,
           })
           if (!batchTimeout) {
             batchTimeout = setTimeout(() => {
@@ -944,9 +1012,9 @@ export default function EarthMap() {
               vessel_name: data.vessel_name || existing.vessel_name,
               ship_type: data.ship_type ?? existing.ship_type,
               ship_category: data.ship_category || existing.ship_category,
-              destination: data.destination,
-              length_meters: data.length_meters,
-              width_meters: data.width_meters,
+              destination: data.destination || existing.destination,
+              length_meters: data.length_meters ?? existing.length_meters,
+              width_meters: data.width_meters ?? existing.width_meters,
             })
           }
         }
@@ -959,6 +1027,7 @@ export default function EarthMap() {
     }
 
     return () => {
+      cancelled = true
       if (batchTimeout) clearTimeout(batchTimeout)
       es.close()
       vesselEventSourceRef.current = null
@@ -1179,6 +1248,7 @@ export default function EarthMap() {
   // Stable callback for point selection - won't cause globe re-initialization
   const handlePointSelect = useCallback((data: CommodityData | RefineryData | null, type: 'commodity' | 'refinery') => {
     setSelectedPoint({ data, type })
+    setSelectedVessel(null)
   }, [])
 
   // Memoize props to prevent globe re-renders
@@ -1632,6 +1702,10 @@ export default function EarthMap() {
           vessels={showVessels ? vessels : []}
           satelliteMode={satelliteMode}
           onPointSelect={handlePointSelect}
+          onVesselClick={(vessel) => {
+            setSelectedVessel(vessel)
+            setSelectedPoint({ data: null, type: null })
+          }}
         />
 
         {/* Selected Point Info Panel - Left Side (desktop) / Bottom sheet (mobile) */}
@@ -1918,6 +1992,224 @@ export default function EarthMap() {
                   </div>
                 )
               })()}
+          </div>
+        )}
+
+        {/* Selected Vessel Info Panel */}
+        {selectedVessel && (
+          <div
+            className="absolute z-[9999] bg-black bg-opacity-95 border border-blue-500/50 rounded-xl p-4 sm:p-6 shadow-2xl backdrop-blur-sm overflow-y-auto
+              inset-x-2 bottom-2 max-h-[60vh]
+              sm:inset-x-auto sm:bottom-auto sm:left-4 sm:top-1/2 sm:-translate-y-1/2 sm:w-96 sm:max-h-[80vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={(e) => { e.stopPropagation(); setSelectedVessel(null) }}
+              className="absolute top-3 right-3 text-gray-400 hover:text-white transition-colors z-10 bg-gray-800 rounded-full p-1"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+
+            {/* Vessel Header */}
+            <div className="flex items-start gap-3 mb-5">
+              <div className="w-12 h-12 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0">
+                <svg viewBox="0 0 24 24" className="w-7 h-7" fill="none" stroke={
+                  ({'tanker': '#EF4444', 'oil_tanker': '#DC2626', 'chemical_tanker': '#F97316', 'bulk_carrier': '#3B82F6', 'container': '#8B5CF6', 'lng_carrier': '#06B6D4', 'lpg_carrier': '#14B8A6'} as Record<string, string>)[selectedVessel.ship_category || ''] || '#9CA3AF'
+                } strokeWidth="1.5">
+                  <path d="M3 17h1l2-7h12l2 7h1" />
+                  <path d="M6 10V6a1 1 0 011-1h3v5" />
+                  <path d="M13 10V4a1 1 0 011-1h2a1 1 0 011 1v6" />
+                  <path d="M2 20c2-1 4-1 6 0s4 1 6 0 4-1 6 0" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0 pr-6">
+                <h3 className="text-lg font-bold text-white truncate">
+                  {selectedVessel.vessel_name || 'Unknown Vessel'}
+                </h3>
+                <p className="text-xs font-semibold uppercase tracking-wider mt-0.5" style={{
+                  color: ({'tanker': '#EF4444', 'oil_tanker': '#DC2626', 'chemical_tanker': '#F97316', 'bulk_carrier': '#3B82F6', 'container': '#8B5CF6', 'lng_carrier': '#06B6D4', 'lpg_carrier': '#14B8A6'} as Record<string, string>)[selectedVessel.ship_category || ''] || '#9CA3AF'
+                }}>
+                  {(selectedVessel.ship_category || 'vessel').replace(/_/g, ' ')}
+                </p>
+              </div>
+            </div>
+
+            {/* Live Position */}
+            <div className="bg-neutral-900/80 rounded-lg p-3 mb-4 border border-neutral-800">
+              <p className="text-[10px] uppercase tracking-wider text-blue-400 font-semibold mb-2 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
+                Live Position
+              </p>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <p className="text-gray-500 text-[10px]">Latitude</p>
+                  <p className="text-white font-mono">{selectedVessel.latitude?.toFixed(5)}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500 text-[10px]">Longitude</p>
+                  <p className="text-white font-mono">{selectedVessel.longitude?.toFixed(5)}</p>
+                </div>
+                {selectedVessel.speed_knots != null && (
+                  <div>
+                    <p className="text-gray-500 text-[10px]">Speed</p>
+                    <p className="text-white font-mono">{selectedVessel.speed_knots} kn</p>
+                  </div>
+                )}
+                {selectedVessel.course != null && (
+                  <div>
+                    <p className="text-gray-500 text-[10px]">Course</p>
+                    <p className="text-white font-mono">{selectedVessel.course}°</p>
+                  </div>
+                )}
+                {selectedVessel.heading != null && (
+                  <div>
+                    <p className="text-gray-500 text-[10px]">Heading</p>
+                    <p className="text-white font-mono">{selectedVessel.heading}°</p>
+                  </div>
+                )}
+                {selectedVessel.navigation_status && (
+                  <div>
+                    <p className="text-gray-500 text-[10px]">Nav Status</p>
+                    <p className="text-white text-xs">{selectedVessel.navigation_status}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Voyage Info */}
+            {(selectedVessel.destination || selectedVessel.flag_country) && (
+              <div className="bg-neutral-900/80 rounded-lg p-3 mb-4 border border-neutral-800">
+                <p className="text-[10px] uppercase tracking-wider text-amber-400 font-semibold mb-2">Voyage Information</p>
+                <div className="space-y-2 text-sm">
+                  {selectedVessel.destination && (
+                    <div className="flex items-start gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-amber-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      <div>
+                        <p className="text-gray-500 text-[10px]">Destination</p>
+                        <p className="text-white">{selectedVessel.destination}</p>
+                      </div>
+                    </div>
+                  )}
+                  {selectedVessel.flag_country && (
+                    <div className="flex items-start gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-amber-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+                      </svg>
+                      <div>
+                        <p className="text-gray-500 text-[10px]">Flag State</p>
+                        <p className="text-white">{selectedVessel.flag_country}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Voyage Details (ETA, cargo) */}
+            {(selectedVessel.eta || selectedVessel.cargo_type) && (
+              <div className="bg-neutral-900/80 rounded-lg p-3 mb-4 border border-neutral-800">
+                <p className="text-[10px] uppercase tracking-wider text-cyan-400 font-semibold mb-2">Cargo & Schedule</p>
+                <div className="space-y-1.5 text-sm">
+                  {selectedVessel.cargo_type && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">Cargo</span>
+                      <span className="text-white text-xs">{selectedVessel.cargo_type}</span>
+                    </div>
+                  )}
+                  {selectedVessel.eta && (
+                    <div className="flex justify-between">
+                      <span className="text-gray-500">ETA</span>
+                      <span className="text-white text-xs">{selectedVessel.eta}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Vessel Details */}
+            <div className="bg-neutral-900/80 rounded-lg p-3 mb-4 border border-neutral-800">
+              <p className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold mb-2">Vessel Details</p>
+              <div className="space-y-1.5 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-500">MMSI</span>
+                  <span className="text-white font-mono text-xs">{selectedVessel.mmsi}</span>
+                </div>
+                {selectedVessel.imo_number && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">IMO</span>
+                    <span className="text-white font-mono text-xs">{selectedVessel.imo_number}</span>
+                  </div>
+                )}
+                {selectedVessel.call_sign && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Call Sign</span>
+                    <span className="text-white font-mono text-xs">{selectedVessel.call_sign}</span>
+                  </div>
+                )}
+                {selectedVessel.ship_type != null && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">AIS Ship Type</span>
+                    <span className="text-white font-mono text-xs">{selectedVessel.ship_type}</span>
+                  </div>
+                )}
+                {selectedVessel.size_category && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Size Class</span>
+                    <span className="text-white text-xs capitalize">{selectedVessel.size_category.replace(/_/g, ' ')}</span>
+                  </div>
+                )}
+                {selectedVessel.length_meters != null && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Length</span>
+                    <span className="text-white font-mono text-xs">{selectedVessel.length_meters} m</span>
+                  </div>
+                )}
+                {selectedVessel.width_meters != null && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Width</span>
+                    <span className="text-white font-mono text-xs">{selectedVessel.width_meters} m</span>
+                  </div>
+                )}
+                {selectedVessel.draught != null && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Draught</span>
+                    <span className="text-white font-mono text-xs">{selectedVessel.draught} m</span>
+                  </div>
+                )}
+                {selectedVessel.dwt != null && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">DWT</span>
+                    <span className="text-white font-mono text-xs">{selectedVessel.dwt.toLocaleString()} t</span>
+                  </div>
+                )}
+                {selectedVessel.last_position_update && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Last Update</span>
+                    <span className="text-white text-xs">{new Date(selectedVessel.last_position_update).toLocaleString()}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Satellite view of vessel position */}
+            {satelliteMode && selectedVessel.latitude && selectedVessel.longitude && (
+              <div className="mb-3">
+                <p className="text-[10px] uppercase tracking-wider text-emerald-400 font-semibold mb-1.5">Satellite View</p>
+                <div className="rounded-lg overflow-hidden border border-neutral-700/50">
+                  <img
+                    src={`https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/${selectedVessel.longitude},${selectedVessel.latitude},8,0/360x180@2x?access_token=${MAPBOX_TOKEN}`}
+                    alt="Vessel position satellite view"
+                    className="w-full h-[140px] object-cover"
+                    loading="eager"
+                  />
+                </div>
+              </div>
+            )}
           </div>
         )}
 
