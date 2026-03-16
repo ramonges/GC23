@@ -900,6 +900,11 @@ export default function EarthMap() {
 
     let cancelled = false
 
+    // Clear previous data when filters change
+    vesselsRef.current.clear()
+    setVessels([])
+    setVesselCount(0)
+
     // Step 1: Load existing vessels from Supabase
     const loadFromSupabase = async () => {
       try {
