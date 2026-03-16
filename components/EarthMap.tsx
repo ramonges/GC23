@@ -858,8 +858,18 @@ export default function EarthMap() {
   const [showFiltersSheet, setShowFiltersSheet] = useState(false)
   const [satelliteMode, setSatelliteMode] = useState(false)
   const [satelliteZoom, setSatelliteZoom] = useState(15)
+  const [satelliteFullscreen, setSatelliteFullscreen] = useState(false)
+  const [fullscreenZoom, setFullscreenZoom] = useState(15)
 
   const activeFiltersCount = [selectedCategory, selectedCommodity, selectedCompany].filter(Boolean).length
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && satelliteFullscreen) setSatelliteFullscreen(false)
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [satelliteFullscreen])
 
   const fetchAvailableCompanies = useCallback(async () => {
     try {
@@ -1472,16 +1482,24 @@ export default function EarthMap() {
                       ))}
                     </div>
                   </div>
-                  <div className="relative rounded-lg overflow-hidden bg-neutral-900 border border-neutral-700/50">
+                  <div
+                    className="relative rounded-lg overflow-hidden bg-neutral-900 border border-neutral-700/50 cursor-pointer group"
+                    onClick={(e) => { e.stopPropagation(); setFullscreenZoom(satelliteZoom); setSatelliteFullscreen(true) }}
+                  >
                     <img
                       src={`https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/${selectedPoint.data.longitude},${selectedPoint.data.latitude},${satelliteZoom},0/320x200@2x?access_token=${MAPBOX_TOKEN}`}
                       alt="Satellite view of site"
-                      className="w-full h-[200px] object-cover"
+                      className="w-full h-[200px] object-cover transition-transform group-hover:scale-105"
                       loading="eager"
                     />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white opacity-0 group-hover:opacity-90 transition-opacity drop-shadow-lg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                      </svg>
+                    </div>
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent px-2 py-1.5">
                       <p className="text-[10px] text-neutral-300">
-                        {selectedPoint.data.latitude.toFixed(4)}, {selectedPoint.data.longitude.toFixed(4)}
+                        {selectedPoint.data.latitude.toFixed(4)}, {selectedPoint.data.longitude.toFixed(4)} — click to expand
                       </p>
                     </div>
                   </div>
@@ -1734,6 +1752,76 @@ export default function EarthMap() {
           </div>
         </div>
       </div>
+
+      {/* Satellite Fullscreen Modal */}
+      {satelliteFullscreen && selectedPoint.data && 'latitude' in selectedPoint.data && selectedPoint.data.latitude && selectedPoint.data.longitude && (
+        <div
+          className="fixed inset-0 z-[99999] bg-black/90 backdrop-blur-md flex items-center justify-center"
+          onClick={() => setSatelliteFullscreen(false)}
+        >
+          <div
+            className="relative w-[95vw] h-[85vh] max-w-[1200px] max-h-[800px] rounded-2xl overflow-hidden border border-neutral-700 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img
+              src={`https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/${selectedPoint.data.longitude},${selectedPoint.data.latitude},${fullscreenZoom},0/1280x1280@2x?access_token=${MAPBOX_TOKEN}`}
+              alt="Satellite view of site"
+              className="w-full h-full object-cover"
+              loading="eager"
+            />
+
+            {/* Top bar with title and close */}
+            <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/80 via-black/40 to-transparent p-4 flex items-start justify-between">
+              <div>
+                <h3 className="text-white font-bold text-lg drop-shadow-lg">
+                  {selectedPoint.type === 'refinery'
+                    ? (selectedPoint.data as RefineryData).name
+                    : (selectedPoint.data as CommodityData).title}
+                </h3>
+                <p className="text-neutral-300 text-sm drop-shadow">
+                  {selectedPoint.data.latitude.toFixed(5)}, {selectedPoint.data.longitude.toFixed(5)}
+                </p>
+              </div>
+              <button
+                onClick={() => setSatelliteFullscreen(false)}
+                className="p-2 rounded-full bg-black/50 hover:bg-black/80 text-white transition-all"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Bottom zoom controls */}
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 flex items-end justify-between">
+              <div className="flex gap-1.5">
+                {[
+                  { label: 'Area', zoom: 12 },
+                  { label: 'Mid', zoom: 14 },
+                  { label: 'Close', zoom: 15 },
+                  { label: 'Detail', zoom: 16 },
+                  { label: 'Max', zoom: 18 },
+                ].map(({ label, zoom }) => (
+                  <button
+                    key={zoom}
+                    onClick={() => setFullscreenZoom(zoom)}
+                    className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-all ${
+                      fullscreenZoom === zoom
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-black/60 text-neutral-300 hover:bg-black/80 hover:text-white border border-neutral-600'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-neutral-400 text-xs">
+                Zoom {fullscreenZoom} — Press Esc or click outside to close
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
