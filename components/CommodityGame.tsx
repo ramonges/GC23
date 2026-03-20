@@ -135,15 +135,16 @@ interface LeaderboardEntry {
 }
 
 const TIERS = [
-  { name: 'Master Diamond', maxSeconds: 7 * 60, color: 'from-cyan-400 to-blue-500', text: 'text-cyan-300', bg: 'bg-cyan-500/20', border: 'border-cyan-400/40', icon: '💎' },
-  { name: 'Platinum', maxSeconds: 8 * 60, color: 'from-slate-300 to-slate-400', text: 'text-slate-300', bg: 'bg-slate-400/20', border: 'border-slate-300/40', icon: '⚪' },
-  { name: 'Gold', maxSeconds: 9 * 60, color: 'from-yellow-400 to-amber-500', text: 'text-yellow-400', bg: 'bg-yellow-500/20', border: 'border-yellow-400/40', icon: '🥇' },
-  { name: 'Silver', maxSeconds: 10 * 60, color: 'from-gray-300 to-gray-400', text: 'text-gray-400', bg: 'bg-gray-400/20', border: 'border-gray-300/40', icon: '🥈' },
-  { name: 'Bronze', maxSeconds: Infinity, color: 'from-orange-400 to-orange-600', text: 'text-orange-400', bg: 'bg-orange-500/20', border: 'border-orange-400/40', icon: '🥉' },
+  { name: 'Master Diamond', minPercent: 100, color: 'from-cyan-400 to-blue-500', text: 'text-cyan-300', bg: 'bg-cyan-500/20', border: 'border-cyan-400/40', icon: '💎', label: '100%' },
+  { name: 'Platinum', minPercent: 90, color: 'from-slate-300 to-slate-400', text: 'text-slate-300', bg: 'bg-slate-400/20', border: 'border-slate-300/40', icon: '⚪', label: '90%+' },
+  { name: 'Gold', minPercent: 85, color: 'from-yellow-400 to-amber-500', text: 'text-yellow-400', bg: 'bg-yellow-500/20', border: 'border-yellow-400/40', icon: '🥇', label: '85%+' },
+  { name: 'Silver', minPercent: 75, color: 'from-gray-300 to-gray-400', text: 'text-gray-400', bg: 'bg-gray-400/20', border: 'border-gray-300/40', icon: '🥈', label: '75%+' },
+  { name: 'Bronze', minPercent: 0, color: 'from-orange-400 to-orange-600', text: 'text-orange-400', bg: 'bg-orange-500/20', border: 'border-orange-400/40', icon: '🥉', label: '< 75%' },
 ] as const
 
-function getTier(timeSeconds: number) {
-  return TIERS.find((t) => timeSeconds < t.maxSeconds) || TIERS[TIERS.length - 1]
+function getTier(score: number, totalCountries: number) {
+  const percent = totalCountries > 0 ? (score / totalCountries) * 100 : 0
+  return TIERS.find((t) => percent >= t.minPercent) || TIERS[TIERS.length - 1]
 }
 
 function formatDuration(s: number) {
@@ -352,7 +353,7 @@ export default function CommodityGame() {
   }
 
   const color = (commodity ?? GAME_COMMODITIES[0])?.color ?? '#666'
-  const elapsedTier = gameOverPopup ? getTier(gameOverPopup.elapsedSeconds) : null
+  const elapsedTier = gameOverPopup ? getTier(gameOverPopup.score, allCountries.length) : null
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-gray-100">
@@ -583,7 +584,7 @@ export default function CommodityGame() {
                     <span className="text-sm">{tier.icon}</span>
                     <span className={`text-xs font-medium ${tier.text}`}>{tier.name}</span>
                     <span className="text-xs text-gray-500">
-                      {tier.maxSeconds < Infinity ? `< ${tier.maxSeconds / 60}min` : '≥ 10min'}
+                      {tier.label}
                     </span>
                   </div>
                 ))}
@@ -612,7 +613,7 @@ export default function CommodityGame() {
                     </thead>
                     <tbody>
                       {leaderboard.map((entry, i) => {
-                        const tier = getTier(entry.time_seconds)
+                        const tier = getTier(entry.score, allCountries.length)
                         return (
                           <tr key={entry.id} className="border-b border-gray-800 hover:bg-gray-800/50 transition-colors">
                             <td className="py-3 pl-2 text-gray-400 font-mono text-sm">{i + 1}</td>
