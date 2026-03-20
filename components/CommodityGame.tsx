@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import { supabase } from '@/lib/supabase'
 import { matchCountry, allCountries } from '@/lib/countries'
-import { Clock, Gamepad2 } from 'lucide-react'
+import { Clock, Gamepad2, Trophy } from 'lucide-react'
 
 const GameGlobe3D = dynamic(() => import('./GameGlobe3D'), {
   ssr: false,
@@ -15,7 +15,6 @@ const GameGlobe3D = dynamic(() => import('./GameGlobe3D'), {
   ),
 })
 
-// Same commodity categories as EarthMap (map with commodities)
 const commodityCategories = {
   Energy: ['Crude Oil', 'Natural Gas', 'Uranium', 'Coal'],
   Metals: ['Gold', 'Silver', 'Copper', 'Steel', 'Lithium', 'Iron Ore', 'Platinum', 'Silicon', 'Titanium'],
@@ -62,9 +61,8 @@ const COMMODITY_COLORS: Record<string, string> = {
   'Lean Hogs': '#DEB887',
 }
 
-const GAME_DURATION_SEC = 15 * 60 // 15 minutes
+const GAME_DURATION_SEC = 15 * 60
 
-// Map DB country to Natural Earth ADMIN (for site filtering)
 const dbCountryToCanonical: Record<string, string> = {
   'United States': 'United States of America',
   'USA': 'United States of America',
@@ -94,8 +92,6 @@ function canonicalForDb(dbCountry: string): string {
   return dbCountryToCanonical[dbCountry?.trim() || ''] ?? (dbCountry?.trim() || '')
 }
 
-// Flatten commodityCategories (same as map) into game options
-// All data from commodity_locations (big table used by EarthMap)
 const GAME_COMMODITIES = (() => {
   const list: { id: string; label: string; color: string; commodityType: string; commodityName: string }[] = []
   for (const [cat, names] of Object.entries(commodityCategories)) {
@@ -129,6 +125,33 @@ interface Site {
   [key: string]: any
 }
 
+interface LeaderboardEntry {
+  id: string
+  player_name: string
+  commodity: string
+  score: number
+  time_seconds: number
+  created_at: string
+}
+
+const TIERS = [
+  { name: 'Master Diamond', maxSeconds: 7 * 60, color: 'from-cyan-400 to-blue-500', text: 'text-cyan-300', bg: 'bg-cyan-500/20', border: 'border-cyan-400/40', icon: '💎' },
+  { name: 'Platinum', maxSeconds: 8 * 60, color: 'from-slate-300 to-slate-400', text: 'text-slate-300', bg: 'bg-slate-400/20', border: 'border-slate-300/40', icon: '⚪' },
+  { name: 'Gold', maxSeconds: 9 * 60, color: 'from-yellow-400 to-amber-500', text: 'text-yellow-400', bg: 'bg-yellow-500/20', border: 'border-yellow-400/40', icon: '🥇' },
+  { name: 'Silver', maxSeconds: 10 * 60, color: 'from-gray-300 to-gray-400', text: 'text-gray-400', bg: 'bg-gray-400/20', border: 'border-gray-300/40', icon: '🥈' },
+  { name: 'Bronze', maxSeconds: Infinity, color: 'from-orange-400 to-orange-600', text: 'text-orange-400', bg: 'bg-orange-500/20', border: 'border-orange-400/40', icon: '🥉' },
+] as const
+
+function getTier(timeSeconds: number) {
+  return TIERS.find((t) => timeSeconds < t.maxSeconds) || TIERS[TIERS.length - 1]
+}
+
+function formatDuration(s: number) {
+  const m = Math.floor(s / 60)
+  const sec = s % 60
+  return `${m}:${sec.toString().padStart(2, '0')}`
+}
+
 export default function CommodityGame() {
   const [commodity, setCommodity] = useState<GameCommodity | null>(GAME_COMMODITIES[0] ?? null)
   const [gameStarted, setGameStarted] = useState(false)
@@ -138,15 +161,25 @@ export default function CommodityGame() {
   const [sites, setSites] = useState<Site[]>([])
   const [selectedSite, setSelectedSite] = useState<Site | null>(null)
   const [message, setMessage] = useState<string | null>(null)
+  const [showAllCountriesTable, setShowAllCountriesTable] = useState(false)
+  const gameOverHandledRef = useRef(false)
+
+  // Game-over state: results + name input
   const [gameOverPopup, setGameOverPopup] = useState<{
     score: number
     topPercent: number | null
     countries: string[]
+    elapsedSeconds: number
   } | null>(null)
-  const [showAllCountriesTable, setShowAllCountriesTable] = useState(false)
-  const gameOverHandledRef = useRef(false)
+  const [playerName, setPlayerName] = useState('')
+  const [nameSaved, setNameSaved] = useState(false)
+  const [savingName, setSavingName] = useState(false)
 
-  // Timer starts when user unlocks first country
+  // Leaderboard popup
+  const [showLeaderboard, setShowLeaderboard] = useState(false)
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
+  const [leaderboardLoading, setLeaderboardLoading] = useState(false)
+
   useEffect(() => {
     if (!gameStarted || timeLeft <= 0) return
     const t = setInterval(() => setTimeLeft((s) => Math.max(0, s - 1)), 1000)
@@ -159,42 +192,73 @@ export default function CommodityGame() {
 
     const score = unlockedCountries.size
     const countries = Array.from(unlockedCountries).sort()
-    const commodityLabel = (commodity ?? GAME_COMMODITIES[0])?.commodityName ?? 'Crude Oil'
+    const elapsedSeconds = GAME_DURATION_SEC - timeLeft
 
     try {
-      await supabase.from('commodity_game_scores').insert({
-        commodity: commodityLabel,
-        score,
-      })
-    } catch (e) {
-      console.warn('Could not save score:', e)
-    }
-
-    try {
+      const commodityLabel = (commodity ?? GAME_COMMODITIES[0])?.commodityName ?? 'Crude Oil'
       const { data: allScores } = await supabase
-        .from('commodity_game_scores')
+        .from('commodity_game_leaderboard')
         .select('score')
         .eq('commodity', commodityLabel)
 
       const scores = (allScores || []).map((r: any) => r.score)
       const total = scores.length
-      const betterOrEqual = scores.filter((s) => s >= score).length
+      const betterOrEqual = scores.filter((s: number) => s >= score).length
       const topPercent = total > 0 ? Math.round((betterOrEqual / total) * 100) : 100
 
-      setGameOverPopup({ score, topPercent, countries })
+      setGameOverPopup({ score, topPercent, countries, elapsedSeconds })
     } catch (e) {
       console.warn('Could not compute percentile:', e)
-      setGameOverPopup({ score, topPercent: null, countries })
+      setGameOverPopup({ score, topPercent: null, countries, elapsedSeconds })
     }
-  }, [commodity, unlockedCountries])
+  }, [commodity, unlockedCountries, timeLeft])
 
-  // When clock reaches 0: trigger finish
   useEffect(() => {
     if (!gameStarted || timeLeft !== 0 || !commodity || gameOverHandledRef.current) return
     handleFinishGame()
   }, [gameStarted, timeLeft, commodity, handleFinishGame])
 
-  // Fetch sites from commodity_locations only (big table used by EarthMap)
+  const handleSaveName = async () => {
+    if (!playerName.trim() || !gameOverPopup || savingName) return
+    setSavingName(true)
+    const commodityLabel = (commodity ?? GAME_COMMODITIES[0])?.commodityName ?? 'Crude Oil'
+    try {
+      await supabase.from('commodity_game_leaderboard').insert({
+        player_name: playerName.trim(),
+        commodity: commodityLabel,
+        score: gameOverPopup.score,
+        time_seconds: gameOverPopup.elapsedSeconds,
+      })
+      setNameSaved(true)
+    } catch (e) {
+      console.warn('Could not save to leaderboard:', e)
+    } finally {
+      setSavingName(false)
+    }
+  }
+
+  const fetchLeaderboard = async () => {
+    setLeaderboardLoading(true)
+    try {
+      const { data } = await supabase
+        .from('commodity_game_leaderboard')
+        .select('*')
+        .order('score', { ascending: false })
+        .order('time_seconds', { ascending: true })
+        .limit(50)
+      setLeaderboard((data as LeaderboardEntry[]) || [])
+    } catch (e) {
+      console.warn('Could not fetch leaderboard:', e)
+    } finally {
+      setLeaderboardLoading(false)
+    }
+  }
+
+  const openLeaderboard = () => {
+    setShowLeaderboard(true)
+    fetchLeaderboard()
+  }
+
   const fetchSites = useCallback(async () => {
     if (!commodity || unlockedCountries.size === 0) {
       setSites([])
@@ -267,7 +331,6 @@ export default function CommodityGame() {
     setMessage(`✓ ${matched} unlocked!`)
     setTimeout(() => setMessage(null), 1500)
     setCountryInput('')
-    // Start timer on first unlock
     if (!gameStarted) {
       gameOverHandledRef.current = false
       setGameStarted(true)
@@ -284,15 +347,12 @@ export default function CommodityGame() {
     setSelectedSite(null)
     setGameOverPopup(null)
     setShowAllCountriesTable(false)
-  }
-
-  const formatTime = (s: number) => {
-    const m = Math.floor(s / 60)
-    const sec = s % 60
-    return `${m}:${sec.toString().padStart(2, '0')}`
+    setPlayerName('')
+    setNameSaved(false)
   }
 
   const color = (commodity ?? GAME_COMMODITIES[0])?.color ?? '#666'
+  const elapsedTier = gameOverPopup ? getTier(gameOverPopup.elapsedSeconds) : null
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-gray-100">
@@ -324,16 +384,25 @@ export default function CommodityGame() {
           {gameStarted && (
             <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg">
               <Clock size={18} />
-              <span className="font-mono font-bold text-lg">{formatTime(timeLeft)}</span>
+              <span className="font-mono font-bold text-lg">{formatDuration(timeLeft)}</span>
             </div>
           )}
           <span className="text-sm text-gray-500">
             {unlockedCountries.size} / {allCountries.length} countries unlocked
           </span>
+
+          {/* Leaderboard button - top right */}
+          <button
+            onClick={openLeaderboard}
+            className="ml-auto flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-black rounded-lg font-semibold hover:from-yellow-300 hover:to-amber-400 transition-all shadow-md hover:shadow-lg"
+          >
+            <Trophy size={18} />
+            Leaderboard
+          </button>
         </div>
       </div>
 
-      {/* Input bar - always visible */}
+      {/* Input bar */}
       {!gameOverPopup && (
         <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3 flex-wrap">
           <input
@@ -365,7 +434,7 @@ export default function CommodityGame() {
         </div>
       )}
 
-      {/* 3D Globe - always visible */}
+      {/* 3D Globe */}
       <div className="flex-1 min-h-0 relative">
         <div className="w-full h-full min-h-[400px]">
           <GameGlobe3D
@@ -376,21 +445,64 @@ export default function CommodityGame() {
           />
         </div>
 
-        {/* End-of-game popup (when clock reaches 0 or Finish clicked) */}
+        {/* Game-over popup with name input */}
         {gameOverPopup && (
           <div className="absolute inset-0 z-[2000] flex items-center justify-center bg-black/60 p-4">
             <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-lg w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
-              <h2 className="text-2xl font-bold text-black mb-4 text-center">Results</h2>
-              <p className="text-lg text-gray-700 mb-2 text-center">
-                You unlocked <strong>{gameOverPopup.score}</strong> / {allCountries.length} countries.
-              </p>
-              {gameOverPopup.topPercent != null ? (
-                <p className="text-xl font-bold text-green-600 mb-4 text-center">
-                  You&apos;re in the <strong>Top {gameOverPopup.topPercent}%</strong> of players!
-                </p>
-              ) : (
-                <p className="text-gray-500 mb-4 text-center">Ranking will be available once more players have played.</p>
+              <h2 className="text-2xl font-bold text-black mb-2 text-center">Results</h2>
+
+              {/* Tier badge */}
+              {elapsedTier && (
+                <div className="flex justify-center mb-4">
+                  <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${elapsedTier.bg} border ${elapsedTier.border}`}>
+                    <span className="text-xl">{elapsedTier.icon}</span>
+                    <span className={`font-bold ${elapsedTier.text}`}>{elapsedTier.name}</span>
+                  </div>
+                </div>
               )}
+
+              <p className="text-lg text-gray-700 mb-1 text-center">
+                You unlocked <strong>{gameOverPopup.score}</strong> / {allCountries.length} countries
+              </p>
+              <p className="text-sm text-gray-500 mb-2 text-center">
+                Time: <strong>{formatDuration(gameOverPopup.elapsedSeconds)}</strong>
+              </p>
+              {gameOverPopup.topPercent != null && (
+                <p className="text-lg font-bold text-green-600 mb-4 text-center">
+                  Top {gameOverPopup.topPercent}% of players!
+                </p>
+              )}
+
+              {/* Name input for leaderboard */}
+              {!nameSaved ? (
+                <div className="mb-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                  <p className="text-sm font-medium text-gray-700 mb-2">Enter your name for the leaderboard:</p>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={playerName}
+                      onChange={(e) => setPlayerName(e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSaveName()}
+                      placeholder="Your name..."
+                      maxLength={30}
+                      className="flex-1 px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black text-sm"
+                      autoFocus
+                    />
+                    <button
+                      onClick={handleSaveName}
+                      disabled={!playerName.trim() || savingName}
+                      className="px-4 py-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-black rounded-lg font-semibold text-sm disabled:opacity-50 hover:from-yellow-300 hover:to-amber-400 transition-all"
+                    >
+                      {savingName ? 'Saving...' : 'Submit'}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="mb-4 p-3 bg-green-50 rounded-xl border border-green-200 text-center">
+                  <p className="text-sm font-medium text-green-700">Saved to leaderboard as <strong>{playerName}</strong>!</p>
+                </div>
+              )}
+
               {gameOverPopup.countries.length > 0 && (
                 <div className="mb-4 flex-1 min-h-0 overflow-hidden">
                   <p className="text-sm font-medium text-gray-600 mb-2">Countries unlocked:</p>
@@ -443,6 +555,83 @@ export default function CommodityGame() {
                   })}
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Leaderboard popup */}
+        {showLeaderboard && (
+          <div className="absolute inset-0 z-[4000] flex items-center justify-center bg-black/70 p-4">
+            <div className="bg-gray-900 rounded-2xl shadow-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col border border-gray-700">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-bold text-white flex items-center gap-3">
+                  <Trophy size={24} className="text-yellow-400" />
+                  Leaderboard
+                </h3>
+                <button
+                  onClick={() => setShowLeaderboard(false)}
+                  className="text-gray-400 hover:text-white text-2xl leading-none"
+                >
+                  ×
+                </button>
+              </div>
+
+              {/* Tier legend */}
+              <div className="flex flex-wrap gap-2 mb-4">
+                {TIERS.map((tier) => (
+                  <div key={tier.name} className={`flex items-center gap-1.5 px-3 py-1 rounded-full ${tier.bg} border ${tier.border}`}>
+                    <span className="text-sm">{tier.icon}</span>
+                    <span className={`text-xs font-medium ${tier.text}`}>{tier.name}</span>
+                    <span className="text-xs text-gray-500">
+                      {tier.maxSeconds < Infinity ? `< ${tier.maxSeconds / 60}min` : '≥ 10min'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {leaderboardLoading ? (
+                <div className="flex-1 flex items-center justify-center py-12">
+                  <div className="w-8 h-8 border-3 border-yellow-400 border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : leaderboard.length === 0 ? (
+                <div className="flex-1 flex items-center justify-center py-12">
+                  <p className="text-gray-500">No scores yet. Be the first!</p>
+                </div>
+              ) : (
+                <div className="overflow-y-auto flex-1 -mx-2 px-2">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="text-left text-xs text-gray-500 uppercase tracking-wider border-b border-gray-700">
+                        <th className="pb-3 pl-2">#</th>
+                        <th className="pb-3">Player</th>
+                        <th className="pb-3">Commodity</th>
+                        <th className="pb-3 text-right">Score</th>
+                        <th className="pb-3 text-right">Time</th>
+                        <th className="pb-3 text-right pr-2">Tier</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {leaderboard.map((entry, i) => {
+                        const tier = getTier(entry.time_seconds)
+                        return (
+                          <tr key={entry.id} className="border-b border-gray-800 hover:bg-gray-800/50 transition-colors">
+                            <td className="py-3 pl-2 text-gray-400 font-mono text-sm">{i + 1}</td>
+                            <td className="py-3 text-white font-medium">{entry.player_name}</td>
+                            <td className="py-3 text-gray-400 text-sm">{entry.commodity}</td>
+                            <td className="py-3 text-right text-white font-bold">{entry.score}</td>
+                            <td className="py-3 text-right text-gray-300 font-mono text-sm">{formatDuration(entry.time_seconds)}</td>
+                            <td className="py-3 text-right pr-2">
+                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${tier.bg} ${tier.text} border ${tier.border}`}>
+                                {tier.icon} {tier.name}
+                              </span>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         )}

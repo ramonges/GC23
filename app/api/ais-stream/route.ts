@@ -18,12 +18,12 @@ const AIS_SHIP_CATEGORIES: Record<number, string> = {
   76: 'bulk_carrier', 77: 'general_cargo', 78: 'general_cargo', 79: 'general_cargo',
 }
 
-function getShipCategory(shipType: number | undefined): string {
-  if (!shipType) return 'other'
+function getShipCategory(shipType: number | undefined): string | null {
+  if (shipType == null) return null
   return AIS_SHIP_CATEGORIES[shipType] || 'other'
 }
 
-// Batch upsert queue — flushes to Supabase every few seconds
+// Batch upsert queue
 const upsertQueue = new Map<string, Record<string, any>>()
 let flushTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -37,7 +37,7 @@ async function flushToSupabase() {
       onConflict: 'mmsi',
       ignoreDuplicates: false,
     })
-  } catch { /* log silently in production */ }
+  } catch { /* log silently */ }
 }
 
 function scheduleFlush() {
@@ -48,15 +48,16 @@ function scheduleFlush() {
   }, 3000)
 }
 
-function queuePositionUpsert(data: Record<string, any>) {
+function queueUpsert(data: Record<string, any>) {
   const mmsi = data.mmsi as string
   const existing = upsertQueue.get(mmsi) || {}
-  upsertQueue.set(mmsi, {
-    ...existing,
-    ...data,
-    last_position_update: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  })
+  const merged: Record<string, any> = { ...existing }
+  for (const [k, v] of Object.entries(data)) {
+    if (v !== undefined && v !== null) merged[k] = v
+  }
+  merged.last_position_update = new Date().toISOString()
+  merged.updated_at = new Date().toISOString()
+  upsertQueue.set(mmsi, merged)
   scheduleFlush()
 }
 
@@ -75,6 +76,9 @@ export async function GET(req: NextRequest) {
 
   const encoder = new TextEncoder()
   let wsConnection: WebSocket | null = null
+
+  // Server-side MMSI → category lookup (built from ShipStaticData)
+  const mmsiCategories = new Map<string, string>()
 
   const stream = new ReadableStream({
     start(controller) {
@@ -106,42 +110,63 @@ export async function GET(req: NextRequest) {
             const pos = msg.Message?.PositionReport
             if (!pos) return
 
+            const mmsi = String(pos.UserID || meta.MMSI)
+            const lat = meta.latitude ?? pos.Latitude
+            const lng = meta.longitude ?? pos.Longitude
+            if (lat == null || lng == null) return
+
             const shipType = meta.ShipType ?? pos.ShipType
-            const category = getShipCategory(shipType)
+            const streamCategory = getShipCategory(shipType)
+            const knownCategory = mmsiCategories.get(mmsi)
+            const category = streamCategory || knownCategory || 'other'
 
-            if (filterCategories.size > 0 && !filterCategories.has(category)) return
+            if (knownCategory) mmsiCategories.set(mmsi, knownCategory)
+            else if (streamCategory) mmsiCategories.set(mmsi, streamCategory)
 
-            const vesselData = {
-              mmsi: String(pos.UserID || meta.MMSI),
-              vessel_name: meta.ShipName?.trim() || undefined,
-              latitude: meta.latitude ?? pos.Latitude,
-              longitude: meta.longitude ?? pos.Longitude,
+            const effectiveCategory = streamCategory || knownCategory
+
+            const vesselData: Record<string, any> = {
+              mmsi,
+              latitude: lat,
+              longitude: lng,
               speed_knots: pos.Sog,
               course: pos.Cog,
               heading: pos.TrueHeading === 511 ? undefined : pos.TrueHeading,
-              navigation_status: String(pos.NavigationalStatus ?? ''),
-              ship_type: shipType,
-              ship_category: category,
+              navigation_status: pos.NavigationalStatus != null ? String(pos.NavigationalStatus) : undefined,
             }
+            if (meta.ShipName?.trim()) vesselData.vessel_name = meta.ShipName.trim()
+            if (shipType != null) vesselData.ship_type = shipType
+            if (effectiveCategory) vesselData.ship_category = effectiveCategory
 
-            // Save to Supabase
-            queuePositionUpsert(vesselData)
+            // Always save position to Supabase (category will merge with existing row)
+            queueUpsert(vesselData)
 
-            send({ type: 'position', ...vesselData })
+            // Only send to SSE client if it matches the requested categories
+            if (filterCategories.size === 0 || (effectiveCategory && filterCategories.has(effectiveCategory))) {
+              send({
+                type: 'position',
+                ...vesselData,
+                ship_category: effectiveCategory || 'other',
+              })
+            }
           }
 
           if (msgType === 'ShipStaticData') {
             const sd = msg.Message?.ShipStaticData
             if (!sd) return
 
+            const mmsi = String(sd.UserID || meta.MMSI)
             const category = getShipCategory(sd.Type)
-            if (filterCategories.size > 0 && !filterCategories.has(category)) return
+
+            if (category) mmsiCategories.set(mmsi, category)
+
+            if (filterCategories.size > 0 && category && !filterCategories.has(category)) return
 
             const staticData: Record<string, any> = {
-              mmsi: String(sd.UserID || meta.MMSI),
-              vessel_name: sd.Name?.trim() || meta.ShipName?.trim(),
+              mmsi,
+              vessel_name: sd.Name?.trim() || meta.ShipName?.trim() || undefined,
               ship_type: sd.Type,
-              ship_category: category,
+              ship_category: category || undefined,
               destination: sd.Destination?.trim() || undefined,
               call_sign: sd.CallSign?.trim() || undefined,
             }
@@ -154,8 +179,7 @@ export async function GET(req: NextRequest) {
             }
             if (sd.MaximumStaticDraught) staticData.draught = sd.MaximumStaticDraught
 
-            // Save to Supabase
-            queuePositionUpsert(staticData)
+            queueUpsert(staticData)
 
             send({ type: 'static', ...staticData })
           }

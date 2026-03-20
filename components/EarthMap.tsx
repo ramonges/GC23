@@ -912,9 +912,9 @@ export default function EarthMap() {
         const { data: rows, error } = await supabase
           .from('vessels')
           .select('*')
-          .in('ship_category', categoryArr)
           .not('latitude', 'is', null)
           .not('longitude', 'is', null)
+          .or(`ship_category.in.(${categoryArr.join(',')}),ship_category.is.null`)
           .order('last_position_update', { ascending: false })
           .limit(2000)
 
