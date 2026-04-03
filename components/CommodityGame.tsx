@@ -289,6 +289,31 @@ export default function CommodityGame() {
         if (rows.length < PAGE_SIZE) keepFetching = false
       }
 
+      // corn_table: merge when Agricultural/Corn is selected
+      if (commodity.commodityType === 'Agricultural' && commodity.commodityName === 'Corn') {
+        try {
+          const { data: cornRows } = await supabase
+            .from('corn_table')
+            .select('*')
+            .not('latitude', 'is', null)
+            .not('longitude', 'is', null)
+
+          if (cornRows && cornRows.length > 0) {
+            const cornAsSites = cornRows.map((c: any) => ({
+              ...c,
+              title: c.producer_name ?? 'Corn Producer',
+              commodity_type: 'Agricultural',
+              commodity_name: 'Corn',
+            }))
+            const existingKeys = new Set(allData.map((d: any) => `${Number(d.latitude).toFixed(5)}_${Number(d.longitude).toFixed(5)}`))
+            const toAdd = cornAsSites.filter((m: any) => !existingKeys.has(`${Number(m.latitude).toFixed(5)}_${Number(m.longitude).toFixed(5)}`))
+            allData = allData.concat(toAdd)
+          }
+        } catch (e) {
+          console.warn('corn_table game fetch failed:', e)
+        }
+      }
+
       const filtered = allData.filter((r: any) => {
         const dbC = r.country?.trim() || ''
         const canon = canonicalForDb(dbC) || dbC
@@ -298,7 +323,7 @@ export default function CommodityGame() {
       setSites(
         filtered.map((r: any) => ({
           id: r.id,
-          title: r.title || 'Site',
+          title: r.title || r.producer_name || 'Site',
           latitude: Number(r.latitude ?? r.lat),
           longitude: Number(r.longitude ?? r.lng),
           country: r.country,
@@ -672,6 +697,30 @@ export default function CommodityGame() {
                   <span className="text-gray-500">Annual capacity:</span>{' '}
                   {selectedSite.annual_capacity_tonnes?.toLocaleString()} tonnes
                 </p>
+              )}
+              {selectedSite.producer_type && (
+                <p><span className="text-gray-500">Type:</span> {selectedSite.producer_type}</p>
+              )}
+              {selectedSite.production_mt != null && (
+                <p><span className="text-gray-500">Production:</span> {Number(selectedSite.production_mt).toLocaleString()} mt</p>
+              )}
+              {selectedSite.available_mt != null && (
+                <p><span className="text-gray-500">Available:</span> {Number(selectedSite.available_mt).toLocaleString()} mt</p>
+              )}
+              {selectedSite.fob_price_usd_mt != null && (
+                <p><span className="text-gray-500">FOB Price:</span> ${Number(selectedSite.fob_price_usd_mt).toLocaleString()}/mt</p>
+              )}
+              {selectedSite.grade_standard && (
+                <p><span className="text-gray-500">Grade:</span> {selectedSite.grade_standard}</p>
+              )}
+              {selectedSite.gmo_status && (
+                <p><span className="text-gray-500">GMO:</span> {selectedSite.gmo_status}</p>
+              )}
+              {selectedSite.loading_port && (
+                <p><span className="text-gray-500">Port:</span> {selectedSite.loading_port}</p>
+              )}
+              {selectedSite.crop_year && (
+                <p><span className="text-gray-500">Crop Year:</span> {selectedSite.crop_year}</p>
               )}
             </div>
           </div>

@@ -1087,6 +1087,19 @@ export default function EarthMap() {
         } catch (_) {}
       }
 
+      // Add corn_table producers when Agricultural/Corn is selected
+      const showCornCompanies = !selectedCategory || (selectedCategory === 'Agricultural' && (!selectedCommodity || selectedCommodity === 'Corn'))
+      if (showCornCompanies) {
+        try {
+          const { data: cornRows } = await supabase.from('corn_table').select('producer_name')
+          if (cornRows) {
+            cornRows.forEach((r: any) => {
+              if (r.producer_name) operatorNames.push(r.producer_name)
+            })
+          }
+        } catch (_) {}
+      }
+
       const unique = Array.from(new Set([...companyNames, ...operatorNames])).sort()
       setAvailableCompanies(unique)
     } catch (err) {
@@ -1183,6 +1196,54 @@ export default function EarthMap() {
           }
         } catch (e) {
           console.warn('gold_mines fetch failed:', e)
+        }
+      }
+
+      // corn_table: fallback fetch when Agricultural/Corn is selected
+      const showCorn = !selectedCategory || (selectedCategory === 'Agricultural' && (!selectedCommodity || selectedCommodity === 'Corn'))
+      if (showCorn) {
+        try {
+          let cornQuery = supabase.from('corn_table').select('*')
+          if (!ignoreCompany && selectedCompany) {
+            cornQuery = cornQuery.or(`producer_name.eq.${selectedCompany}`)
+          }
+          const { data: cornRows, error: cornErr } = await cornQuery
+
+          console.log('corn_table query result:', { rowCount: cornRows?.length ?? 0, error: cornErr?.message ?? null })
+          if (cornErr) {
+            console.warn('corn_table fetch skipped:', cornErr.message)
+          } else if (cornRows && cornRows.length > 0) {
+            const cornAsCommodity = cornRows.map((c: any) => {
+              const numLat = typeof c.latitude === 'number' ? c.latitude : parseFloat(c.latitude)
+              const numLng = typeof c.longitude === 'number' ? c.longitude : parseFloat(c.longitude)
+              return {
+                ...c,
+                id: c.id ?? `corn-${String(c.producer_name ?? '').replace(/\s/g, '-')}-${c.country ?? ''}`,
+                title: c.producer_name ?? 'Corn Producer',
+                owner: c.producer_name ?? '',
+                address: [c.region, c.country].filter(Boolean).join(', '),
+                latitude: numLat,
+                longitude: numLng,
+                commodity_type: 'Agricultural',
+                commodity_name: 'Corn',
+                company: c.producer_name,
+                operator: c.producer_name,
+                country: c.country,
+                region: c.region,
+                production_yearly: c.production_mt != null ? Number(c.production_mt) : undefined,
+                production_unit: 'mt',
+                grade: c.grade_standard,
+              }
+            }).filter((m: any) => !isNaN(m.latitude) && !isNaN(m.longitude) && m.latitude >= -90 && m.latitude <= 90 && m.longitude >= -180 && m.longitude <= 180)
+            const existingKeys = new Set(allData.filter((d: any) => d.commodity_name === 'Corn').map((d: any) => `${d.latitude?.toFixed(5)}_${d.longitude?.toFixed(5)}`))
+            const toAdd = cornAsCommodity.filter((m: any) => !existingKeys.has(`${m.latitude.toFixed(5)}_${m.longitude.toFixed(5)}`))
+            console.log(`corn_table: ${cornRows.length} rows fetched, ${cornAsCommodity.length} with valid coords, ${toAdd.length} new (non-duplicate) added`)
+            allData = allData.concat(toAdd)
+          } else {
+            console.log('corn_table: 0 rows returned — check RLS policies or that table has data')
+          }
+        } catch (e) {
+          console.warn('corn_table fetch failed:', e)
         }
       }
 
@@ -1862,6 +1923,51 @@ export default function EarthMap() {
                   major_milestones: 'Major Milestones',
                   ownership_changes: 'Ownership Changes',
                   associated_metals: 'Associated Metals',
+                  // Corn table (corn_table)
+                  producer_name: 'Producer',
+                  producer_type: 'Producer Type',
+                  contact_name: 'Contact Name',
+                  iso_code: 'ISO Code',
+                  crop_year: 'Crop Year',
+                  planted_area_ha: 'Planted Area (ha)',
+                  harvested_area_ha: 'Harvested Area (ha)',
+                  yield_mt_ha: 'Yield (mt/ha)',
+                  production_mt: 'Production (mt)',
+                  stock_on_hand_mt: 'Stock on Hand (mt)',
+                  committed_mt: 'Committed (mt)',
+                  available_mt: 'Available (mt)',
+                  farmer_priced_pct: 'Farmer Priced (%)',
+                  moisture_pct: 'Moisture (%)',
+                  test_weight_lbs_bu: 'Test Weight (lbs/bu)',
+                  aflatoxin_ppb: 'Aflatoxin (ppb)',
+                  vomitoxin_ppm: 'Vomitoxin (ppm)',
+                  grade_standard: 'Grade Standard',
+                  gmo_status: 'GMO Status',
+                  approved_traits: 'Approved Traits',
+                  loading_port: 'Loading Port',
+                  distance_to_port_km: 'Distance to Port (km)',
+                  inland_freight_usd_mt: 'Inland Freight (USD/mt)',
+                  port_handling_usd_mt: 'Port Handling (USD/mt)',
+                  storage_cost_usd_mt_month: 'Storage Cost (USD/mt/mo)',
+                  export_tax_pct: 'Export Tax (%)',
+                  fx_currency: 'FX Currency',
+                  fx_rate_local_usd: 'FX Rate (Local/USD)',
+                  fx_parallel_rate: 'FX Parallel Rate',
+                  fob_price_usd_mt: 'FOB Price (USD/mt)',
+                  basis_vs_cbot_usd_mt: 'Basis vs CBOT (USD/mt)',
+                  cbot_nearby_usd_mt: 'CBOT Nearby (USD/mt)',
+                  total_logistics_cost_usd_mt: 'Total Logistics (USD/mt)',
+                  incoterms: 'Incoterms',
+                  typical_contract: 'Typical Contract',
+                  min_lot_size_mt: 'Min Lot Size (mt)',
+                  max_lot_size_mt: 'Max Lot Size (mt)',
+                  typical_lead_time_days: 'Lead Time (days)',
+                  major_buyers: 'Major Buyers',
+                  export_markets: 'Export Markets',
+                  harvest_start: 'Harvest Start',
+                  harvest_end: 'Harvest End',
+                  peak_months: 'Peak Months',
+                  notes: 'Notes',
                 }
                 
                 return (
