@@ -1203,17 +1203,29 @@ export default function EarthMap() {
       const showCorn = !selectedCategory || (selectedCategory === 'Agricultural' && (!selectedCommodity || selectedCommodity === 'Corn'))
       if (showCorn) {
         try {
-          let cornQuery = supabase.from('corn_table').select('*')
-          if (!ignoreCompany && selectedCompany) {
-            cornQuery = cornQuery.or(`producer_name.eq.${selectedCompany}`)
+          const CORN_PAGE = 1000
+          let cornAll: any[] = []
+          let cornFrom = 0
+          let cornKeep = true
+          while (cornKeep) {
+            let cornQuery = supabase.from('corn_table').select('*').range(cornFrom, cornFrom + CORN_PAGE - 1)
+            if (!ignoreCompany && selectedCompany) {
+              cornQuery = cornQuery.or(`producer_name.eq.${selectedCompany}`)
+            }
+            const { data: cornRows, error: cornErr } = await cornQuery
+            if (cornErr) {
+              console.warn('corn_table fetch skipped:', cornErr.message)
+              break
+            }
+            const rows = cornRows || []
+            cornAll = cornAll.concat(rows)
+            cornFrom += CORN_PAGE
+            if (rows.length < CORN_PAGE) cornKeep = false
           }
-          const { data: cornRows, error: cornErr } = await cornQuery
 
-          console.log('corn_table query result:', { rowCount: cornRows?.length ?? 0, error: cornErr?.message ?? null })
-          if (cornErr) {
-            console.warn('corn_table fetch skipped:', cornErr.message)
-          } else if (cornRows && cornRows.length > 0) {
-            const cornAsCommodity = cornRows.map((c: any) => {
+          console.log('corn_table query result:', { totalRows: cornAll.length })
+          if (cornAll.length > 0) {
+            const cornAsCommodity = cornAll.map((c: any) => {
               const numLat = typeof c.latitude === 'number' ? c.latitude : parseFloat(c.latitude)
               const numLng = typeof c.longitude === 'number' ? c.longitude : parseFloat(c.longitude)
               return {
@@ -1237,10 +1249,10 @@ export default function EarthMap() {
             }).filter((m: any) => !isNaN(m.latitude) && !isNaN(m.longitude) && m.latitude >= -90 && m.latitude <= 90 && m.longitude >= -180 && m.longitude <= 180)
             const existingKeys = new Set(allData.filter((d: any) => d.commodity_name === 'Corn').map((d: any) => `${d.latitude?.toFixed(5)}_${d.longitude?.toFixed(5)}`))
             const toAdd = cornAsCommodity.filter((m: any) => !existingKeys.has(`${m.latitude.toFixed(5)}_${m.longitude.toFixed(5)}`))
-            console.log(`corn_table: ${cornRows.length} rows fetched, ${cornAsCommodity.length} with valid coords, ${toAdd.length} new (non-duplicate) added`)
+            console.log(`corn_table: ${cornAll.length} rows fetched, ${cornAsCommodity.length} with valid coords, ${toAdd.length} new (non-duplicate) added`)
             allData = allData.concat(toAdd)
           } else {
-            console.log('corn_table: 0 rows returned — check RLS policies or that table has data')
+            console.log('corn_table: 0 rows returned')
           }
         } catch (e) {
           console.warn('corn_table fetch failed:', e)

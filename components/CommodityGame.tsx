@@ -289,24 +289,37 @@ export default function CommodityGame() {
         if (rows.length < PAGE_SIZE) keepFetching = false
       }
 
-      // corn_table: merge when Agricultural/Corn is selected
+      // corn_table: merge when Agricultural/Corn is selected (paginated)
       if (commodity.commodityType === 'Agricultural' && commodity.commodityName === 'Corn') {
         try {
-          const { data: cornRows } = await supabase
-            .from('corn_table')
-            .select('*')
-            .not('latitude', 'is', null)
-            .not('longitude', 'is', null)
-
-          if (cornRows && cornRows.length > 0) {
-            const cornAsSites = cornRows.map((c: any) => ({
+          const CP = 1000
+          let cornAll: any[] = []
+          let cf = 0
+          let ck = true
+          while (ck) {
+            const { data: cr, error: ce } = await supabase
+              .from('corn_table')
+              .select('*')
+              .not('latitude', 'is', null)
+              .not('longitude', 'is', null)
+              .range(cf, cf + CP - 1)
+            if (ce) break
+            const rows = cr || []
+            cornAll = cornAll.concat(rows)
+            cf += CP
+            if (rows.length < CP) ck = false
+          }
+          if (cornAll.length > 0) {
+            const cornAsSites = cornAll.map((c: any) => ({
               ...c,
               title: c.producer_name ?? 'Corn Producer',
               commodity_type: 'Agricultural',
               commodity_name: 'Corn',
+              latitude: typeof c.latitude === 'number' ? c.latitude : parseFloat(c.latitude),
+              longitude: typeof c.longitude === 'number' ? c.longitude : parseFloat(c.longitude),
             }))
             const existingKeys = new Set(allData.map((d: any) => `${Number(d.latitude).toFixed(5)}_${Number(d.longitude).toFixed(5)}`))
-            const toAdd = cornAsSites.filter((m: any) => !existingKeys.has(`${Number(m.latitude).toFixed(5)}_${Number(m.longitude).toFixed(5)}`))
+            const toAdd = cornAsSites.filter((m: any) => !isNaN(m.latitude) && !isNaN(m.longitude) && !existingKeys.has(`${m.latitude.toFixed(5)}_${m.longitude.toFixed(5)}`))
             allData = allData.concat(toAdd)
           }
         } catch (e) {
