@@ -170,6 +170,42 @@ function defaultVesselFor(commodity: string): string | null {
   return Object.keys(vesselClasses).find((v) => vesselClasses[v].commodities.includes(commodity)) || null
 }
 
+const INLAND_ONLY_SEA_NM = 25
+
+function normalizeCountryName(country?: string): string {
+  if (!country) return ''
+  const n = country.toLowerCase().replace(/[^a-z]/g, '')
+  if (n === 'us' || n === 'usa' || n === 'unitedstatesofamerica') return 'unitedstates'
+  if (n === 'uk' || n === 'gb' || n === 'greatbritain' || n === 'britain') return 'unitedkingdom'
+  return n
+}
+
+function countriesMatch(a?: string, b?: string): boolean {
+  const na = normalizeCountryName(a)
+  const nb = normalizeCountryName(b)
+  return !!na && na === nb
+}
+
+function isInlandOnlySeaLeg(from: Port, to: Port): boolean {
+  if (from.name === to.name && from.country === to.country) return true
+  return haversineDistanceKm(from.lat, from.lng, to.lat, to.lng) / 1.852 < INLAND_ONLY_SEA_NM
+}
+
+function resolveDeliveryRoute(
+  asset: Pick<Asset, 'latitude' | 'longitude' | 'country'>,
+  destination: Port,
+): { inlandOnly: boolean; inlandKm: number; handoff: Port } {
+  const nearest = findNearestPort(asset.latitude, asset.longitude)
+  if (isInlandOnlySeaLeg(nearest.port, destination) || countriesMatch(asset.country, destination.country)) {
+    return {
+      inlandOnly: true,
+      inlandKm: haversineDistanceKm(asset.latitude, asset.longitude, destination.lat, destination.lng),
+      handoff: destination,
+    }
+  }
+  return { inlandOnly: false, inlandKm: nearest.distanceKm, handoff: nearest.port }
+}
+
 function normalizeAsset(row: any, source: string): Asset | null {
   const lat = Number(row.latitude ?? row.lat)
   const lng = Number(row.longitude ?? row.lng)
@@ -249,6 +285,7 @@ interface RankedSource {
   unitLabel: string
   status: DeliveryStatus
   rankReason: string
+  inlandOnly: boolean
 }
 
 function requiredDeliveryDeadline(laycanStart: string, laycanEnd: string): Date | null {
@@ -286,9 +323,8 @@ function computeModeledCost(params: {
   dischargeCustomsClearance: number
   canalToll: 'suez' | 'panama' | 'none'
 }) {
-  const vessel = vesselClasses[params.vesselClass]
   const commodity = commoditySpecs[params.selectedCommodity]
-  if (!vessel || !commodity || params.volume <= 0) return null
+  if (!commodity || params.volume <= 0) return null
 
   const parcelMt = parcelToMt(params.selectedCommodity, params.volume)
   const inlandDist = params.nearestPort.distanceKm
@@ -302,6 +338,37 @@ function computeModeledCost(params: {
     params.destinationPort.lat,
     params.destinationPort.lng,
   ) / 1.852
+  const inlandOnly = seaDistNm < INLAND_ONLY_SEA_NM
+  const vessel = !inlandOnly && params.vesselClass ? vesselClasses[params.vesselClass] : null
+  if (!inlandOnly && !vessel) return null
+
+  if (inlandOnly) {
+    const marineIns = inlandCost * (params.marineInsurancePct / 100)
+    const lateRisk = params.expectedDelayDays > 0 && params.latePenaltyPerDay > 0 ? Math.min(params.expectedDelayDays, 7) * params.latePenaltyPerDay : 0
+    const blendingTotal = params.blendingMode !== 'none' ? params.stockpileCost + params.blendingFee + (params.maxStorageDays > 0 ? params.maxStorageDays * 500 : 0) : 0
+    const subtotal = inlandCost + marineIns + lateRisk + blendingTotal
+    const contingency = subtotal * (params.contingencyPct / 100)
+    const totalCost = subtotal + contingency
+    const unitCost = commodity.unit === 'bbls' ? totalCost / params.volume : totalCost / parcelMt
+    const perMt = parcelMt > 0 ? 1 / parcelMt : 0
+    return {
+      inlandCost, inlandDist, inlandDays, inlandMode: params.inlandMode,
+      parcelMt, volume: params.volume,
+      sailingDays: 0, loadingDays: 0, dischargeDays: 0, totalDays: inlandDays,
+      seaDistNm: 0,
+      freight: 0, bunker: 0, port: 0, canal: 0,
+      dischargePortCost: 0, marineIns, lateRisk, blendingTotal,
+      contingency,
+      totalCost, unitCost, unitLabel: commodity.unit,
+      originPort: params.nearestPort.port, destinationPort: params.destinationPort,
+      vessel: null, commodity, inlandOnly: true,
+      inlandCostPerMt: inlandCost * perMt,
+      freightCostPerMt: 0,
+    }
+  }
+
+  if (!vessel) return null
+
   const sailingDays = seaDistNm / (vessel.speed * 24)
   const loadRate = params.loadingRateMtDay > 0 ? params.loadingRateMtDay : commodity.loadingRateMtHr * 24
   const dischRate = params.dischargeRateMtDay > 0 ? params.dischargeRateMtDay : commodity.dischargeRateMtHr * 24
@@ -350,7 +417,7 @@ function computeModeledCost(params: {
     contingency,
     totalCost, unitCost, unitLabel: commodity.unit,
     originPort: params.nearestPort.port, destinationPort: params.destinationPort,
-    vessel, commodity,
+    vessel, commodity, inlandOnly: false,
     inlandCostPerMt: inlandCost * perMt,
     freightCostPerMt: (hireCost + bunkerCost + canalCost) * perMt,
   }
@@ -367,18 +434,21 @@ function rankEligibleSources(
         inlandDistanceKm: null, inlandDays: null, inlandCostPerMt: null,
         freightCostPerMt: null, deliveredCostPerMt: null, transitDays: null,
         unitLabel: commoditySpecs[params.selectedCommodity]?.unit || 'MT',
-        status: 'insufficient', rankReason: 'Insufficient data',
+        status: 'insufficient', rankReason: 'Insufficient data', inlandOnly: false,
       }
     }
-    const nearest = findNearestPort(asset.latitude, asset.longitude)
-    const modeled = computeModeledCost({ ...params, nearestPort: nearest })
+    const route = resolveDeliveryRoute(asset, params.destinationPort)
+    const modeled = computeModeledCost({
+      ...params,
+      nearestPort: { port: route.handoff, distanceKm: route.inlandKm },
+    })
     if (!modeled) {
       return {
-        asset, exportPort: nearest.port, inlandMode: params.inlandMode,
-        inlandDistanceKm: nearest.distanceKm, inlandDays: Math.ceil(nearest.distanceKm / 500),
-        inlandCostPerMt: null, freightCostPerMt: null, deliveredCostPerMt: null, transitDays: null,
+        asset, exportPort: route.handoff, inlandMode: params.inlandMode,
+        inlandDistanceKm: route.inlandKm, inlandDays: Math.ceil(route.inlandKm / 500),
+        inlandCostPerMt: null, freightCostPerMt: route.inlandOnly ? 0 : null, deliveredCostPerMt: null, transitDays: null,
         unitLabel: commoditySpecs[params.selectedCommodity]?.unit || 'MT',
-        status: 'insufficient', rankReason: 'Insufficient data',
+        status: 'insufficient', rankReason: 'Insufficient data', inlandOnly: route.inlandOnly,
       }
     }
     let status: DeliveryStatus = 'meets'
@@ -389,7 +459,7 @@ function rankEligibleSources(
     }
     return {
       asset,
-      exportPort: nearest.port,
+      exportPort: route.handoff,
       inlandMode: params.inlandMode,
       inlandDistanceKm: modeled.inlandDist,
       inlandDays: modeled.inlandDays,
@@ -400,6 +470,7 @@ function rankEligibleSources(
       unitLabel: modeled.unitLabel,
       status,
       rankReason: '',
+      inlandOnly: route.inlandOnly,
     }
   })
 
@@ -440,7 +511,9 @@ function rankEligibleSources(
         ? 'Insufficient data'
         : s.status === 'risk'
           ? 'Does not meet delivery window'
-          : i === 0 ? reasonForFirst : reasonForRest,
+          : s.inlandOnly
+            ? (i === 0 ? `${reasonForFirst} · inland delivery` : 'Inland delivery · no ocean freight')
+            : i === 0 ? reasonForFirst : reasonForRest,
     }))
   }
 
@@ -696,15 +769,19 @@ export default function ShippingDeliveryWizard() {
     loadAssets()
   }, [selectedCommodity, originCountry, commodities, selectedApiGravity, sourceMode])
 
-  // Nearest port when asset selected
+  // Route asset to destination: inland-only when the destination is local
   useEffect(() => {
     if (!selectedAsset) {
       setNearestPort(null)
       return
     }
-    const np = findNearestPort(selectedAsset.latitude, selectedAsset.longitude)
-    setNearestPort(np)
-  }, [selectedAsset])
+    if (!destinationPort) {
+      setNearestPort(findNearestPort(selectedAsset.latitude, selectedAsset.longitude))
+      return
+    }
+    const route = resolveDeliveryRoute(selectedAsset, destinationPort)
+    setNearestPort({ port: route.handoff, distanceKm: route.inlandKm })
+  }, [selectedAsset, destinationPort])
 
   // Keep inland mode valid for current commodity (e.g. no pipeline for coal)
   const allowedInlandModes = (INLAND_MODES_BY_COMMODITY[selectedCommodity] || ['truck', 'rail']) as InlandModeOption[]
@@ -768,7 +845,12 @@ export default function ShippingDeliveryWizard() {
 
   // Cost calculation
   useEffect(() => {
-    if (!selectedAsset || !nearestPort || !destinationPort || !vesselClass || volume <= 0) {
+    if (!selectedAsset || !nearestPort || !destinationPort || volume <= 0) {
+      setCostBreakdown(null)
+      return
+    }
+    const inlandDelivery = isInlandOnlySeaLeg(nearestPort.port, destinationPort)
+    if (!inlandDelivery && !vesselClass) {
       setCostBreakdown(null)
       return
     }
@@ -901,7 +983,14 @@ export default function ShippingDeliveryWizard() {
     canalToll, laycanStart, laycanEnd,
   ])
 
+  const inlandOnly = !!(nearestPort && destinationPort && isInlandOnlySeaLeg(nearestPort.port, destinationPort))
+
   const handleNext = () => {
+    if (inlandOnly && step >= 5) {
+      setShowMap(true)
+      setMapFullScreen(true)
+      return
+    }
     if (step < STEPS) setStep(step + 1)
     else {
       setShowMap(true)
@@ -937,7 +1026,7 @@ export default function ShippingDeliveryWizard() {
   const canProceedStep3 = !!selectedAsset && (sourceMode === 'auto' || !!originCountry)
   const canProceedStep4 = true
   const canProceedStep5 = true
-  const canProceedStep6 = !!vesselClass
+  const canProceedStep6 = inlandOnly || !!vesselClass
   const canProceedStep7 = true
   const canProceedStep8 = true
 
@@ -945,24 +1034,26 @@ export default function ShippingDeliveryWizard() {
   if (selectedAsset && nearestPort && destinationPort) {
     routes.push({
       id: 'inland',
-      name: 'Asset → Port',
+      name: inlandOnly ? 'Asset → Destination' : 'Asset → Port',
       startLat: selectedAsset.latitude,
       startLng: selectedAsset.longitude,
-      endLat: nearestPort.port.lat,
-      endLng: nearestPort.port.lng,
+      endLat: inlandOnly ? destinationPort.lat : nearestPort.port.lat,
+      endLng: inlandOnly ? destinationPort.lng : nearestPort.port.lng,
       color: '#F59E0B',
       waypoints: [],
     })
-    routes.push({
-      id: 'sea',
-      name: `${nearestPort.port.name} → ${destinationPort.name}`,
-      startLat: nearestPort.port.lat,
-      startLng: nearestPort.port.lng,
-      endLat: destinationPort.lat,
-      endLng: destinationPort.lng,
-      color: '#3B82F6',
-      waypoints: generateSeaWaypoints(nearestPort.port.lat, nearestPort.port.lng, destinationPort.lat, destinationPort.lng),
-    })
+    if (!inlandOnly) {
+      routes.push({
+        id: 'sea',
+        name: `${nearestPort.port.name} → ${destinationPort.name}`,
+        startLat: nearestPort.port.lat,
+        startLng: nearestPort.port.lng,
+        endLat: destinationPort.lat,
+        endLng: destinationPort.lng,
+        color: '#3B82F6',
+        waypoints: generateSeaWaypoints(nearestPort.port.lat, nearestPort.port.lng, destinationPort.lat, destinationPort.lng),
+      })
+    }
   }
 
   const markers = selectedAsset ? [{
@@ -1025,7 +1116,11 @@ export default function ShippingDeliveryWizard() {
           )}
         </div>
       ) : (
-        <p className="text-gray-500 text-sm">Complete origin, destination, vessel and volume to see cost breakdown.</p>
+        <p className="text-gray-500 text-sm">
+          {inlandOnly
+            ? 'Complete origin, destination and volume to see the inland cost breakdown.'
+            : 'Complete origin, destination, vessel and volume to see cost breakdown.'}
+        </p>
       )}
     </FormCard>
   )
@@ -1054,7 +1149,7 @@ export default function ShippingDeliveryWizard() {
         {nearestPort && selectedAsset && (
           <div className="grid grid-cols-1 gap-3 pt-1">
             <KpiPanel
-              label="Recommended export port"
+              label={inlandOnly ? 'Inland delivery to' : 'Recommended export port'}
               value={`${nearestPort.port.name}, ${nearestPort.port.country}`}
             />
             <KpiPanel
@@ -1347,8 +1442,8 @@ export default function ShippingDeliveryWizard() {
                                   </td>
                                   {autoRankTab === 'cost' && (
                                     <td className="px-3 py-2 align-top text-black">
-                                      {row.freightCostPerMt == null ? '—' : `$${row.freightCostPerMt.toFixed(2)}/MT`}
-                                      <div className="text-gray-500">Estimated</div>
+                                      {row.inlandOnly ? '$0.00/MT' : row.freightCostPerMt == null ? '—' : `$${row.freightCostPerMt.toFixed(2)}/MT`}
+                                      <div className="text-gray-500">{row.inlandOnly ? 'Inland' : 'Estimated'}</div>
                                     </td>
                                   )}
                                   {autoRankTab === 'cost' && (
@@ -1482,10 +1577,13 @@ export default function ShippingDeliveryWizard() {
           {step === 4 && selectedAsset && nearestPort && (
             <FormCard title="Inland">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
-                <KpiPanel label="Recommended export port" value={`${nearestPort.port.name}, ${nearestPort.port.country}`} />
+                <KpiPanel label={inlandOnly ? 'Inland delivery to' : 'Recommended export port'} value={`${nearestPort.port.name}, ${nearestPort.port.country}`} />
                 <KpiPanel label="Distance" value={`${nearestPort.distanceKm.toFixed(0)} km`} hint={selectedAsset.title} />
                 <KpiPanel label="Estimated inland cost" value={`$${(nearestPort.distanceKm * inlandRatePerKm).toFixed(2)} / MT`} hint={`Estimated · ${nearestPort.distanceKm.toFixed(0)} km · ${inlandMode}`} />
               </div>
+              {inlandOnly && (
+                <p className="text-sm text-gray-500 mb-4">Inland delivery · no vessel, bunker, or ocean freight.</p>
+              )}
               <div className="mb-4">
                 <label className={labelClass}>Inland transport mode</label>
                 <select value={inlandMode} onChange={(e) => setInlandMode(e.target.value as any)} className={inputClass}>
@@ -1495,6 +1593,7 @@ export default function ShippingDeliveryWizard() {
                   {allowedInlandModes.includes('pipeline') && <option value="pipeline">Pipeline</option>}
                 </select>
               </div>
+              {!inlandOnly && (
               <div className="space-y-3 mb-4">
                 <div className="text-sm font-medium text-gray-700">Port charges ($/MT)</div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1518,6 +1617,7 @@ export default function ShippingDeliveryWizard() {
                   </label>
                 </div>
               </div>
+              )}
               <StepActions onBack={handleBack} onNext={handleNext} />
             </FormCard>
           )}
@@ -1560,12 +1660,22 @@ export default function ShippingDeliveryWizard() {
                   </div>
                 )}
               </div>
-              <StepActions onBack={handleBack} onNext={handleNext} />
+              <StepActions
+                onBack={handleBack}
+                onNext={handleNext}
+                nextLabel={inlandOnly ? 'View on map' : 'Continue'}
+              />
             </FormCard>
           )}
 
           {/* Step 6: Vessel */}
-          {step === 6 && spec && (
+          {step === 6 && inlandOnly && (
+            <FormCard title="Vessel">
+              <p className="text-sm text-gray-500">Inland delivery · vessel and ocean freight are not required.</p>
+              <StepActions onBack={handleBack} onNext={handleNext} nextLabel="View on map" />
+            </FormCard>
+          )}
+          {step === 6 && spec && !inlandOnly && (
             <FormCard title="Vessel">
               <div className="space-y-4">
                 <div>
@@ -1595,7 +1705,7 @@ export default function ShippingDeliveryWizard() {
           )}
 
           {/* Step 7: Charter type */}
-          {step === 7 && (
+          {step === 7 && !inlandOnly && (
             <FormCard title="Charter">
               <div className="space-y-2 mb-4">
                 {(['voyage', 'time', 'bareboat'] as CharterType[]).map((t) => (
@@ -1639,7 +1749,7 @@ export default function ShippingDeliveryWizard() {
           )}
 
           {/* Step 8: Freight rate */}
-          {step === 8 && (
+          {step === 8 && !inlandOnly && (
             <FormCard title="Freight">
               <div className="space-y-2 mb-4">
                 <label className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer ${freightRate === 'market' ? 'border-black bg-gray-50' : 'border-gray-200 hover:bg-gray-50'}`}>
@@ -1685,8 +1795,14 @@ export default function ShippingDeliveryWizard() {
         <div className={`flex flex-col bg-gray-50 ${mapFullScreen ? 'flex-1 min-h-0' : ''}`}>
           <div className="border-b border-gray-200 px-8 py-4 flex flex-wrap justify-between items-center gap-3 flex-shrink-0 bg-white">
             <div>
-              <h2 className="text-xl font-semibold text-black">{selectedAsset?.title} → {nearestPort?.port.name} → {destinationPort?.name}</h2>
-              <p className="text-sm text-gray-500">{selectedCommodity} • {vesselClass} • {inlandMode} • ${costBreakdown ? (costBreakdown.totalCost/1e6).toFixed(2) : '—'}M</p>
+              <h2 className="text-xl font-semibold text-black">
+                {inlandOnly
+                  ? `${selectedAsset?.title} → ${destinationPort?.name}`
+                  : `${selectedAsset?.title} → ${nearestPort?.port.name} → ${destinationPort?.name}`}
+              </h2>
+              <p className="text-sm text-gray-500">
+                {selectedCommodity} • {inlandOnly ? inlandMode : vesselClass} • {inlandOnly ? 'inland' : inlandMode} • ${costBreakdown ? (costBreakdown.totalCost/1e6).toFixed(2) : '—'}M
+              </p>
             </div>
             <div className="flex flex-wrap gap-2">
               <button onClick={() => window.print()} className={`${secondaryBtnClass} flex items-center gap-2`}><FileText size={16} /> PDF</button>
