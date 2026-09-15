@@ -188,6 +188,12 @@ function countryQueryValues(country?: string): string[] {
   return [country]
 }
 
+function countriesMatch(a?: string, b?: string): boolean {
+  const na = normalizeCountryName(a)
+  const nb = normalizeCountryName(b)
+  return !!na && na === nb
+}
+
 function isInlandOnlySeaLeg(from: Port, to: Port): boolean {
   if (from.name === to.name && from.country === to.country) return true
   return haversineDistanceKm(from.lat, from.lng, to.lat, to.lng) / 1.852 < INLAND_ONLY_SEA_NM
@@ -990,6 +996,12 @@ export default function ShippingDeliveryWizard() {
         if (cancelled) return
         setRankedLowestCost(ranked.lowestCost)
         setRankedFlow(ranked.flow)
+      } catch (err) {
+        console.error(err)
+        if (!cancelled) {
+          setRankedLowestCost([])
+          setRankedFlow([])
+        }
       } finally {
         if (!cancelled) setAutoLoading(false)
       }
