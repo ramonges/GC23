@@ -214,8 +214,6 @@ export default function ShippingDeliveryWizard() {
   const [inlandMode, setInlandMode] = useState<'truck' | 'rail' | 'conveyor' | 'pipeline'>('truck')
   const [volume, setVolume] = useState(0)
   const [quantityUnit, setQuantityUnit] = useState('MT')
-  const [selectedGrade, setSelectedGrade] = useState('')
-  const [grades, setGrades] = useState<string[]>([])
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [vesselClass, setVesselClass] = useState('')
   const [charterType, setCharterType] = useState<CharterType>('voyage')
@@ -303,33 +301,12 @@ export default function ShippingDeliveryWizard() {
   }, [])
 
   useEffect(() => {
-    setSelectedGrade('')
     if (!selectedCommodity) {
-      setGrades([])
       setQuantityUnit('MT')
       return
     }
     setQuantityUnit(DEFAULT_QUANTITY_UNIT[selectedCommodity] || displaySpecUnit(commoditySpecs[selectedCommodity]?.unit))
-    async function loadGrades() {
-      const src = commodities.find(c => c.name === selectedCommodity)?.source
-      let values: string[] = []
-      if (src === 'coal_mines') {
-        const { data } = await supabase.from('coal_mines').select('coal_type, grade')
-        values = [...new Set((data || []).flatMap((r: any) => [r.coal_type, r.grade]).filter(Boolean))]
-      } else if (src === 'gold_mines') {
-        const { data } = await supabase.from('gold_mines').select('grade')
-        values = [...new Set((data || []).map((r: any) => r.grade).filter(Boolean))]
-      } else if (src === 'sugar_plants') {
-        const { data } = await supabase.from('sugar_plants').select('primary_grade')
-        values = [...new Set((data || []).map((r: any) => r.primary_grade).filter(Boolean))]
-      } else {
-        const { data } = await supabase.from('commodity_locations').select('grade').eq('commodity_name', selectedCommodity)
-        values = [...new Set((data || []).map((r: any) => r.grade).filter(Boolean))]
-      }
-      setGrades(values.sort())
-    }
-    loadGrades()
-  }, [selectedCommodity, commodities])
+  }, [selectedCommodity])
 
   // Reset region when country changes
   useEffect(() => { setOriginRegion('') }, [originCountry])
@@ -591,7 +568,6 @@ export default function ShippingDeliveryWizard() {
     setNearestPort(null)
     setVolume(0)
     setQuantityUnit('MT')
-    setSelectedGrade('')
     setShowAdvanced(false)
     setVesselClass('')
     setDestinationPort(null)
@@ -766,20 +742,6 @@ export default function ShippingDeliveryWizard() {
                       Source: database · Unit: {quantityUnit || displaySpecUnit(spec.unit)}{spec.vesselTypes?.length ? ` · Compatible vessels: ${spec.vesselTypes.join(', ')}` : ''}
                     </p>
                   )}
-                </div>
-                <div>
-                  <label className={labelClass}>Grade / Product</label>
-                  <select
-                    value={selectedGrade}
-                    onChange={(e) => setSelectedGrade(e.target.value)}
-                    className={inputClass}
-                    disabled={!selectedCommodity}
-                  >
-                    <option value="">{grades.length ? 'Select grade...' : 'No grades available yet'}</option>
-                    {grades.map((g) => (
-                      <option key={g} value={g}>{g}</option>
-                    ))}
-                  </select>
                 </div>
                 <div>
                   <label className={labelClass}>Quantity</label>
