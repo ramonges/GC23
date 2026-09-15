@@ -244,6 +244,7 @@ export default function ShippingDeliveryWizard() {
   const [volume, setVolume] = useState(0)
   const [quantityUnit, setQuantityUnit] = useState('MT')
   const [showAdvanced, setShowAdvanced] = useState(false)
+  const [sourceMode, setSourceMode] = useState<'manual' | 'auto'>('manual')
   const [selectedApiGravity, setSelectedApiGravity] = useState('any')
   const [vesselClass, setVesselClass] = useState('')
   const [charterType, setCharterType] = useState<CharterType>('voyage')
@@ -610,6 +611,7 @@ export default function ShippingDeliveryWizard() {
     setVolume(0)
     setQuantityUnit('MT')
     setShowAdvanced(false)
+    setSourceMode('manual')
     setSelectedApiGravity('any')
     setVesselClass('')
     setDestinationPort(null)
@@ -717,31 +719,34 @@ export default function ShippingDeliveryWizard() {
   )
 
   const calculatedInfoCard = (selectedCommodity || nearestPort) ? (
-    <FormCard title="Calculated">
+    <FormCard title="Route">
       <div className="space-y-3">
-        {selectedCommodity && spec && (
+        {selectedCommodity && (
           <div>
             <div className="text-xs text-gray-500 mb-0.5">Commodity</div>
             <div className="text-base font-bold text-black">{selectedCommodity}</div>
-            <p className="text-xs text-gray-500 mt-1">
-              Source: database · Unit: {spec.unit} · Compatible vessels: {spec.vesselTypes.join(', ')}
-            </p>
+          </div>
+        )}
+        {selectedAsset && (
+          <div>
+            <div className="text-xs text-gray-500 mb-0.5">Production asset</div>
+            <div className="text-base font-bold text-black">{selectedAsset.title}</div>
           </div>
         )}
         {nearestPort && selectedAsset && (
           <div className="grid grid-cols-1 gap-3 pt-1">
             <KpiPanel
-              label="Nearest export port"
+              label="Recommended export port"
               value={`${nearestPort.port.name}, ${nearestPort.port.country}`}
             />
             <KpiPanel
               label="Distance"
               value={`${nearestPort.distanceKm.toFixed(0)} km`}
-              hint={selectedAsset.title}
             />
             <KpiPanel
               label="Estimated inland cost"
               value={`$${(nearestPort.distanceKm * inlandRatePerKm).toFixed(2)} / MT`}
+              hint={`Estimated · ${nearestPort.distanceKm.toFixed(0)} km · ${inlandMode}`}
             />
           </div>
         )}
@@ -879,12 +884,40 @@ export default function ShippingDeliveryWizard() {
             </FormCard>
           )}
 
-          {/* Step 2: Origin country & asset */}
+          {/* Step 2: Production source */}
           {step === 2 && (
-            <FormCard title="Origin">
+            <FormCard title="Production source">
               <div className="space-y-4">
                 <div>
-                  <label className={labelClass}>Origin country</label>
+                  <label className={labelClass}>How would you like to select the source?</label>
+                  <div className="space-y-2">
+                    <label className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer ${sourceMode === 'auto' ? 'border-black bg-gray-50' : 'border-gray-200 hover:bg-gray-50'}`}>
+                      <input type="radio" name="sourceMode" className="mt-1" checked={sourceMode === 'auto'} onChange={() => setSourceMode('auto')} />
+                      <div>
+                        <div className="text-sm font-medium text-black">Find the best sources automatically</div>
+                        <div className="text-xs text-gray-500">Compare eligible production assets by delivered cost</div>
+                      </div>
+                    </label>
+                    <label className={`flex items-start gap-3 p-3 border rounded-lg cursor-pointer ${sourceMode === 'manual' ? 'border-black bg-gray-50' : 'border-gray-200 hover:bg-gray-50'}`}>
+                      <input type="radio" name="sourceMode" className="mt-1" checked={sourceMode === 'manual'} onChange={() => setSourceMode('manual')} />
+                      <div>
+                        <div className="text-sm font-medium text-black">Select manually</div>
+                        <div className="text-xs text-gray-500">Choose a specific country, region and production asset</div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                {sourceMode === 'auto' && (
+                  <p className="text-sm text-gray-500">
+                    Eligible production assets will be compared using commodity specifications, route and delivered cost.
+                  </p>
+                )}
+
+                {sourceMode === 'manual' && (
+                  <>
+                <div>
+                  <label className={labelClass}>Country</label>
                   <select
                     value={originCountry}
                     onChange={(e) => { setOriginCountry(e.target.value); setSelectedAsset(null) }}
@@ -913,7 +946,7 @@ export default function ShippingDeliveryWizard() {
                 )}
                 {originCountry && (
                   <div>
-                    <label className={labelClass}>Mine/field</label>
+                    <label className={labelClass}>Production asset</label>
                     <select
                       value={selectedAsset?.id || ''}
                       onChange={(e) => {
@@ -929,34 +962,62 @@ export default function ShippingDeliveryWizard() {
                     </select>
                     {selectedAsset && (
                       <div className="mt-3 space-y-3">
-                        <div className="grid grid-cols-2 gap-3">
-                          <KpiPanel label="Operator" value={selectedAsset.operator || '—'} />
-                          {selectedAsset.grade && <KpiPanel label="Grade" value={String(selectedAsset.grade)} />}
-                          {(selectedAsset.api_gravity != null || selectedAsset.calorific_value_kcal_kg) && (
-                            <KpiPanel
-                              label={selectedAsset.calorific_value_kcal_kg ? 'Calorific value' : 'API gravity'}
-                              value={selectedAsset.calorific_value_kcal_kg ? `${selectedAsset.calorific_value_kcal_kg} kcal/kg` : String(selectedAsset.api_gravity)}
-                            />
-                          )}
-                          {selectedAsset.production_capacity && (
-                            <KpiPanel label="Capacity" value={`${Number(selectedAsset.production_capacity).toLocaleString()}/yr`} />
-                          )}
-                        </div>
-                        <div>
-                          <div className="text-xs text-gray-500 mb-1.5">Quality overrides (optional)</div>
-                          <div className="grid grid-cols-2 gap-3">
-                            <input type="number" placeholder="Calorific" value={qualityOverrideCal} onChange={(e) => setQualityOverrideCal(e.target.value ? Number(e.target.value) : '')} className={inputClass} />
-                            <input type="number" placeholder="Moisture %" value={qualityOverrideMoisture} onChange={(e) => setQualityOverrideMoisture(e.target.value ? Number(e.target.value) : '')} className={inputClass} />
-                            <input type="number" placeholder="Sulfur %" value={qualityOverrideSulfur} onChange={(e) => setQualityOverrideSulfur(e.target.value ? Number(e.target.value) : '')} className={inputClass} />
-                            <input type="number" placeholder="Ash %" value={qualityOverrideAsh} onChange={(e) => setQualityOverrideAsh(e.target.value ? Number(e.target.value) : '')} className={inputClass} />
+                        <div className="bg-gray-50 rounded-xl border border-gray-200 px-4 py-3 space-y-3">
+                          <div>
+                            <div className="text-xs text-gray-500 mb-0.5">Production asset</div>
+                            <div className="text-base font-bold text-black">{selectedAsset.title}</div>
+                          </div>
+                          <div>
+                            <div className="text-xs text-gray-500 mb-0.5">Operator</div>
+                            <div className="text-base font-bold text-black">{selectedAsset.operator || '—'}</div>
                           </div>
                         </div>
+                        {selectedCommodity === 'Crude Oil' ? (
+                          <div className="grid grid-cols-2 gap-3">
+                            <KpiPanel
+                              label="API Gravity"
+                              value={selectedAsset.api_gravity != null && selectedAsset.api_gravity !== '' ? `${selectedAsset.api_gravity}°` : '—'}
+                            />
+                            <KpiPanel
+                              label="Sulfur %"
+                              value={selectedAsset.sulfur_content != null && selectedAsset.sulfur_content !== '' ? String(selectedAsset.sulfur_content) : '—'}
+                            />
+                          </div>
+                        ) : (
+                          <>
+                            <div className="grid grid-cols-2 gap-3">
+                              {selectedAsset.grade && <KpiPanel label="Grade" value={String(selectedAsset.grade)} />}
+                              {(selectedAsset.calorific_value_kcal_kg != null) && (
+                                <KpiPanel label="Calorific value" value={`${selectedAsset.calorific_value_kcal_kg} kcal/kg`} />
+                              )}
+                              {selectedAsset.production_capacity && (
+                                <KpiPanel label="Capacity" value={`${Number(selectedAsset.production_capacity).toLocaleString()}/yr`} />
+                              )}
+                            </div>
+                            <div>
+                              <div className="text-xs text-gray-500 mb-1.5">Quality overrides (optional)</div>
+                              <div className="grid grid-cols-2 gap-3">
+                                <input type="number" placeholder="Calorific" value={qualityOverrideCal} onChange={(e) => setQualityOverrideCal(e.target.value ? Number(e.target.value) : '')} className={inputClass} />
+                                <input type="number" placeholder="Moisture %" value={qualityOverrideMoisture} onChange={(e) => setQualityOverrideMoisture(e.target.value ? Number(e.target.value) : '')} className={inputClass} />
+                                <input type="number" placeholder="Sulfur %" value={qualityOverrideSulfur} onChange={(e) => setQualityOverrideSulfur(e.target.value ? Number(e.target.value) : '')} className={inputClass} />
+                                <input type="number" placeholder="Ash %" value={qualityOverrideAsh} onChange={(e) => setQualityOverrideAsh(e.target.value ? Number(e.target.value) : '')} className={inputClass} />
+                              </div>
+                            </div>
+                          </>
+                        )}
                       </div>
                     )}
                   </div>
                 )}
+                  </>
+                )}
               </div>
-              <StepActions onBack={handleBack} onNext={handleNext} nextDisabled={!canProceedStep2} />
+              <StepActions
+                onBack={handleBack}
+                onNext={handleNext}
+                nextDisabled={!canProceedStep2}
+                nextLabel={sourceMode === 'auto' ? 'Find sources' : 'Use this source'}
+              />
             </FormCard>
           )}
 
@@ -964,9 +1025,9 @@ export default function ShippingDeliveryWizard() {
           {step === 3 && selectedAsset && nearestPort && (
             <FormCard title="Inland">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
-                <KpiPanel label="Nearest export port" value={`${nearestPort.port.name}, ${nearestPort.port.country}`} />
+                <KpiPanel label="Recommended export port" value={`${nearestPort.port.name}, ${nearestPort.port.country}`} />
                 <KpiPanel label="Distance" value={`${nearestPort.distanceKm.toFixed(0)} km`} hint={selectedAsset.title} />
-                <KpiPanel label="Estimated inland cost" value={`$${(nearestPort.distanceKm * inlandRatePerKm).toFixed(2)} / MT`} />
+                <KpiPanel label="Estimated inland cost" value={`$${(nearestPort.distanceKm * inlandRatePerKm).toFixed(2)} / MT`} hint={`Estimated · ${nearestPort.distanceKm.toFixed(0)} km · ${inlandMode}`} />
               </div>
               <div className="mb-4">
                 <label className={labelClass}>Inland transport mode</label>
