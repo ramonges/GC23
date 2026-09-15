@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, type ReactNode } from 'react'
-import { ChevronRight, CheckCircle, Navigation, FileSpreadsheet, FileText } from 'lucide-react'
+import { ChevronRight, CheckCircle, ChevronDown, Navigation, FileSpreadsheet, FileText } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { supabase } from '@/lib/supabase'
 import {
@@ -81,6 +81,30 @@ const INLAND_MODES_BY_COMMODITY: Record<string, InlandModeOption[]> = {
 }
 
 const INCOTERMS = ['CIF', 'FOB', 'CFR', 'DES', 'DAP'] as const
+
+const DEFAULT_QUANTITY_UNIT: Record<string, string> = {
+  'Crude Oil': 'bbl',
+  'Natural Gas': 'mmbtu',
+  'Uranium': 'MT',
+  'Coal': 'MT',
+  'Gold': 'oz',
+  'Iron Ore': 'MT',
+  'Copper': 'MT',
+  'Sugar': 'MT',
+}
+
+function unitOptionsFor(commodity: string): string[] {
+  const def = DEFAULT_QUANTITY_UNIT[commodity] || 'MT'
+  if (commodity === 'Crude Oil') return ['bbl', 'MT']
+  if (commodity === 'Natural Gas') return ['mmbtu', 'MT']
+  if (commodity === 'Gold') return ['oz', 'MT']
+  return [def]
+}
+
+function displaySpecUnit(specUnit?: string): string {
+  if (specUnit === 'bbls') return 'bbl'
+  return specUnit || 'MT'
+}
 
 function parcelToMt(commodity: string, parcelSize: number): number {
   const c = commoditySpecs[commodity]
@@ -189,6 +213,10 @@ export default function ShippingDeliveryWizard() {
   const [nearestPort, setNearestPort] = useState<{ port: Port; distanceKm: number } | null>(null)
   const [inlandMode, setInlandMode] = useState<'truck' | 'rail' | 'conveyor' | 'pipeline'>('truck')
   const [volume, setVolume] = useState(0)
+  const [quantityUnit, setQuantityUnit] = useState('MT')
+  const [selectedGrade, setSelectedGrade] = useState('')
+  const [grades, setGrades] = useState<string[]>([])
+  const [showAdvanced, setShowAdvanced] = useState(false)
   const [vesselClass, setVesselClass] = useState('')
   const [charterType, setCharterType] = useState<CharterType>('voyage')
   const [freightRate, setFreightRate] = useState<'market' | 'custom'>('market')
@@ -273,6 +301,35 @@ export default function ShippingDeliveryWizard() {
     }
     load()
   }, [])
+
+  useEffect(() => {
+    setSelectedGrade('')
+    if (!selectedCommodity) {
+      setGrades([])
+      setQuantityUnit('MT')
+      return
+    }
+    setQuantityUnit(DEFAULT_QUANTITY_UNIT[selectedCommodity] || displaySpecUnit(commoditySpecs[selectedCommodity]?.unit))
+    async function loadGrades() {
+      const src = commodities.find(c => c.name === selectedCommodity)?.source
+      let values: string[] = []
+      if (src === 'coal_mines') {
+        const { data } = await supabase.from('coal_mines').select('coal_type, grade')
+        values = [...new Set((data || []).flatMap((r: any) => [r.coal_type, r.grade]).filter(Boolean))]
+      } else if (src === 'gold_mines') {
+        const { data } = await supabase.from('gold_mines').select('grade')
+        values = [...new Set((data || []).map((r: any) => r.grade).filter(Boolean))]
+      } else if (src === 'sugar_plants') {
+        const { data } = await supabase.from('sugar_plants').select('primary_grade')
+        values = [...new Set((data || []).map((r: any) => r.primary_grade).filter(Boolean))]
+      } else {
+        const { data } = await supabase.from('commodity_locations').select('grade').eq('commodity_name', selectedCommodity)
+        values = [...new Set((data || []).map((r: any) => r.grade).filter(Boolean))]
+      }
+      setGrades(values.sort())
+    }
+    loadGrades()
+  }, [selectedCommodity, commodities])
 
   // Reset region when country changes
   useEffect(() => { setOriginRegion('') }, [originCountry])
@@ -533,6 +590,9 @@ export default function ShippingDeliveryWizard() {
     setSelectedAsset(null)
     setNearestPort(null)
     setVolume(0)
+    setQuantityUnit('MT')
+    setSelectedGrade('')
+    setShowAdvanced(false)
     setVesselClass('')
     setDestinationPort(null)
     setCostBreakdown(null)
@@ -540,11 +600,11 @@ export default function ShippingDeliveryWizard() {
     setMapFullScreen(false)
   }
 
-  const canProceedStep1 = !!selectedCommodity
+  const canProceedStep1 = !!selectedCommodity && volume > 0
   const canProceedStep2 = !!originCountry && !!selectedAsset
   const canProceedStep3 = true
   const canProceedStep4 = false // blending optional
-  const canProceedStep5 = volume > 0 && !!vesselClass
+  const canProceedStep5 = !!vesselClass
   const canProceedStep6 = true
   const canProceedStep7 = true
   const canProceedStep8 = !!destinationPort
@@ -688,14 +748,9 @@ export default function ShippingDeliveryWizard() {
           {/* Step 1: Commodity */}
           {step === 1 && (
             <FormCard title="Commodity">
-              {commodities.length > 0 && (
-                <p className="mb-4 text-xs text-gray-500">
-                  Source: database · {commodities.map(c => c.name).join(', ')}
-                </p>
-              )}
               <div className="space-y-4">
                 <div>
-                  <label className={labelClass}>Commodity (from DB)</label>
+                  <label className={labelClass}>Commodity</label>
                   <select
                     value={selectedCommodity}
                     onChange={(e) => { setSelectedCommodity(e.target.value); setOriginCountry(''); setSelectedAsset(null) }}
@@ -708,44 +763,97 @@ export default function ShippingDeliveryWizard() {
                   </select>
                   {spec && (
                     <p className="mt-1.5 text-xs text-gray-500">
-                      Source: database · Unit: {spec.unit} · Compatible vessels: {spec.vesselTypes.join(', ')}
+                      Source: database · Unit: {quantityUnit || displaySpecUnit(spec.unit)}{spec.vesselTypes?.length ? ` · Compatible vessels: ${spec.vesselTypes.join(', ')}` : ''}
                     </p>
                   )}
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className={labelClass}>Incoterms</label>
-                    <select value={incoterm} onChange={(e) => setIncoterm(e.target.value)} className={inputClass}>
-                      {INCOTERMS.map((t) => <option key={t} value={t}>{t}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className={labelClass}>Currency</label>
-                    <select value={currency} onChange={(e) => setCurrency(e.target.value)} className={inputClass}>
-                      <option value="USD">USD</option>
-                      <option value="EUR">EUR</option>
+                <div>
+                  <label className={labelClass}>Grade / Product</label>
+                  <select
+                    value={selectedGrade}
+                    onChange={(e) => setSelectedGrade(e.target.value)}
+                    className={inputClass}
+                    disabled={!selectedCommodity}
+                  >
+                    <option value="">{grades.length ? 'Select grade...' : 'No grades available yet'}</option>
+                    {grades.map((g) => (
+                      <option key={g} value={g}>{g}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className={labelClass}>Quantity</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      min={0}
+                      value={volume || ''}
+                      onChange={(e) => setVolume(Number(e.target.value) || 0)}
+                      placeholder="Quantity"
+                      className={inputClass}
+                    />
+                    <select
+                      value={quantityUnit}
+                      onChange={(e) => setQuantityUnit(e.target.value)}
+                      className={`${inputClass} w-28 flex-shrink-0`}
+                    >
+                      {unitOptionsFor(selectedCommodity).map((u) => (
+                        <option key={u} value={u}>{u}</option>
+                      ))}
                     </select>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className={labelClass}>Marine insurance %</label>
-                    <input type="number" step={0.05} value={marineInsurancePct} onChange={(e) => setMarineInsurancePct(Number(e.target.value))} className={inputClass} />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Contingency buffer %</label>
-                    <input type="number" step={0.5} value={contingencyPct} onChange={(e) => setContingencyPct(Number(e.target.value))} className={inputClass} />
+                <div>
+                  <div className="text-sm font-medium text-gray-700 mb-1.5">Required delivery</div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">From</label>
+                      <input type="date" value={laycanStart} onChange={(e) => setLaycanStart(e.target.value)} className={inputClass} />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">To</label>
+                      <input type="date" value={laycanEnd} onChange={(e) => setLaycanEnd(e.target.value)} className={inputClass} />
+                    </div>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className={labelClass}>Laycan start</label>
-                    <input type="date" value={laycanStart} onChange={(e) => setLaycanStart(e.target.value)} className={inputClass} />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Laycan end</label>
-                    <input type="date" value={laycanEnd} onChange={(e) => setLaycanEnd(e.target.value)} className={inputClass} />
-                  </div>
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => setShowAdvanced(!showAdvanced)}
+                    className="flex items-center gap-1 text-sm text-gray-600 hover:text-black"
+                  >
+                    Advanced assumptions
+                    <ChevronDown size={16} className={`transition-transform ${showAdvanced ? 'rotate-180' : ''}`} />
+                  </button>
+                  {showAdvanced && (
+                    <div className="mt-3 space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className={labelClass}>Incoterms</label>
+                          <select value={incoterm} onChange={(e) => setIncoterm(e.target.value)} className={inputClass}>
+                            {INCOTERMS.map((t) => <option key={t} value={t}>{t}</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <label className={labelClass}>Currency</label>
+                          <select value={currency} onChange={(e) => setCurrency(e.target.value)} className={inputClass}>
+                            <option value="USD">USD</option>
+                            <option value="EUR">EUR</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className={labelClass}>Marine insurance %</label>
+                          <input type="number" step={0.05} value={marineInsurancePct} onChange={(e) => setMarineInsurancePct(Number(e.target.value))} className={inputClass} />
+                        </div>
+                        <div>
+                          <label className={labelClass}>Contingency buffer %</label>
+                          <input type="number" step={0.5} value={contingencyPct} onChange={(e) => setContingencyPct(Number(e.target.value))} className={inputClass} />
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
               <StepActions onNext={handleNext} nextDisabled={!canProceedStep1} showBack={false} />
@@ -913,19 +1021,10 @@ export default function ShippingDeliveryWizard() {
             </FormCard>
           )}
 
-          {/* Step 5: Volume & vessel */}
+          {/* Step 5: Vessel */}
           {step === 5 && spec && (
             <FormCard title="Vessel">
               <div className="space-y-4">
-                <div>
-                  <label className={labelClass}>Volume (MT)</label>
-                  <select value={volume} onChange={(e) => setVolume(Number(e.target.value))} className={inputClass}>
-                    <option value={0}>Select...</option>
-                    {parcelOptions.map((p) => (
-                      <option key={p.size} value={p.size}>{p.label}</option>
-                    ))}
-                  </select>
-                </div>
                 <div>
                   <label className={labelClass}>Vessel class</label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
