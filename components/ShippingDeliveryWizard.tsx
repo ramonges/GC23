@@ -15,6 +15,15 @@ import {
   Port,
   balticRoutes,
 } from '@/lib/shippingConfig'
+import {
+  fetchCommodityQuote,
+  volumeToSpecUnits,
+  commodityQtyForQuote,
+  formatUsd,
+  formatUsdFull,
+  type MarketQuote,
+  type PriceUnit,
+} from '@/lib/marketPrices'
 import type { ShippingRoute } from '@/lib/types'
 
 const Globe3D = dynamic(() => import('./Globe3DClient'), {
@@ -296,6 +305,17 @@ interface RankedSource {
   inlandOnly: boolean
 }
 
+function marketCostParams(quote: MarketQuote | null, quantityUnit: string, displayVolume: number) {
+  return {
+    commodityPrice: quote?.price ?? null,
+    commodityPriceUnit: quote?.unit ?? null,
+    commodityPriceLabel: quote?.label,
+    commodityPriceDate: quote?.date,
+    quantityUnit,
+    displayVolume,
+  }
+}
+
 function requiredDeliveryDeadline(laycanStart: string, laycanEnd: string): Date | null {
   const raw = laycanEnd || laycanStart
   if (!raw) return null
@@ -330,6 +350,12 @@ function computeModeledCost(params: {
   dischargeUnloadGrab: number
   dischargeCustomsClearance: number
   canalToll: 'suez' | 'panama' | 'none'
+  commodityPrice?: number | null
+  commodityPriceUnit?: PriceUnit | null
+  commodityPriceLabel?: string
+  commodityPriceDate?: string
+  quantityUnit?: string
+  displayVolume?: number
 }) {
   const commodity = commoditySpecs[params.selectedCommodity]
   if (!commodity || params.volume <= 0) return null
@@ -339,6 +365,14 @@ function computeModeledCost(params: {
   const inlandCostPerTon = inlandRatePerKmFor(params.inlandMode)
   const inlandCost = inlandDist * inlandCostPerTon * parcelMt
   const inlandDays = Math.ceil(inlandDist / 500)
+  const commodityQty = params.commodityPrice && params.commodityPriceUnit
+    ? commodityQtyForQuote(params.selectedCommodity, params.volume, params.commodityPriceUnit)
+    : 0
+  const commodityCost = params.commodityPrice && commodityQty > 0 ? params.commodityPrice * commodityQty : 0
+  const displayUnit = params.quantityUnit || (commodity.unit === 'bbls' ? 'bbl' : commodity.unit)
+  const displayQty = params.displayVolume && params.displayVolume > 0
+    ? params.displayVolume
+    : (displayUnit === 'MT' ? parcelMt : params.volume)
 
   const seaDistNm = haversineDistanceKm(
     params.nearestPort.port.lat,
@@ -351,13 +385,13 @@ function computeModeledCost(params: {
   if (!inlandOnly && !vessel) return null
 
   if (inlandOnly) {
-    const marineIns = inlandCost * (params.marineInsurancePct / 100)
     const lateRisk = params.expectedDelayDays > 0 && params.latePenaltyPerDay > 0 ? Math.min(params.expectedDelayDays, 7) * params.latePenaltyPerDay : 0
     const blendingTotal = params.blendingMode !== 'none' ? params.stockpileCost + params.blendingFee + (params.maxStorageDays > 0 ? params.maxStorageDays * 500 : 0) : 0
+    const marineIns = (inlandCost + commodityCost) * (params.marineInsurancePct / 100)
     const subtotal = inlandCost + marineIns + lateRisk + blendingTotal
     const contingency = subtotal * (params.contingencyPct / 100)
-    const totalCost = subtotal + contingency
-    const unitCost = commodity.unit === 'bbls' ? totalCost / params.volume : totalCost / parcelMt
+    const totalCost = commodityCost + subtotal + contingency
+    const unitCost = displayQty > 0 ? totalCost / displayQty : 0
     const perMt = parcelMt > 0 ? 1 / parcelMt : 0
     return {
       inlandCost, inlandDist, inlandDays, inlandMode: params.inlandMode,
@@ -367,7 +401,12 @@ function computeModeledCost(params: {
       freight: 0, bunker: 0, port: 0, canal: 0,
       dischargePortCost: 0, marineIns, lateRisk, blendingTotal,
       contingency,
-      totalCost, unitCost, unitLabel: commodity.unit,
+      commodityCost, commodityQty,
+      commodityPrice: params.commodityPrice || 0,
+      commodityPriceUnit: params.commodityPriceUnit || null,
+      commodityPriceLabel: params.commodityPriceLabel || '',
+      commodityPriceDate: params.commodityPriceDate || '',
+      totalCost, unitCost, unitLabel: displayUnit === 'bbls' ? 'bbl' : displayUnit,
       originPort: params.nearestPort.port, destinationPort: params.destinationPort,
       vessel: null, commodity, inlandOnly: true,
       inlandCostPerMt: inlandCost * perMt,
@@ -405,14 +444,14 @@ function computeModeledCost(params: {
   if (params.canalToll === 'panama' || (params.canalToll === 'none' && needsPanama)) canalCost += 450000
 
   const dischargePortCost = parcelMt * (params.dischargePortDues + params.dischargeUnloadGrab + params.dischargeCustomsClearance)
-  const marineIns = (inlandCost + hireCost + bunkerCost + portCost + canalCost) * (params.marineInsurancePct / 100)
+  const marineIns = (inlandCost + hireCost + bunkerCost + portCost + canalCost + commodityCost) * (params.marineInsurancePct / 100)
   const lateRisk = params.expectedDelayDays > 0 && params.latePenaltyPerDay > 0 ? Math.min(params.expectedDelayDays, 7) * params.latePenaltyPerDay : 0
   const blendingTotal = params.blendingMode !== 'none' ? params.stockpileCost + params.blendingFee + (params.maxStorageDays > 0 ? params.maxStorageDays * 500 : 0) : 0
   const freightTotal = hireCost + bunkerCost + portCost + canalCost
   const subtotal = inlandCost + freightTotal + dischargePortCost + marineIns + lateRisk + blendingTotal
   const contingency = subtotal * (params.contingencyPct / 100)
-  const totalCost = subtotal + contingency
-  const unitCost = commodity.unit === 'bbls' ? totalCost / params.volume : totalCost / parcelMt
+  const totalCost = commodityCost + subtotal + contingency
+  const unitCost = displayQty > 0 ? totalCost / displayQty : 0
   const perMt = parcelMt > 0 ? 1 / parcelMt : 0
 
   return {
@@ -423,7 +462,12 @@ function computeModeledCost(params: {
     freight: hireCost, bunker: bunkerCost, port: portCost, canal: canalCost,
     dischargePortCost, marineIns, lateRisk, blendingTotal,
     contingency,
-    totalCost, unitCost, unitLabel: commodity.unit,
+    commodityCost, commodityQty,
+    commodityPrice: params.commodityPrice || 0,
+    commodityPriceUnit: params.commodityPriceUnit || null,
+    commodityPriceLabel: params.commodityPriceLabel || '',
+    commodityPriceDate: params.commodityPriceDate || '',
+    totalCost, unitCost, unitLabel: displayUnit === 'bbls' ? 'bbl' : displayUnit,
     originPort: params.nearestPort.port, destinationPort: params.destinationPort,
     vessel, commodity, inlandOnly: false,
     inlandCostPerMt: inlandCost * perMt,
@@ -654,6 +698,8 @@ export default function ShippingDeliveryWizard() {
   const [showMap, setShowMap] = useState(false)
   const [mapFullScreen, setMapFullScreen] = useState(false)
   const [costBreakdown, setCostBreakdown] = useState<any>(null)
+  const [marketQuote, setMarketQuote] = useState<MarketQuote | null>(null)
+  const [marketQuoteLoading, setMarketQuoteLoading] = useState(false)
   // Step 1 extras
   const [incoterm, setIncoterm] = useState<string>('CIF')
   const [currency, setCurrency] = useState('USD')
@@ -738,6 +784,27 @@ export default function ShippingDeliveryWizard() {
     setQuantityUnit(DEFAULT_QUANTITY_UNIT[selectedCommodity] || displaySpecUnit(commoditySpecs[selectedCommodity]?.unit))
     if (selectedCommodity !== 'Crude Oil') setSelectedApiGravity('any')
   }, [selectedCommodity])
+
+  useEffect(() => {
+    if (!selectedCommodity) {
+      setMarketQuote(null)
+      setMarketQuoteLoading(false)
+      return
+    }
+    let cancelled = false
+    setMarketQuoteLoading(true)
+    fetchCommodityQuote(selectedCommodity, destinationPort?.country)
+      .then((quote) => {
+        if (!cancelled) setMarketQuote(quote)
+      })
+      .catch(() => {
+        if (!cancelled) setMarketQuote(null)
+      })
+      .finally(() => {
+        if (!cancelled) setMarketQuoteLoading(false)
+      })
+    return () => { cancelled = true }
+  }, [selectedCommodity, destinationPort?.country])
 
   // Reset region when country changes
   useEffect(() => { setOriginRegion('') }, [originCountry])
@@ -870,9 +937,14 @@ export default function ShippingDeliveryWizard() {
       setCostBreakdown(null)
       return
     }
+    const specVolume = volumeToSpecUnits(selectedCommodity, volume, quantityUnit)
+    if (specVolume <= 0) {
+      setCostBreakdown(null)
+      return
+    }
     const modeled = computeModeledCost({
       selectedCommodity,
-      volume,
+      volume: specVolume,
       nearestPort,
       destinationPort,
       vesselClass,
@@ -897,10 +969,11 @@ export default function ShippingDeliveryWizard() {
       dischargeUnloadGrab,
       dischargeCustomsClearance,
       canalToll,
+      ...marketCostParams(marketQuote, quantityUnit, volume),
     })
     if (!modeled) return
     setCostBreakdown(modeled)
-  }, [selectedAsset, nearestPort, destinationPort, vesselClass, volume, inlandMode, loadingRateMtDay, dischargeRateMtDay, portDuesPerMt, stevedoringPerMt, wharfagePerMt, surveyorFee, inspectionFee, fumigationFee, marineInsurancePct, contingencyPct, latePenaltyPerDay, expectedDelayDays, blendingMode, stockpileCost, blendingFee, maxStorageDays, dischargePortDues, dischargeUnloadGrab, dischargeCustomsClearance, canalToll, selectedCommodity])
+  }, [selectedAsset, nearestPort, destinationPort, vesselClass, volume, quantityUnit, inlandMode, loadingRateMtDay, dischargeRateMtDay, portDuesPerMt, stevedoringPerMt, wharfagePerMt, surveyorFee, inspectionFee, fumigationFee, marineInsurancePct, contingencyPct, latePenaltyPerDay, expectedDelayDays, blendingMode, stockpileCost, blendingFee, maxStorageDays, dischargePortDues, dischargeUnloadGrab, dischargeCustomsClearance, canalToll, selectedCommodity, marketQuote])
 
   // Automatic source ranking against the selected destination
   useEffect(() => {
@@ -967,7 +1040,7 @@ export default function ShippingDeliveryWizard() {
         if (cancelled) return
         const ranked = rankEligibleSources(list, {
           selectedCommodity: commodityName,
-          volume,
+          volume: volumeToSpecUnits(commodityName, volume, quantityUnit),
           destinationPort: destPort,
           vesselClass: vesselName,
           inlandMode: defaultInlandModeFor(commodityName),
@@ -992,6 +1065,7 @@ export default function ShippingDeliveryWizard() {
           dischargeCustomsClearance,
           canalToll,
           deadline: requiredDeliveryDeadline(laycanStart, laycanEnd),
+          ...marketCostParams(marketQuote, quantityUnit, volume),
         })
         if (cancelled) return
         setRankedLowestCost(ranked.lowestCost)
@@ -1009,12 +1083,12 @@ export default function ShippingDeliveryWizard() {
     load()
     return () => { cancelled = true }
   }, [
-    sourceMode, selectedCommodity, selectedApiGravity, destinationPort, volume, commodities,
+    sourceMode, selectedCommodity, selectedApiGravity, destinationPort, volume, quantityUnit, commodities,
     loadingRateMtDay, dischargeRateMtDay, portDuesPerMt, stevedoringPerMt, wharfagePerMt,
     surveyorFee, inspectionFee, fumigationFee, marineInsurancePct, contingencyPct,
     latePenaltyPerDay, expectedDelayDays, blendingMode, stockpileCost, blendingFee,
     maxStorageDays, dischargePortDues, dischargeUnloadGrab, dischargeCustomsClearance,
-    canalToll, laycanStart, laycanEnd,
+    canalToll, laycanStart, laycanEnd, marketQuote,
   ])
 
   const inlandOnly = !!(nearestPort && destinationPort && isInlandOnlySeaLeg(nearestPort.port, destinationPort))
@@ -1102,18 +1176,69 @@ export default function ShippingDeliveryWizard() {
     country: selectedAsset.country,
   }] : []
 
+  const commodityLineDetail = costBreakdown?.commodityPrice
+    ? `$${Number(costBreakdown.commodityPrice).toFixed(2)}/${costBreakdown.commodityPriceUnit || 'unit'} × ${Number(costBreakdown.commodityQty || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })} ${costBreakdown.commodityPriceUnit || ''}${costBreakdown.commodityPriceDate ? ` · ${costBreakdown.commodityPriceDate}` : ''}`
+    : marketQuoteLoading
+      ? 'Fetching market price…'
+      : 'Market price unavailable'
+
   const costItems = costBreakdown ? [
-    { label: 'Inland', value: costBreakdown.inlandCost },
-    { label: 'Port', value: costBreakdown.port },
-    { label: 'Bunker', value: costBreakdown.bunker },
-    { label: 'Freight', value: costBreakdown.freight },
-    { label: 'Discharge', value: costBreakdown.dischargePortCost ?? 0 },
-    { label: 'Canal', value: costBreakdown.canal },
-    { label: 'Insurance', value: costBreakdown.marineIns ?? 0 },
-    { label: 'Late risk', value: costBreakdown.lateRisk ?? 0 },
-    { label: 'Blending', value: costBreakdown.blendingTotal ?? 0 },
-    { label: 'Contingency', value: costBreakdown.contingency ?? 0 },
-  ].filter(i => i.value > 0) : []
+    {
+      label: costBreakdown.commodityPriceLabel ? `${selectedCommodity} (${costBreakdown.commodityPriceLabel})` : selectedCommodity || 'Commodity',
+      value: costBreakdown.commodityCost ?? 0,
+      detail: commodityLineDetail,
+      always: true,
+    },
+    {
+      label: 'Inland',
+      value: costBreakdown.inlandCost,
+      detail: costBreakdown.inlandDist != null ? `${Number(costBreakdown.inlandDist).toFixed(0)} km · ${costBreakdown.inlandMode}` : undefined,
+      always: true,
+    },
+    ...(!costBreakdown.inlandOnly ? [
+      { label: 'Port', value: costBreakdown.port, always: false },
+      { label: 'Bunker', value: costBreakdown.bunker, always: false },
+      { label: 'Freight', value: costBreakdown.freight, always: false },
+      { label: 'Discharge', value: costBreakdown.dischargePortCost ?? 0, always: false },
+      { label: 'Canal', value: costBreakdown.canal, always: false },
+    ] : []),
+    { label: 'Insurance', value: costBreakdown.marineIns ?? 0, always: true },
+    { label: 'Late risk', value: costBreakdown.lateRisk ?? 0, always: false },
+    { label: 'Blending', value: costBreakdown.blendingTotal ?? 0, always: false },
+    { label: 'Contingency', value: costBreakdown.contingency ?? 0, always: true },
+  ].filter((i) => i.always || i.value > 0) : []
+
+  const costLines = (
+    <div className="space-y-2 text-sm">
+      {costItems.map(({ label, value, detail }) => (
+        <div key={label}>
+          <div className="flex justify-between gap-3">
+            <span className="text-gray-500">{label}</span>
+            <span className="text-black font-medium">{formatUsd(value)}</span>
+          </div>
+          {detail && <div className="text-[11px] text-gray-400 mt-0.5">{detail}</div>}
+        </div>
+      ))}
+    </div>
+  )
+
+  const costTotals = costBreakdown ? (
+    <div className="border-t border-gray-200 pt-4 mt-4">
+      <div className="text-xs text-gray-500 mb-1">Delivered cost / {costBreakdown.unitLabel}</div>
+      <div className="text-2xl font-bold text-black">${Number(costBreakdown.unitCost).toFixed(2)}</div>
+      <div className="text-sm text-black font-medium mt-2">
+        Total transaction cost {formatUsd(costBreakdown.totalCost)}
+      </div>
+      <div className="text-xs text-gray-500 mt-0.5">{formatUsdFull(costBreakdown.totalCost)} estimated</div>
+      {costBreakdown.commodityPrice ? (
+        <div className="text-xs text-gray-400 mt-2">
+          Includes commodity at market price ({costBreakdown.commodityPriceLabel || 'FRED'})
+        </div>
+      ) : marketQuoteLoading ? (
+        <div className="text-xs text-gray-400 mt-2">Waiting for market price…</div>
+      ) : null}
+    </div>
+  ) : null
 
   const inlandRatePerKm =
     inlandMode === 'truck' ? INLAND_COST_PER_KM_Truck
@@ -1125,21 +1250,8 @@ export default function ShippingDeliveryWizard() {
     <FormCard title="Cost build-up">
       {costBreakdown ? (
         <div>
-          <div className="space-y-2 text-sm">
-            {costItems.map(({ label, value }) => (
-              <div key={label} className="flex justify-between">
-                <span className="text-gray-500">{label}</span>
-                <span className="text-black font-medium">${(value / 1000).toFixed(1)}k</span>
-              </div>
-            ))}
-          </div>
-          <div className="border-t border-gray-200 pt-4 mt-4">
-            <div className="text-xs text-gray-500 mb-1">Delivered cost / {costBreakdown.unitLabel}</div>
-            <div className="text-2xl font-bold text-black">${costBreakdown.unitCost.toFixed(2)}</div>
-            <div className="text-sm text-gray-500 mt-1">
-              Total transaction cost ${(costBreakdown.totalCost / 1e6).toFixed(2)}M
-            </div>
-          </div>
+          {costLines}
+          {costTotals}
           {costBreakdown.totalDays > 0 && (
             <div className="mt-4 grid grid-cols-2 gap-3">
               <KpiPanel label="ETA" value={`${costBreakdown.totalDays.toFixed(0)} days`} />
@@ -1273,6 +1385,16 @@ export default function ShippingDeliveryWizard() {
                       ))}
                     </select>
                   </div>
+                  {marketQuote && (
+                    <p className="mt-1.5 text-xs text-gray-500">
+                      Market {marketQuote.label}: ${marketQuote.price.toFixed(2)}/{marketQuote.unit}
+                      {marketQuote.date ? ` · ${marketQuote.date}` : ''}
+                      {volume > 0 ? ` · commodity ${formatUsd(marketQuote.price * commodityQtyForQuote(selectedCommodity, volumeToSpecUnits(selectedCommodity, volume, quantityUnit), marketQuote.unit))}` : ''}
+                    </p>
+                  )}
+                  {selectedCommodity && !marketQuote && !marketQuoteLoading && (
+                    <p className="mt-1.5 text-xs text-gray-500">Market price unavailable for this commodity</p>
+                  )}
                 </div>
                 <div>
                   <button
@@ -1838,7 +1960,7 @@ export default function ShippingDeliveryWizard() {
                   : `${selectedAsset?.title} → ${nearestPort?.port.name} → ${destinationPort?.name}`}
               </h2>
               <p className="text-sm text-gray-500">
-                {selectedCommodity} • {inlandOnly ? inlandMode : vesselClass} • {inlandOnly ? 'inland' : inlandMode} • ${costBreakdown ? (costBreakdown.totalCost/1e6).toFixed(2) : '—'}M
+                {selectedCommodity} • {inlandOnly ? inlandMode : vesselClass} • {inlandOnly ? 'inland' : inlandMode} • {costBreakdown ? formatUsd(costBreakdown.totalCost) : '—'}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -1852,17 +1974,11 @@ export default function ShippingDeliveryWizard() {
             {costBreakdown && (
               <div className={`absolute left-4 top-4 z-10 bg-white rounded-xl border border-gray-200 shadow-sm p-4 max-w-xs ${mapFullScreen ? 'bottom-4 overflow-y-auto' : 'max-h-[80vh] overflow-y-auto'}`}>
                 <h3 className="text-sm font-semibold text-black mb-3 uppercase tracking-wide">Cost build-up</h3>
-                <div className="space-y-1.5 text-sm">
-                  {costItems.map(({ label, value }) => (
-                    <div key={label} className="flex justify-between"><span className="text-gray-500">{label}</span><span className="text-black font-medium">${(value/1000).toFixed(1)}k</span></div>
-                  ))}
-                  <div className="border-t border-gray-200 pt-3 mt-3">
-                    <div className="text-xs text-gray-500 mb-1">Delivered cost / {costBreakdown.unitLabel}</div>
-                    <div className="text-2xl font-bold text-black">${costBreakdown.unitCost.toFixed(2)}</div>
-                    <div className="text-sm text-gray-500 mt-1">Total transaction cost ${(costBreakdown.totalCost/1e6).toFixed(2)}M</div>
-                    <div className="text-xs text-gray-500 mt-2">ETA: {costBreakdown.totalDays.toFixed(0)} days</div>
-                  </div>
-                </div>
+                {costLines}
+                {costTotals}
+                {costBreakdown.totalDays > 0 && (
+                  <div className="text-xs text-gray-500 mt-3">ETA: {costBreakdown.totalDays.toFixed(0)} days</div>
+                )}
               </div>
             )}
             <div className="flex-1 relative min-w-0">
