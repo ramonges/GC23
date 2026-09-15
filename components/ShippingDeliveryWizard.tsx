@@ -179,7 +179,9 @@ function StepActions({
 
 export default function ShippingDeliveryWizard() {
   const [step, setStep] = useState(1)
-  const [commodities, setCommodities] = useState<{ name: string; source: string }[]>([])
+  const [commodities, setCommodities] = useState<{ name: string; source: string }[]>(
+    COMMODITY_SOURCES.map((c) => ({ name: c.name, source: c.source }))
+  )
   const [selectedCommodity, setSelectedCommodity] = useState('')
   const [originCountry, setOriginCountry] = useState('')
   const [assets, setAssets] = useState<Asset[]>([])
@@ -249,7 +251,7 @@ export default function ShippingDeliveryWizard() {
   const [dischargeUnloadGrab, setDischargeUnloadGrab] = useState(0)
   const [dischargeCustomsClearance, setDischargeCustomsClearance] = useState(0)
 
-  // Fetch commodities that exist in DB
+  // Fetch commodities that exist in DB; keep the known DB-backed list if the query returns nothing
   useEffect(() => {
     async function load() {
       const list: { name: string; source: string }[] = []
@@ -267,7 +269,7 @@ export default function ShippingDeliveryWizard() {
       for (const n of ['Sugar']) {
         if (names.includes(n) && !list.some(x => x.name === n)) list.push({ name: n, source: 'commodity_locations' })
       }
-      setCommodities(list)
+      setCommodities(list.length > 0 ? list : COMMODITY_SOURCES.map((c) => ({ name: c.name, source: c.source })))
     }
     load()
   }, [])
