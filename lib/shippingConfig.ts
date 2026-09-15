@@ -25,9 +25,16 @@ export const majorPorts: Port[] = [
   { name: 'Ningbo', country: 'China', lat: 29.9, lng: 121.6, region: 'East Asia' },
   { name: 'Beilun/Baoshan', country: 'China', lat: 29.9, lng: 121.8, region: 'East Asia' },
   { name: 'Busan', country: 'South Korea', lat: 35.1, lng: 129.0, region: 'East Asia' },
+  { name: 'Yanbu', country: 'Saudi Arabia', lat: 23.986, lng: 38.228, region: 'Red Sea' },
+  { name: 'Jeddah', country: 'Saudi Arabia', lat: 21.485, lng: 39.168, region: 'Red Sea' },
+  { name: 'Ain Sukhna', country: 'Egypt', lat: 29.59, lng: 32.37, region: 'Red Sea' },
   { name: 'Ras Tanura', country: 'Saudi Arabia', lat: 26.6, lng: 50.2, region: 'Middle East' },
   { name: 'Jubail', country: 'Saudi Arabia', lat: 27.0, lng: 49.7, region: 'Middle East' },
+  { name: 'Basra', country: 'Iraq', lat: 30.515, lng: 47.855, region: 'Middle East' },
+  { name: 'Kuwait', country: 'Kuwait', lat: 29.077, lng: 48.153, region: 'Middle East' },
+  { name: 'Jebel Ali', country: 'UAE', lat: 24.987, lng: 55.027, region: 'Middle East' },
   { name: 'Fujairah', country: 'UAE', lat: 25.1, lng: 56.3, region: 'Middle East' },
+  { name: 'Ceyhan', country: 'Turkey', lat: 36.89, lng: 35.93, region: 'East Mediterranean' },
   { name: 'Singapore', country: 'Singapore', lat: 1.3, lng: 103.8, region: 'Southeast Asia' },
   { name: 'Lagos', country: 'Nigeria', lat: 6.4, lng: 3.4, region: 'West Africa' },
   { name: 'Rotterdam', country: 'Netherlands', lat: 51.9, lng: 4.5, region: 'North Europe' },
@@ -188,10 +195,12 @@ export function haversineDistanceKm(lat1: number, lng1: number, lat2: number, ln
   return R * c
 }
 
-export function findNearestPort(assetLat: number, assetLng: number): { port: Port; distanceKm: number } {
-  let nearest = majorPorts[0]
+export function findNearestPort(assetLat: number, assetLng: number, destination?: Port | null): { port: Port; distanceKm: number } {
+  const candidates = majorPorts.filter((p) => !destination || p.name !== destination.name || p.country !== destination.country)
+  const list = candidates.length > 0 ? candidates : majorPorts
+  let nearest = list[0]
   let minDist = haversineDistanceKm(assetLat, assetLng, nearest.lat, nearest.lng)
-  for (const p of majorPorts) {
+  for (const p of list) {
     const d = haversineDistanceKm(assetLat, assetLng, p.lat, p.lng)
     if (d < minDist) {
       minDist = d
@@ -199,6 +208,55 @@ export function findNearestPort(assetLat: number, assetLng: number): { port: Por
     }
   }
   return { port: nearest, distanceKm: minDist }
+}
+
+const SUEZ_CORRIDOR: Array<{ lat: number; lng: number }> = [
+  { lat: 26.6, lng: 35.0 },
+  { lat: 28.6, lng: 33.2 },
+  { lat: 29.93, lng: 32.55 },
+  { lat: 31.5, lng: 32.35 },
+  { lat: 36.7, lng: 14.2 },
+  { lat: 36.1, lng: -5.4 },
+  { lat: 48.7, lng: -5.8 },
+]
+
+function usesSuezCorridor(origin: Port, dest: Port): boolean {
+  const pair = [origin.region, dest.region]
+  const redSea = pair.includes('Red Sea')
+  const europeOrUs = pair.includes('North Europe') || pair.includes('US East Coast') || pair.includes('US Gulf')
+  const eastMedToNorth = (origin.region === 'East Mediterranean' && dest.region === 'North Europe')
+    || (dest.region === 'East Mediterranean' && origin.region === 'North Europe')
+  return (redSea && europeOrUs) || eastMedToNorth
+}
+
+export function generateRoutedSeaWaypoints(origin: Port, dest: Port): Array<{ lat: number; lng: number }> {
+  if (!usesSuezCorridor(origin, dest)) {
+    return generateSeaWaypoints(origin.lat, origin.lng, dest.lat, dest.lng)
+  }
+  const fromRedSea = origin.region === 'Red Sea' || dest.region === 'Red Sea'
+  const northbound = origin.region === 'Red Sea' || origin.region === 'East Mediterranean'
+  let vias: Array<{ lat: number; lng: number }>
+  if (origin.region === 'East Mediterranean' || dest.region === 'East Mediterranean') {
+    vias = [
+      { lat: 36.7, lng: 14.2 },
+      { lat: 36.1, lng: -5.4 },
+    ]
+  } else {
+    vias = northbound ? SUEZ_CORRIDOR : [...SUEZ_CORRIDOR].reverse()
+    if (!fromRedSea) vias = SUEZ_CORRIDOR
+  }
+  const points = [{ lat: origin.lat, lng: origin.lng }, ...vias, { lat: dest.lat, lng: dest.lng }]
+  const out: Array<{ lat: number; lng: number }> = []
+  for (let i = 0; i < points.length - 1; i++) {
+    const seg = generateSeaWaypoints(points[i].lat, points[i].lng, points[i + 1].lat, points[i + 1].lng)
+    const step = Math.max(1, Math.floor(seg.length / 8))
+    for (let j = 0; j < seg.length; j += step) out.push(seg[j])
+    const last = seg[seg.length - 1]
+    if (last && (out.length === 0 || out[out.length - 1].lat !== last.lat || out[out.length - 1].lng !== last.lng)) {
+      out.push(last)
+    }
+  }
+  return out
 }
 
 // Baltic dry index route benchmarks (mock 30-day avg rates — replace with live API if available)

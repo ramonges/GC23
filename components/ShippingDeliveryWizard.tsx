@@ -9,7 +9,7 @@ import {
   commoditySpecs,
   vesselClasses,
   findNearestPort,
-  generateSeaWaypoints,
+  generateRoutedSeaWaypoints,
   haversineDistanceKm,
   CharterType,
   Port,
@@ -212,7 +212,7 @@ function resolveDeliveryRoute(
   asset: Pick<Asset, 'latitude' | 'longitude' | 'country'>,
   destination: Port,
 ): { inlandOnly: boolean; inlandKm: number; handoff: Port } {
-  const nearest = findNearestPort(asset.latitude, asset.longitude)
+  const nearest = findNearestPort(asset.latitude, asset.longitude, destination)
   if (isInlandOnlySeaLeg(nearest.port, destination) || countriesMatch(asset.country, destination.country)) {
     return {
       inlandOnly: true,
@@ -438,7 +438,14 @@ function computeModeledCost(params: {
   let canalCost = 0
   const oReg = params.nearestPort.port.region
   const dReg = params.destinationPort.region
-  const needsSuez = vessel.canalSuez && ((oReg === 'East Asia' && dReg === 'North Europe') || (oReg === 'North Europe' && dReg === 'East Asia'))
+  const needsSuez = vessel.canalSuez && (
+    (oReg === 'East Asia' && dReg === 'North Europe') ||
+    (oReg === 'North Europe' && dReg === 'East Asia') ||
+    (oReg === 'Red Sea' && (dReg === 'North Europe' || dReg === 'US East Coast' || dReg === 'US Gulf')) ||
+    (dReg === 'Red Sea' && (oReg === 'North Europe' || oReg === 'US East Coast' || oReg === 'US Gulf')) ||
+    (oReg === 'East Mediterranean' && dReg === 'North Europe') ||
+    (dReg === 'East Mediterranean' && oReg === 'North Europe')
+  )
   const needsPanama = vessel.canalPanama && ((oReg === 'US Gulf' && dReg === 'East Asia') || (oReg === 'East Asia' && dReg === 'US Gulf'))
   if (params.canalToll === 'suez' || (params.canalToll === 'none' && needsSuez)) canalCost += 550000
   if (params.canalToll === 'panama' || (params.canalToll === 'none' && needsPanama)) canalCost += 450000
@@ -1159,7 +1166,7 @@ export default function ShippingDeliveryWizard() {
         endLat: destinationPort.lat,
         endLng: destinationPort.lng,
         color: '#3B82F6',
-        waypoints: generateSeaWaypoints(nearestPort.port.lat, nearestPort.port.lng, destinationPort.lat, destinationPort.lng),
+        waypoints: generateRoutedSeaWaypoints(nearestPort.port, destinationPort),
       })
     }
   }
