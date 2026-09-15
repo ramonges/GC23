@@ -180,10 +180,12 @@ function normalizeCountryName(country?: string): string {
   return n
 }
 
-function countriesMatch(a?: string, b?: string): boolean {
-  const na = normalizeCountryName(a)
-  const nb = normalizeCountryName(b)
-  return !!na && na === nb
+function countryQueryValues(country?: string): string[] {
+  if (!country) return []
+  const n = normalizeCountryName(country)
+  if (n === 'unitedstates') return ['United States', 'USA', 'US', 'United States of America']
+  if (n === 'unitedkingdom') return ['United Kingdom', 'UK', 'Great Britain']
+  return [country]
 }
 
 function isInlandOnlySeaLeg(from: Port, to: Port): boolean {
@@ -438,8 +440,12 @@ function rankEligibleSources(
       }
     }
     const route = resolveDeliveryRoute(asset, params.destinationPort)
+    const inlandModeForAsset = (route.inlandOnly && (INLAND_MODES_BY_COMMODITY[params.selectedCommodity] || []).includes('pipeline'))
+      ? 'pipeline'
+      : params.inlandMode
     const modeled = computeModeledCost({
       ...params,
+      inlandMode: inlandModeForAsset,
       nearestPort: { port: route.handoff, distanceKm: route.inlandKm },
     })
     if (!modeled) {
@@ -781,7 +787,11 @@ export default function ShippingDeliveryWizard() {
     }
     const route = resolveDeliveryRoute(selectedAsset, destinationPort)
     setNearestPort({ port: route.handoff, distanceKm: route.inlandKm })
-  }, [selectedAsset, destinationPort])
+    const allowed = INLAND_MODES_BY_COMMODITY[selectedCommodity] || ['truck']
+    if (route.inlandOnly && allowed.includes('pipeline')) {
+      setInlandMode('pipeline')
+    }
+  }, [selectedAsset, destinationPort, selectedCommodity])
 
   // Keep inland mode valid for current commodity (e.g. no pipeline for coal)
   const allowedInlandModes = (INLAND_MODES_BY_COMMODITY[selectedCommodity] || ['truck', 'rail']) as InlandModeOption[]
@@ -914,26 +924,38 @@ export default function ShippingDeliveryWizard() {
       setAutoLoading(true)
       try {
         const src = commodities.find(c => c.name === commodityName)?.source || 'commodity_locations'
+        const seen = new Set<string>()
         const list: Asset[] = []
+        const addRows = (rows: any[] | null) => {
+          for (const r of rows || []) {
+            if (commodityName === 'Crude Oil' && !assetMatchesApiRange(r.api_gravity, selectedApiGravity)) continue
+            const asset = normalizeAsset(r, src)
+            if (!asset || seen.has(asset.id)) continue
+            seen.add(asset.id)
+            list.push(asset)
+          }
+        }
         if (src === 'coal_mines' || src === 'gold_mines' || src === 'sugar_plants') {
           const { data } = await supabase.from(src).select('*').not('latitude', 'is', null).limit(1000)
-          for (const r of data || []) {
-            const asset = normalizeAsset(r, src)
-            if (asset) list.push(asset)
+          addRows(data)
+          for (const country of countryQueryValues(destPort.country)) {
+            const { data: local } = await supabase.from(src).select('*').eq('country', country).not('latitude', 'is', null).limit(1000)
+            addRows(local)
           }
         } else {
           const type = COMMODITY_TYPE_MAP[commodityName] || 'Energy'
-          let assetQuery = supabase.from('commodity_locations').select('*')
-            .eq('commodity_type', type).eq('commodity_name', commodityName)
-            .not('latitude', 'is', null).limit(1000)
-          if (commodityName === 'Crude Oil') {
-            assetQuery = applyApiGravityFilter(assetQuery, selectedApiGravity)
+          const base = () => {
+            let q = supabase.from('commodity_locations').select('*')
+              .eq('commodity_type', type).eq('commodity_name', commodityName)
+              .not('latitude', 'is', null)
+            if (commodityName === 'Crude Oil') q = applyApiGravityFilter(q, selectedApiGravity)
+            return q
           }
-          const { data } = await assetQuery
-          for (const r of data || []) {
-            if (commodityName === 'Crude Oil' && !assetMatchesApiRange(r.api_gravity, selectedApiGravity)) continue
-            const asset = normalizeAsset(r, src)
-            if (asset) list.push(asset)
+          const { data } = await base().limit(1000)
+          addRows(data)
+          for (const country of countryQueryValues(destPort.country)) {
+            const { data: local } = await base().eq('country', country).limit(1000)
+            addRows(local)
           }
         }
         if (cancelled) return
@@ -1422,6 +1444,9 @@ export default function ShippingDeliveryWizard() {
                                     setSelectedAsset(row.asset)
                                     if (row.asset.country) setOriginCountry(row.asset.country)
                                     setOriginRegion(row.asset.region || '')
+                                    if (row.inlandOnly && (INLAND_MODES_BY_COMMODITY[selectedCommodity] || []).includes('pipeline')) {
+                                      setInlandMode('pipeline')
+                                    }
                                   }}
                                   className={`cursor-pointer border-t border-gray-100 ${selected ? 'bg-gray-50' : 'hover:bg-gray-50'}`}
                                 >
