@@ -1001,6 +1001,7 @@ export default function ShippingDeliveryWizard() {
       setRankedFlow([])
       return
     }
+    const originVesselClass: string = vesselName
     const destPort = destinationPort
     const commodityName = selectedCommodity
     let cancelled = false
@@ -1049,7 +1050,7 @@ export default function ShippingDeliveryWizard() {
           selectedCommodity: commodityName,
           volume: volumeToSpecUnits(commodityName, volume, quantityUnit),
           destinationPort: destPort,
-          vesselClass: vesselName,
+          vesselClass: originVesselClass,
           inlandMode: defaultInlandModeFor(commodityName),
           loadingRateMtDay,
           dischargeRateMtDay,
@@ -1694,11 +1695,11 @@ export default function ShippingDeliveryWizard() {
                           <div className="grid grid-cols-2 gap-3">
                             <KpiPanel
                               label="API Gravity"
-                              value={selectedAsset.api_gravity != null && selectedAsset.api_gravity !== '' ? `${selectedAsset.api_gravity}°` : '—'}
+                              value={selectedAsset.api_gravity != null ? `${selectedAsset.api_gravity}°` : '—'}
                             />
                             <KpiPanel
                               label="Sulfur %"
-                              value={selectedAsset.sulfur_content != null && selectedAsset.sulfur_content !== '' ? String(selectedAsset.sulfur_content) : '—'}
+                              value={selectedAsset.sulfur_content != null ? String(selectedAsset.sulfur_content) : '—'}
                             />
                           </div>
                         ) : (

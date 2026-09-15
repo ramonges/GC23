@@ -1,13 +1,8 @@
 import { NextRequest } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import WebSocket from 'ws'
+import { supabase } from '@/lib/supabase'
 
 const AIS_STREAM_URL = 'wss://stream.aisstream.io/v0/stream'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 const AIS_SHIP_CATEGORIES: Record<number, string> = {
   80: 'tanker', 81: 'chemical_tanker', 82: 'chemical_tanker',
