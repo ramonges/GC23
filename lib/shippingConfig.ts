@@ -233,18 +233,13 @@ export function generateRoutedSeaWaypoints(origin: Port, dest: Port): Array<{ la
   if (!usesSuezCorridor(origin, dest)) {
     return generateSeaWaypoints(origin.lat, origin.lng, dest.lat, dest.lng)
   }
-  const fromRedSea = origin.region === 'Red Sea' || dest.region === 'Red Sea'
   const northbound = origin.region === 'Red Sea' || origin.region === 'East Mediterranean'
-  let vias: Array<{ lat: number; lng: number }>
-  if (origin.region === 'East Mediterranean' || dest.region === 'East Mediterranean') {
-    vias = [
-      { lat: 36.7, lng: 14.2 },
-      { lat: 36.1, lng: -5.4 },
-    ]
-  } else {
-    vias = northbound ? SUEZ_CORRIDOR : [...SUEZ_CORRIDOR].reverse()
-    if (!fromRedSea) vias = SUEZ_CORRIDOR
-  }
+  const vias = origin.region === 'East Mediterranean' || dest.region === 'East Mediterranean'
+    ? [
+        { lat: 36.7, lng: 14.2 },
+        { lat: 36.1, lng: -5.4 },
+      ]
+    : northbound ? SUEZ_CORRIDOR : [...SUEZ_CORRIDOR].reverse()
   const points = [{ lat: origin.lat, lng: origin.lng }, ...vias, { lat: dest.lat, lng: dest.lng }]
   const out: Array<{ lat: number; lng: number }> = []
   for (let i = 0; i < points.length - 1; i++) {
