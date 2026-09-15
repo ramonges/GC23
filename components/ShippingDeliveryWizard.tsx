@@ -472,7 +472,7 @@ function rankEligibleSources(
     return {
       asset,
       exportPort: route.handoff,
-      inlandMode: params.inlandMode,
+      inlandMode: inlandModeForAsset,
       inlandDistanceKm: modeled.inlandDist,
       inlandDays: modeled.inlandDays,
       inlandCostPerMt: modeled.inlandCostPerMt,
