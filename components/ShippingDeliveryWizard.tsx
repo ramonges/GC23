@@ -143,7 +143,7 @@ function parcelToMt(commodity: string, parcelSize: number): number {
   return parcelSize
 }
 
-const STEP_LABELS = ['Commodity', 'Origin', 'Inland', 'Blending', 'Vessel', 'Charter', 'Freight', 'Destination'] as const
+const STEP_LABELS = ['Commodity', 'Destination', 'Sources', 'Inland', 'Blending', 'Vessel', 'Charter', 'Freight'] as const
 
 const inputClass =
   'w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-black text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black'
@@ -621,13 +621,13 @@ export default function ShippingDeliveryWizard() {
   }
 
   const canProceedStep1 = !!selectedCommodity && volume > 0
-  const canProceedStep2 = !!originCountry && !!selectedAsset
-  const canProceedStep3 = true
-  const canProceedStep4 = false // blending optional
-  const canProceedStep5 = !!vesselClass
-  const canProceedStep6 = true
+  const canProceedStep2 = !!destinationPort
+  const canProceedStep3 = sourceMode === 'auto' || (!!originCountry && !!selectedAsset)
+  const canProceedStep4 = true
+  const canProceedStep5 = true
+  const canProceedStep6 = !!vesselClass
   const canProceedStep7 = true
-  const canProceedStep8 = !!destinationPort
+  const canProceedStep8 = true
 
   const routes: ShippingRoute[] = []
   if (selectedAsset && nearestPort && destinationPort) {
@@ -718,13 +718,19 @@ export default function ShippingDeliveryWizard() {
     </FormCard>
   )
 
-  const calculatedInfoCard = (selectedCommodity || nearestPort) ? (
+  const calculatedInfoCard = (selectedCommodity || destinationPort || nearestPort) ? (
     <FormCard title="Route">
       <div className="space-y-3">
         {selectedCommodity && (
           <div>
             <div className="text-xs text-gray-500 mb-0.5">Commodity</div>
             <div className="text-base font-bold text-black">{selectedCommodity}</div>
+          </div>
+        )}
+        {destinationPort && (
+          <div>
+            <div className="text-xs text-gray-500 mb-0.5">Destination</div>
+            <div className="text-base font-bold text-black">{destinationPort.name}, {destinationPort.country}</div>
           </div>
         )}
         {selectedAsset && (
@@ -828,19 +834,6 @@ export default function ShippingDeliveryWizard() {
                   </div>
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-gray-700 mb-1.5">Required delivery</div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs text-gray-500 mb-1">From</label>
-                      <input type="date" value={laycanStart} onChange={(e) => setLaycanStart(e.target.value)} className={inputClass} />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-500 mb-1">To</label>
-                      <input type="date" value={laycanEnd} onChange={(e) => setLaycanEnd(e.target.value)} className={inputClass} />
-                    </div>
-                  </div>
-                </div>
-                <div>
                   <button
                     type="button"
                     onClick={() => setShowAdvanced(!showAdvanced)}
@@ -884,9 +877,69 @@ export default function ShippingDeliveryWizard() {
             </FormCard>
           )}
 
-          {/* Step 2: Production source */}
+          {/* Step 2: Destination */}
           {step === 2 && (
-            <FormCard title="Production source">
+            <FormCard title="Destination">
+              <div className="space-y-4">
+                <div>
+                  <label className={labelClass}>Destination port</label>
+                  <select
+                    value={destinationPort ? `${destinationPort.name}-${destinationPort.country}` : ''}
+                    onChange={(e) => {
+                      const v = e.target.value
+                      const p = majorPorts.find(x => `${x.name}-${x.country}` === v)
+                      setDestinationPort(p || null)
+                    }}
+                    className={inputClass}
+                  >
+                    <option value="">Select...</option>
+                    {majorPorts.filter(p => !nearestPort || p.name !== nearestPort.port.name).map((p) => (
+                      <option key={`${p.name}-${p.country}`} value={`${p.name}-${p.country}`}>{p.name}, {p.country}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-gray-700 mb-1.5">Required delivery</div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">From</label>
+                      <input type="date" value={laycanStart} onChange={(e) => setLaycanStart(e.target.value)} className={inputClass} />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">To</label>
+                      <input type="date" value={laycanEnd} onChange={(e) => setLaycanEnd(e.target.value)} className={inputClass} />
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label className={labelClass}>Discharge rate (MT/day)</label>
+                  <input type="number" value={dischargeRateMtDay || ''} onChange={(e) => setDischargeRateMtDay(Number(e.target.value))} placeholder="Default from commodity" className={inputClass} />
+                </div>
+                <div className="text-sm font-medium text-gray-700">Demurrage terms</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <input type="number" placeholder="Rate $/day" value={demurrageRatePerDay || ''} onChange={(e) => setDemurrageRatePerDay(Number(e.target.value))} className={inputClass} />
+                  <input type="number" placeholder="Grace period days" value={demurrageGraceDays || ''} onChange={(e) => setDemurrageGraceDays(Number(e.target.value))} className={inputClass} />
+                  <input type="number" placeholder="Dispatch rate" value={dispatchDemurrage || ''} onChange={(e) => setDispatchDemurrage(Number(e.target.value))} className={inputClass} />
+                </div>
+                <div className="text-sm font-medium text-gray-700">Late delivery</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <input type="number" placeholder="Penalty $/day" value={latePenaltyPerDay || ''} onChange={(e) => setLatePenaltyPerDay(Number(e.target.value))} className={inputClass} />
+                  <input type="number" placeholder="Expected delay risk (days)" value={expectedDelayDays || ''} onChange={(e) => setExpectedDelayDays(Number(e.target.value))} className={inputClass} />
+                </div>
+                <div className="text-sm font-medium text-gray-700">Discharge port charges ($/MT)</div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <input type="number" placeholder="Port dues" value={dischargePortDues || ''} onChange={(e) => setDischargePortDues(Number(e.target.value))} className={inputClass} />
+                  <input type="number" placeholder="Unload/grab" value={dischargeUnloadGrab || ''} onChange={(e) => setDischargeUnloadGrab(Number(e.target.value))} className={inputClass} />
+                  <input type="number" placeholder="Customs & clearance" value={dischargeCustomsClearance || ''} onChange={(e) => setDischargeCustomsClearance(Number(e.target.value))} className={inputClass} />
+                </div>
+              </div>
+              <StepActions onBack={handleBack} onNext={handleNext} nextDisabled={!canProceedStep2} />
+            </FormCard>
+          )}
+
+          {/* Step 3: Sources */}
+          {step === 3 && (
+            <FormCard title="Sources">
               <div className="space-y-4">
                 <div>
                   <label className={labelClass}>How would you like to select the source?</label>
@@ -1015,14 +1068,14 @@ export default function ShippingDeliveryWizard() {
               <StepActions
                 onBack={handleBack}
                 onNext={handleNext}
-                nextDisabled={!canProceedStep2}
+                nextDisabled={!canProceedStep3}
                 nextLabel={sourceMode === 'auto' ? 'Find sources' : 'Use this source'}
               />
             </FormCard>
           )}
 
-          {/* Step 3: Nearest port + inland */}
-          {step === 3 && selectedAsset && nearestPort && (
+          {/* Step 4: Nearest port + inland */}
+          {step === 4 && selectedAsset && nearestPort && (
             <FormCard title="Inland">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
                 <KpiPanel label="Recommended export port" value={`${nearestPort.port.name}, ${nearestPort.port.country}`} />
@@ -1064,9 +1117,15 @@ export default function ShippingDeliveryWizard() {
               <StepActions onBack={handleBack} onNext={handleNext} />
             </FormCard>
           )}
+          {step === 4 && !(selectedAsset && nearestPort) && (
+            <FormCard title="Inland">
+              <p className="text-sm text-gray-500">Select a production asset to calculate inland routing to the recommended export port.</p>
+              <StepActions onBack={handleBack} onNext={handleNext} />
+            </FormCard>
+          )}
 
-          {/* Step 4: Blending */}
-          {step === 4 && (
+          {/* Step 5: Blending */}
+          {step === 5 && (
             <FormCard title="Blending">
               <div className="space-y-4">
                 <div>
@@ -1101,8 +1160,8 @@ export default function ShippingDeliveryWizard() {
             </FormCard>
           )}
 
-          {/* Step 5: Vessel */}
-          {step === 5 && spec && (
+          {/* Step 6: Vessel */}
+          {step === 6 && spec && (
             <FormCard title="Vessel">
               <div className="space-y-4">
                 <div>
@@ -1127,12 +1186,12 @@ export default function ShippingDeliveryWizard() {
                   </div>
                 </div>
               </div>
-              <StepActions onBack={handleBack} onNext={handleNext} nextDisabled={!canProceedStep5} />
+              <StepActions onBack={handleBack} onNext={handleNext} nextDisabled={!canProceedStep6} />
             </FormCard>
           )}
 
-          {/* Step 6: Charter type */}
-          {step === 6 && (
+          {/* Step 7: Charter type */}
+          {step === 7 && (
             <FormCard title="Charter">
               <div className="space-y-2 mb-4">
                 {(['voyage', 'time', 'bareboat'] as CharterType[]).map((t) => (
@@ -1175,8 +1234,8 @@ export default function ShippingDeliveryWizard() {
             </FormCard>
           )}
 
-          {/* Step 7: Freight rate */}
-          {step === 7 && (
+          {/* Step 8: Freight rate */}
+          {step === 8 && (
             <FormCard title="Freight">
               <div className="space-y-2 mb-4">
                 <label className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer ${freightRate === 'market' ? 'border-black bg-gray-50' : 'border-gray-200 hover:bg-gray-50'}`}>
@@ -1204,56 +1263,9 @@ export default function ShippingDeliveryWizard() {
                   <input type="number" value={customRate || ''} onChange={(e) => setCustomRate(Number(e.target.value))} placeholder="$/MT or lumpsum" className={inputClass} />
                 </div>
               )}
-              <StepActions onBack={handleBack} onNext={handleNext} />
-            </FormCard>
-          )}
-
-          {/* Step 8: Destination & penalties */}
-          {step === 8 && (
-            <FormCard title="Destination">
-              <div className="space-y-4">
-                <div>
-                  <label className={labelClass}>Destination port</label>
-                  <select
-                    value={destinationPort ? `${destinationPort.name}-${destinationPort.country}` : ''}
-                    onChange={(e) => {
-                      const v = e.target.value
-                      const p = majorPorts.find(x => `${x.name}-${x.country}` === v)
-                      setDestinationPort(p || null)
-                    }}
-                    className={inputClass}
-                  >
-                    <option value="">Select...</option>
-                    {majorPorts.filter(p => !nearestPort || p.name !== nearestPort.port.name).map((p) => (
-                      <option key={`${p.name}-${p.country}`} value={`${p.name}-${p.country}`}>{p.name}, {p.country}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className={labelClass}>Discharge rate (MT/day)</label>
-                  <input type="number" value={dischargeRateMtDay || ''} onChange={(e) => setDischargeRateMtDay(Number(e.target.value))} placeholder="Default from commodity" className={inputClass} />
-                </div>
-                <div className="text-sm font-medium text-gray-700">Demurrage terms</div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <input type="number" placeholder="Rate $/day" value={demurrageRatePerDay || ''} onChange={(e) => setDemurrageRatePerDay(Number(e.target.value))} className={inputClass} />
-                  <input type="number" placeholder="Grace period days" value={demurrageGraceDays || ''} onChange={(e) => setDemurrageGraceDays(Number(e.target.value))} className={inputClass} />
-                  <input type="number" placeholder="Dispatch rate" value={dispatchDemurrage || ''} onChange={(e) => setDispatchDemurrage(Number(e.target.value))} className={inputClass} />
-                </div>
-                <div className="text-sm font-medium text-gray-700">Late delivery</div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <input type="number" placeholder="Penalty $/day" value={latePenaltyPerDay || ''} onChange={(e) => setLatePenaltyPerDay(Number(e.target.value))} className={inputClass} />
-                  <input type="number" placeholder="Expected delay risk (days)" value={expectedDelayDays || ''} onChange={(e) => setExpectedDelayDays(Number(e.target.value))} className={inputClass} />
-                </div>
-                <div className="text-sm font-medium text-gray-700">Discharge port charges ($/MT)</div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <input type="number" placeholder="Port dues" value={dischargePortDues || ''} onChange={(e) => setDischargePortDues(Number(e.target.value))} className={inputClass} />
-                  <input type="number" placeholder="Unload/grab" value={dischargeUnloadGrab || ''} onChange={(e) => setDischargeUnloadGrab(Number(e.target.value))} className={inputClass} />
-                  <input type="number" placeholder="Customs & clearance" value={dischargeCustomsClearance || ''} onChange={(e) => setDischargeCustomsClearance(Number(e.target.value))} className={inputClass} />
-                </div>
-              </div>
               <div className="mt-6 flex justify-between">
                 <button type="button" onClick={handleBack} className={secondaryBtnClass}>Back</button>
-                <button type="button" onClick={handleNext} disabled={!canProceedStep8} className={primaryBtnClass}>View on map <Navigation size={16} /></button>
+                <button type="button" onClick={handleNext} className={primaryBtnClass}>View on map <Navigation size={16} /></button>
               </div>
             </FormCard>
           )}
