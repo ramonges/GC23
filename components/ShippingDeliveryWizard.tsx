@@ -143,6 +143,313 @@ function parcelToMt(commodity: string, parcelSize: number): number {
   return parcelSize
 }
 
+const COMMODITY_TYPE_MAP: Record<string, string> = {
+  'Crude Oil': 'Energy',
+  'Natural Gas': 'Energy',
+  'Uranium': 'Energy',
+  'Iron Ore': 'Metals',
+  'Copper': 'Metals',
+  'Sugar': 'Agricultural',
+}
+
+function inlandRatePerKmFor(mode: InlandModeOption): number {
+  if (mode === 'truck') return INLAND_COST_PER_KM_Truck
+  if (mode === 'rail') return INLAND_COST_PER_KM_Rail
+  if (mode === 'conveyor') return INLAND_COST_PER_KM_Conveyor
+  return INLAND_COST_PER_KM_Pipeline
+}
+
+function defaultInlandModeFor(commodity: string): InlandModeOption {
+  return (INLAND_MODES_BY_COMMODITY[commodity] || ['truck'])[0]
+}
+
+function defaultVesselFor(commodity: string): string | null {
+  const spec = commoditySpecs[commodity]
+  const fromSpec = spec?.vesselTypes?.find((v) => vesselClasses[v])
+  if (fromSpec) return fromSpec
+  return Object.keys(vesselClasses).find((v) => vesselClasses[v].commodities.includes(commodity)) || null
+}
+
+function normalizeAsset(row: any, source: string): Asset | null {
+  const lat = Number(row.latitude ?? row.lat)
+  const lng = Number(row.longitude ?? row.lng)
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null
+  if (source === 'coal_mines') {
+    return {
+      id: String(row.id),
+      title: row.mine_name || 'Coal Mine',
+      latitude: lat,
+      longitude: lng,
+      country: row.country,
+      region: row.region,
+      operator: row.operator,
+      grade: row.coal_type || row.grade,
+      coal_type: row.coal_type,
+      calorific_value_kcal_kg: row.calorific_value_kcal_kg,
+      sulfur_percent: row.sulfur_percent,
+      annual_capacity_tonnes: row.annual_capacity_tonnes,
+      nearest_port: row.nearest_port,
+      production_capacity: row.annual_capacity_tonnes,
+    }
+  }
+  if (source === 'gold_mines') {
+    return {
+      id: String(row.id),
+      title: row.mine_name || row.name || 'Gold Mine',
+      latitude: lat,
+      longitude: lng,
+      country: row.country,
+      region: row.region,
+      operator: row.operator,
+      production_capacity: row.annual_capacity_troy_oz,
+    }
+  }
+  if (source === 'sugar_plants') {
+    return {
+      id: String(row.id),
+      title: row.mill_name || 'Sugar Mill',
+      latitude: lat,
+      longitude: lng,
+      country: row.country,
+      region: row.region,
+      operator: row.operator,
+      grade: row.primary_grade,
+      production_capacity: row.annual_output_tonnes,
+      current_production: row.annual_output_tonnes,
+    }
+  }
+  return {
+    id: String(row.id),
+    title: row.title || 'Site',
+    latitude: lat,
+    longitude: lng,
+    country: row.country,
+    region: row.region,
+    operator: row.operator,
+    grade: row.grade,
+    api_gravity: row.api_gravity,
+    sulfur_content: row.sulfur_content,
+    production_capacity: row.production_capacity,
+    current_production: row.current_production,
+  }
+}
+
+type DeliveryStatus = 'meets' | 'risk' | 'insufficient'
+
+interface RankedSource {
+  asset: Asset
+  exportPort: Port | null
+  inlandMode: InlandModeOption
+  inlandDistanceKm: number | null
+  inlandDays: number | null
+  inlandCostPerMt: number | null
+  freightCostPerMt: number | null
+  deliveredCostPerMt: number | null
+  transitDays: number | null
+  unitLabel: string
+  status: DeliveryStatus
+  rankReason: string
+}
+
+function requiredDeliveryDeadline(laycanStart: string, laycanEnd: string): Date | null {
+  const raw = laycanEnd || laycanStart
+  if (!raw) return null
+  const d = new Date(`${raw}T23:59:59`)
+  return Number.isNaN(d.getTime()) ? null : d
+}
+
+function computeModeledCost(params: {
+  selectedCommodity: string
+  volume: number
+  nearestPort: { port: Port; distanceKm: number }
+  destinationPort: Port
+  vesselClass: string
+  inlandMode: InlandModeOption
+  loadingRateMtDay: number
+  dischargeRateMtDay: number
+  portDuesPerMt: number
+  stevedoringPerMt: number
+  wharfagePerMt: number
+  surveyorFee: boolean
+  inspectionFee: boolean
+  fumigationFee: boolean
+  marineInsurancePct: number
+  contingencyPct: number
+  latePenaltyPerDay: number
+  expectedDelayDays: number
+  blendingMode: 'none' | 'fixed' | 'optimise'
+  stockpileCost: number
+  blendingFee: number
+  maxStorageDays: number
+  dischargePortDues: number
+  dischargeUnloadGrab: number
+  dischargeCustomsClearance: number
+  canalToll: 'suez' | 'panama' | 'none'
+}) {
+  const vessel = vesselClasses[params.vesselClass]
+  const commodity = commoditySpecs[params.selectedCommodity]
+  if (!vessel || !commodity || params.volume <= 0) return null
+
+  const parcelMt = parcelToMt(params.selectedCommodity, params.volume)
+  const inlandDist = params.nearestPort.distanceKm
+  const inlandCostPerTon = inlandRatePerKmFor(params.inlandMode)
+  const inlandCost = inlandDist * inlandCostPerTon * parcelMt
+  const inlandDays = Math.ceil(inlandDist / 500)
+
+  const seaDistNm = haversineDistanceKm(
+    params.nearestPort.port.lat,
+    params.nearestPort.port.lng,
+    params.destinationPort.lat,
+    params.destinationPort.lng,
+  ) / 1.852
+  const sailingDays = seaDistNm / (vessel.speed * 24)
+  const loadRate = params.loadingRateMtDay > 0 ? params.loadingRateMtDay : commodity.loadingRateMtHr * 24
+  const dischRate = params.dischargeRateMtDay > 0 ? params.dischargeRateMtDay : commodity.dischargeRateMtHr * 24
+  const loadingDays = Math.max(0.5, parcelMt / loadRate) + 0.5
+  const dischargeDays = Math.max(0.5, parcelMt / dischRate) + 0.5
+  const totalDays = inlandDays + 1 + loadingDays + sailingDays + 1.5 + dischargeDays
+
+  const hireCost = vessel.tceRate * totalDays
+  const bunkerSea = vessel.fuelAtSea * sailingDays * VLSFO_USD
+  const bunkerPort = vessel.fuelInPort * (loadingDays + dischargeDays + 2.5) * VLSFO_USD
+  const bunkerCost = bunkerSea + bunkerPort
+  let portCost = vessel.portCostPerCall * 2
+  if (params.portDuesPerMt || params.stevedoringPerMt || params.wharfagePerMt) {
+    portCost = parcelMt * (params.portDuesPerMt + params.stevedoringPerMt + params.wharfagePerMt)
+    if (params.surveyorFee) portCost += 5000
+    if (params.inspectionFee) portCost += 3000
+    if (params.fumigationFee) portCost += 8000
+  }
+
+  let canalCost = 0
+  const oReg = params.nearestPort.port.region
+  const dReg = params.destinationPort.region
+  const needsSuez = vessel.canalSuez && ((oReg === 'East Asia' && dReg === 'North Europe') || (oReg === 'North Europe' && dReg === 'East Asia'))
+  const needsPanama = vessel.canalPanama && ((oReg === 'US Gulf' && dReg === 'East Asia') || (oReg === 'East Asia' && dReg === 'US Gulf'))
+  if (params.canalToll === 'suez' || (params.canalToll === 'none' && needsSuez)) canalCost += 550000
+  if (params.canalToll === 'panama' || (params.canalToll === 'none' && needsPanama)) canalCost += 450000
+
+  const dischargePortCost = parcelMt * (params.dischargePortDues + params.dischargeUnloadGrab + params.dischargeCustomsClearance)
+  const marineIns = (inlandCost + hireCost + bunkerCost + portCost + canalCost) * (params.marineInsurancePct / 100)
+  const lateRisk = params.expectedDelayDays > 0 && params.latePenaltyPerDay > 0 ? Math.min(params.expectedDelayDays, 7) * params.latePenaltyPerDay : 0
+  const blendingTotal = params.blendingMode !== 'none' ? params.stockpileCost + params.blendingFee + (params.maxStorageDays > 0 ? params.maxStorageDays * 500 : 0) : 0
+  const freightTotal = hireCost + bunkerCost + portCost + canalCost
+  const subtotal = inlandCost + freightTotal + dischargePortCost + marineIns + lateRisk + blendingTotal
+  const contingency = subtotal * (params.contingencyPct / 100)
+  const totalCost = subtotal + contingency
+  const unitCost = commodity.unit === 'bbls' ? totalCost / params.volume : totalCost / parcelMt
+  const perMt = parcelMt > 0 ? 1 / parcelMt : 0
+
+  return {
+    inlandCost, inlandDist, inlandDays, inlandMode: params.inlandMode,
+    parcelMt, volume: params.volume,
+    sailingDays, loadingDays, dischargeDays, totalDays,
+    seaDistNm,
+    freight: hireCost, bunker: bunkerCost, port: portCost, canal: canalCost,
+    dischargePortCost, marineIns, lateRisk, blendingTotal,
+    contingency,
+    totalCost, unitCost, unitLabel: commodity.unit,
+    originPort: params.nearestPort.port, destinationPort: params.destinationPort,
+    vessel, commodity,
+    inlandCostPerMt: inlandCost * perMt,
+    freightCostPerMt: (hireCost + bunkerCost + canalCost) * perMt,
+  }
+}
+
+function rankEligibleSources(
+  assets: Asset[],
+  params: Omit<Parameters<typeof computeModeledCost>[0], 'nearestPort'> & { deadline: Date | null },
+): { lowestCost: RankedSource[]; flow: RankedSource[] } {
+  const scored: RankedSource[] = assets.map((asset) => {
+    if (!Number.isFinite(asset.latitude) || !Number.isFinite(asset.longitude)) {
+      return {
+        asset, exportPort: null, inlandMode: params.inlandMode,
+        inlandDistanceKm: null, inlandDays: null, inlandCostPerMt: null,
+        freightCostPerMt: null, deliveredCostPerMt: null, transitDays: null,
+        unitLabel: commoditySpecs[params.selectedCommodity]?.unit || 'MT',
+        status: 'insufficient', rankReason: 'Insufficient data',
+      }
+    }
+    const nearest = findNearestPort(asset.latitude, asset.longitude)
+    const modeled = computeModeledCost({ ...params, nearestPort: nearest })
+    if (!modeled) {
+      return {
+        asset, exportPort: nearest.port, inlandMode: params.inlandMode,
+        inlandDistanceKm: nearest.distanceKm, inlandDays: Math.ceil(nearest.distanceKm / 500),
+        inlandCostPerMt: null, freightCostPerMt: null, deliveredCostPerMt: null, transitDays: null,
+        unitLabel: commoditySpecs[params.selectedCommodity]?.unit || 'MT',
+        status: 'insufficient', rankReason: 'Insufficient data',
+      }
+    }
+    let status: DeliveryStatus = 'meets'
+    if (params.deadline) {
+      const arrival = new Date()
+      arrival.setDate(arrival.getDate() + Math.ceil(modeled.totalDays))
+      if (arrival > params.deadline) status = 'risk'
+    }
+    return {
+      asset,
+      exportPort: nearest.port,
+      inlandMode: params.inlandMode,
+      inlandDistanceKm: modeled.inlandDist,
+      inlandDays: modeled.inlandDays,
+      inlandCostPerMt: modeled.inlandCostPerMt,
+      freightCostPerMt: modeled.freightCostPerMt,
+      deliveredCostPerMt: modeled.unitCost,
+      transitDays: modeled.totalDays,
+      unitLabel: modeled.unitLabel,
+      status,
+      rankReason: '',
+    }
+  })
+
+  const complete = scored.filter((s) => s.status !== 'insufficient' && s.deliveredCostPerMt != null)
+  const feasible = complete.filter((s) => s.status === 'meets')
+  const primary = feasible.length >= 10 ? feasible : complete
+  const leftover = feasible.length >= 10 ? [] : scored.filter((s) => !primary.includes(s))
+
+  const byCost = [...primary].sort((a, b) => {
+    const ac = a.deliveredCostPerMt ?? Number.POSITIVE_INFINITY
+    const bc = b.deliveredCostPerMt ?? Number.POSITIVE_INFINITY
+    if (a.status !== b.status) return a.status === 'meets' ? -1 : 1
+    return ac - bc
+  })
+  const byFlow = [...primary].sort((a, b) => {
+    if (a.status !== b.status) return a.status === 'meets' ? -1 : 1
+    const ad = a.inlandDistanceKm ?? Number.POSITIVE_INFINITY
+    const bd = b.inlandDistanceKm ?? Number.POSITIVE_INFINITY
+    if (ad !== bd) return ad - bd
+    const at = a.inlandDays ?? Number.POSITIVE_INFINITY
+    const bt = b.inlandDays ?? Number.POSITIVE_INFINITY
+    if (at !== bt) return at - bt
+    return (a.inlandCostPerMt ?? Number.POSITIVE_INFINITY) - (b.inlandCostPerMt ?? Number.POSITIVE_INFINITY)
+  })
+
+  const fill = (ranked: RankedSource[], reasonForFirst: string, reasonForRest: string) => {
+    const top = ranked.slice(0, 10)
+    if (top.length < 10) {
+      leftover
+        .filter((s) => !top.some((t) => t.asset.id === s.asset.id))
+        .sort((a, b) => (a.deliveredCostPerMt ?? Number.POSITIVE_INFINITY) - (b.deliveredCostPerMt ?? Number.POSITIVE_INFINITY))
+        .slice(0, 10 - top.length)
+        .forEach((s) => top.push(s))
+    }
+    return top.map((s, i) => ({
+      ...s,
+      rankReason: s.status === 'insufficient'
+        ? 'Insufficient data'
+        : s.status === 'risk'
+          ? 'Does not meet delivery window'
+          : i === 0 ? reasonForFirst : reasonForRest,
+    }))
+  }
+
+  return {
+    lowestCost: fill(byCost, 'Lowest delivered cost', 'Estimated delivered cost'),
+    flow: fill(byFlow, 'Shortest inland route', 'Shorter inland route'),
+  }
+}
+
 const STEP_LABELS = ['Commodity', 'Destination', 'Sources', 'Inland', 'Blending', 'Vessel', 'Charter', 'Freight'] as const
 
 const inputClass =
@@ -245,6 +552,10 @@ export default function ShippingDeliveryWizard() {
   const [quantityUnit, setQuantityUnit] = useState('MT')
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [sourceMode, setSourceMode] = useState<'manual' | 'auto'>('manual')
+  const [autoRankTab, setAutoRankTab] = useState<'cost' | 'flow'>('cost')
+  const [autoLoading, setAutoLoading] = useState(false)
+  const [rankedLowestCost, setRankedLowestCost] = useState<RankedSource[]>([])
+  const [rankedFlow, setRankedFlow] = useState<RankedSource[]>([])
   const [selectedApiGravity, setSelectedApiGravity] = useState('any')
   const [vesselClass, setVesselClass] = useState('')
   const [charterType, setCharterType] = useState<CharterType>('voyage')
@@ -344,8 +655,9 @@ export default function ShippingDeliveryWizard() {
   // Reset region when country changes
   useEffect(() => { setOriginRegion('') }, [originCountry])
 
-  // Fetch assets when commodity + country selected
+  // Fetch assets when commodity + country selected (manual mode)
   useEffect(() => {
+    if (sourceMode === 'auto') return
     if (!selectedCommodity || !originCountry) {
       setAssets([])
       setSelectedAsset(null)
@@ -354,67 +666,15 @@ export default function ShippingDeliveryWizard() {
     }
     async function loadAssets() {
       const list: Asset[] = []
-      const src = commodities.find(c => c.name === selectedCommodity)?.source
-      if (src === 'coal_mines') {
-        const { data } = await supabase.from('coal_mines').select('*').eq('country', originCountry).not('latitude', 'is', null)
+      const src = commodities.find(c => c.name === selectedCommodity)?.source || 'commodity_locations'
+      if (src === 'coal_mines' || src === 'gold_mines' || src === 'sugar_plants') {
+        const { data } = await supabase.from(src).select('*').eq('country', originCountry).not('latitude', 'is', null)
         for (const r of data || []) {
-          list.push({
-            id: r.id,
-            title: r.mine_name || 'Coal Mine',
-            latitude: Number(r.latitude),
-            longitude: Number(r.longitude),
-            country: r.country,
-            region: r.region,
-            operator: r.operator,
-            grade: r.coal_type || r.grade,
-            coal_type: r.coal_type,
-            calorific_value_kcal_kg: r.calorific_value_kcal_kg,
-            sulfur_percent: r.sulfur_percent,
-            annual_capacity_tonnes: r.annual_capacity_tonnes,
-            nearest_port: r.nearest_port,
-            production_capacity: r.annual_capacity_tonnes,
-          })
-        }
-      } else if (src === 'gold_mines') {
-        const { data } = await supabase.from('gold_mines').select('*').eq('country', originCountry).not('latitude', 'is', null)
-        for (const r of data || []) {
-          list.push({
-            id: r.id,
-            title: r.mine_name || r.name || 'Gold Mine',
-            latitude: Number(r.latitude ?? r.lat),
-            longitude: Number(r.longitude ?? r.lng),
-            country: r.country,
-            region: r.region,
-            operator: r.operator,
-            production_capacity: r.annual_capacity_troy_oz,
-          })
-        }
-      } else if (src === 'sugar_plants') {
-        const { data } = await supabase.from('sugar_plants').select('*').eq('country', originCountry).not('latitude', 'is', null)
-        for (const r of data || []) {
-          list.push({
-            id: r.id,
-            title: r.mill_name || 'Sugar Mill',
-            latitude: Number(r.latitude),
-            longitude: Number(r.longitude),
-            country: r.country,
-            region: r.region,
-            operator: r.operator,
-            grade: r.primary_grade,
-            production_capacity: r.annual_output_tonnes,
-            current_production: r.annual_output_tonnes,
-          })
+          const asset = normalizeAsset(r, src)
+          if (asset) list.push(asset)
         }
       } else {
-        const typeMap: Record<string, string> = {
-          'Crude Oil': 'Energy',
-          'Natural Gas': 'Energy',
-          'Uranium': 'Energy',
-          'Iron Ore': 'Metals',
-          'Copper': 'Metals',
-          'Sugar': 'Agricultural',
-        }
-        const type = typeMap[selectedCommodity] || 'Energy'
+        const type = COMMODITY_TYPE_MAP[selectedCommodity] || 'Energy'
         let assetQuery = supabase.from('commodity_locations').select('*')
           .eq('commodity_type', type).eq('commodity_name', selectedCommodity)
           .eq('country', originCountry).not('latitude', 'is', null)
@@ -424,27 +684,15 @@ export default function ShippingDeliveryWizard() {
         const { data } = await assetQuery
         for (const r of data || []) {
           if (selectedCommodity === 'Crude Oil' && !assetMatchesApiRange(r.api_gravity, selectedApiGravity)) continue
-          list.push({
-            id: r.id,
-            title: r.title || 'Site',
-            latitude: Number(r.latitude),
-            longitude: Number(r.longitude),
-            country: r.country,
-            region: r.region,
-            operator: r.operator,
-            grade: r.grade,
-            api_gravity: r.api_gravity,
-            sulfur_content: r.sulfur_content,
-            production_capacity: r.production_capacity,
-            current_production: r.current_production,
-          })
+          const asset = normalizeAsset(r, src)
+          if (asset) list.push(asset)
         }
       }
       setAssets(list)
       setSelectedAsset(null)
     }
     loadAssets()
-  }, [selectedCommodity, originCountry, commodities, selectedApiGravity])
+  }, [selectedCommodity, originCountry, commodities, selectedApiGravity, sourceMode])
 
   // Nearest port when asset selected
   useEffect(() => {
@@ -489,15 +737,7 @@ export default function ShippingDeliveryWizard() {
         const { data } = await supabase.from('sugar_plants').select('country').not('latitude', 'is', null)
         countries = [...new Set((data || []).map((r: any) => r.country))]
       } else {
-        const typeMap: Record<string, string> = {
-          'Crude Oil': 'Energy',
-          'Natural Gas': 'Energy',
-          'Uranium': 'Energy',
-          'Iron Ore': 'Metals',
-          'Copper': 'Metals',
-          'Sugar': 'Agricultural',
-        }
-        const type = typeMap[selectedCommodity] || 'Energy'
+        const type = COMMODITY_TYPE_MAP[selectedCommodity] || 'Energy'
         let countryQuery = supabase.from('commodity_locations').select('country')
           .eq('commodity_type', type).eq('commodity_name', selectedCommodity)
         if (selectedCommodity === 'Crude Oil') {
@@ -530,67 +770,134 @@ export default function ShippingDeliveryWizard() {
       setCostBreakdown(null)
       return
     }
-    const vessel = vesselClasses[vesselClass]
-    const commodity = commoditySpecs[selectedCommodity]
-    if (!vessel || !commodity) return
-
-    const parcelMt = parcelToMt(selectedCommodity, volume)
-    const inlandDist = nearestPort.distanceKm
-    const inlandCostPerTon = inlandMode === 'truck' ? INLAND_COST_PER_KM_Truck : inlandMode === 'rail' ? INLAND_COST_PER_KM_Rail : inlandMode === 'conveyor' ? INLAND_COST_PER_KM_Conveyor : INLAND_COST_PER_KM_Pipeline
-    const inlandCost = inlandDist * inlandCostPerTon * parcelMt
-    const inlandDays = Math.ceil(inlandDist / 500) // rough: 500 km/day
-
-    const seaDistNm = haversineDistanceKm(nearestPort.port.lat, nearestPort.port.lng, destinationPort.lat, destinationPort.lng) / 1.852
-    const sailingDays = seaDistNm / (vessel.speed * 24)
-    const loadRate = loadingRateMtDay > 0 ? loadingRateMtDay : commodity.loadingRateMtHr * 24
-    const dischRate = dischargeRateMtDay > 0 ? dischargeRateMtDay : commodity.dischargeRateMtHr * 24
-    const loadingDays = Math.max(0.5, parcelMt / loadRate) + 0.5
-    const dischargeDays = Math.max(0.5, parcelMt / dischRate) + 0.5
-    const totalDays = inlandDays + 1 + loadingDays + sailingDays + 1.5 + dischargeDays
-
-    const hireCost = vessel.tceRate * totalDays
-    const bunkerSea = vessel.fuelAtSea * sailingDays * VLSFO_USD
-    const bunkerPort = vessel.fuelInPort * (loadingDays + dischargeDays + 2.5) * VLSFO_USD
-    const bunkerCost = bunkerSea + bunkerPort
-    let portCost = vessel.portCostPerCall * 2
-    if (portDuesPerMt || stevedoringPerMt || wharfagePerMt) {
-      portCost = parcelMt * (portDuesPerMt + stevedoringPerMt + wharfagePerMt)
-      if (surveyorFee) portCost += 5000
-      if (inspectionFee) portCost += 3000
-      if (fumigationFee) portCost += 8000
-    }
-
-    let canalCost = 0
-    const oReg = nearestPort.port.region
-    const dReg = destinationPort.region
-    const needsSuez = vessel.canalSuez && ((oReg === 'East Asia' && dReg === 'North Europe') || (oReg === 'North Europe' && dReg === 'East Asia'))
-    const needsPanama = vessel.canalPanama && ((oReg === 'US Gulf' && dReg === 'East Asia') || (oReg === 'East Asia' && dReg === 'US Gulf'))
-    if (canalToll === 'suez' || (canalToll === 'none' && needsSuez)) canalCost += 550000
-    if (canalToll === 'panama' || (canalToll === 'none' && needsPanama)) canalCost += 450000
-
-    const dischargePortCost = parcelMt * (dischargePortDues + dischargeUnloadGrab + dischargeCustomsClearance)
-    const marineIns = (inlandCost + hireCost + bunkerCost + portCost + canalCost) * (marineInsurancePct / 100)
-    const lateRisk = expectedDelayDays > 0 && latePenaltyPerDay > 0 ? Math.min(expectedDelayDays, 7) * latePenaltyPerDay : 0
-    const blendingTotal = blendingMode !== 'none' ? stockpileCost + blendingFee + (maxStorageDays > 0 ? maxStorageDays * 500 : 0) : 0
-    const freightTotal = hireCost + bunkerCost + portCost + canalCost
-    const subtotal = inlandCost + freightTotal + dischargePortCost + marineIns + lateRisk + blendingTotal
-    const contingency = subtotal * (contingencyPct / 100)
-    const totalCost = subtotal + contingency
-    const unitCost = commodity.unit === 'bbls' ? totalCost / volume : totalCost / parcelMt
-
-    setCostBreakdown({
-      inlandCost, inlandDist, inlandDays, inlandMode,
-      parcelMt, volume,
-      sailingDays, loadingDays, dischargeDays, totalDays,
-      seaDistNm,
-      freight: hireCost, bunker: bunkerCost, port: portCost, canal: canalCost,
-      dischargePortCost, marineIns, lateRisk, blendingTotal: blendingMode !== 'none' ? stockpileCost + blendingFee + (maxStorageDays > 0 ? maxStorageDays * 500 : 0) : 0,
-      contingency,
-      totalCost, unitCost, unitLabel: commodity.unit,
-      originPort: nearestPort.port, destinationPort,
-      vessel, commodity,
+    const modeled = computeModeledCost({
+      selectedCommodity,
+      volume,
+      nearestPort,
+      destinationPort,
+      vesselClass,
+      inlandMode,
+      loadingRateMtDay,
+      dischargeRateMtDay,
+      portDuesPerMt,
+      stevedoringPerMt,
+      wharfagePerMt,
+      surveyorFee,
+      inspectionFee,
+      fumigationFee,
+      marineInsurancePct,
+      contingencyPct,
+      latePenaltyPerDay,
+      expectedDelayDays,
+      blendingMode,
+      stockpileCost,
+      blendingFee,
+      maxStorageDays,
+      dischargePortDues,
+      dischargeUnloadGrab,
+      dischargeCustomsClearance,
+      canalToll,
     })
-  }, [selectedAsset, nearestPort, destinationPort, vesselClass, volume, inlandMode, loadingRateMtDay, dischargeRateMtDay, portDuesPerMt, stevedoringPerMt, wharfagePerMt, surveyorFee, inspectionFee, fumigationFee, marineInsurancePct, contingencyPct, latePenaltyPerDay, expectedDelayDays, blendingMode, stockpileCost, blendingFee, maxStorageDays, dischargePortDues, dischargeUnloadGrab, dischargeCustomsClearance, canalToll])
+    if (!modeled) return
+    setCostBreakdown(modeled)
+  }, [selectedAsset, nearestPort, destinationPort, vesselClass, volume, inlandMode, loadingRateMtDay, dischargeRateMtDay, portDuesPerMt, stevedoringPerMt, wharfagePerMt, surveyorFee, inspectionFee, fumigationFee, marineInsurancePct, contingencyPct, latePenaltyPerDay, expectedDelayDays, blendingMode, stockpileCost, blendingFee, maxStorageDays, dischargePortDues, dischargeUnloadGrab, dischargeCustomsClearance, canalToll, selectedCommodity])
+
+  // Automatic source ranking against the selected destination
+  useEffect(() => {
+    if (sourceMode !== 'auto') {
+      setRankedLowestCost([])
+      setRankedFlow([])
+      setAutoLoading(false)
+      return
+    }
+    if (!selectedCommodity || !destinationPort || volume <= 0) {
+      setRankedLowestCost([])
+      setRankedFlow([])
+      return
+    }
+    const vesselName = defaultVesselFor(selectedCommodity)
+    if (!vesselName) {
+      setRankedLowestCost([])
+      setRankedFlow([])
+      return
+    }
+    const destPort = destinationPort
+    const commodityName = selectedCommodity
+    let cancelled = false
+    setRankedLowestCost([])
+    setRankedFlow([])
+    async function load() {
+      setAutoLoading(true)
+      try {
+        const src = commodities.find(c => c.name === commodityName)?.source || 'commodity_locations'
+        const list: Asset[] = []
+        if (src === 'coal_mines' || src === 'gold_mines' || src === 'sugar_plants') {
+          const { data } = await supabase.from(src).select('*').not('latitude', 'is', null).limit(1000)
+          for (const r of data || []) {
+            const asset = normalizeAsset(r, src)
+            if (asset) list.push(asset)
+          }
+        } else {
+          const type = COMMODITY_TYPE_MAP[commodityName] || 'Energy'
+          let assetQuery = supabase.from('commodity_locations').select('*')
+            .eq('commodity_type', type).eq('commodity_name', commodityName)
+            .not('latitude', 'is', null).limit(1000)
+          if (commodityName === 'Crude Oil') {
+            assetQuery = applyApiGravityFilter(assetQuery, selectedApiGravity)
+          }
+          const { data } = await assetQuery
+          for (const r of data || []) {
+            if (commodityName === 'Crude Oil' && !assetMatchesApiRange(r.api_gravity, selectedApiGravity)) continue
+            const asset = normalizeAsset(r, src)
+            if (asset) list.push(asset)
+          }
+        }
+        if (cancelled) return
+        const ranked = rankEligibleSources(list, {
+          selectedCommodity: commodityName,
+          volume,
+          destinationPort: destPort,
+          vesselClass: vesselName,
+          inlandMode: defaultInlandModeFor(commodityName),
+          loadingRateMtDay,
+          dischargeRateMtDay,
+          portDuesPerMt,
+          stevedoringPerMt,
+          wharfagePerMt,
+          surveyorFee,
+          inspectionFee,
+          fumigationFee,
+          marineInsurancePct,
+          contingencyPct,
+          latePenaltyPerDay,
+          expectedDelayDays,
+          blendingMode,
+          stockpileCost,
+          blendingFee,
+          maxStorageDays,
+          dischargePortDues,
+          dischargeUnloadGrab,
+          dischargeCustomsClearance,
+          canalToll,
+          deadline: requiredDeliveryDeadline(laycanStart, laycanEnd),
+        })
+        if (cancelled) return
+        setRankedLowestCost(ranked.lowestCost)
+        setRankedFlow(ranked.flow)
+      } finally {
+        if (!cancelled) setAutoLoading(false)
+      }
+    }
+    load()
+    return () => { cancelled = true }
+  }, [
+    sourceMode, selectedCommodity, selectedApiGravity, destinationPort, volume, commodities,
+    loadingRateMtDay, dischargeRateMtDay, portDuesPerMt, stevedoringPerMt, wharfagePerMt,
+    surveyorFee, inspectionFee, fumigationFee, marineInsurancePct, contingencyPct,
+    latePenaltyPerDay, expectedDelayDays, blendingMode, stockpileCost, blendingFee,
+    maxStorageDays, dischargePortDues, dischargeUnloadGrab, dischargeCustomsClearance,
+    canalToll, laycanStart, laycanEnd,
+  ])
 
   const handleNext = () => {
     if (step < STEPS) setStep(step + 1)
@@ -613,6 +920,9 @@ export default function ShippingDeliveryWizard() {
     setShowAdvanced(false)
     setSourceMode('manual')
     setSelectedApiGravity('any')
+    setRankedLowestCost([])
+    setRankedFlow([])
+    setAutoRankTab('cost')
     setVesselClass('')
     setDestinationPort(null)
     setCostBreakdown(null)
@@ -622,7 +932,7 @@ export default function ShippingDeliveryWizard() {
 
   const canProceedStep1 = !!selectedCommodity && volume > 0
   const canProceedStep2 = !!destinationPort
-  const canProceedStep3 = sourceMode === 'auto' || (!!originCountry && !!selectedAsset)
+  const canProceedStep3 = !!selectedAsset && (sourceMode === 'auto' || !!originCountry)
   const canProceedStep4 = true
   const canProceedStep5 = true
   const canProceedStep6 = !!vesselClass
@@ -962,9 +1272,101 @@ export default function ShippingDeliveryWizard() {
                 </div>
 
                 {sourceMode === 'auto' && (
-                  <p className="text-sm text-gray-500">
-                    Eligible production assets will be compared using commodity specifications, route and delivered cost.
-                  </p>
+                  <div className="space-y-3">
+                    <div>
+                      <div className="text-sm font-medium text-black">Best sources</div>
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        Ranked to {destinationPort ? `${destinationPort.name}, ${destinationPort.country}` : 'the selected destination'} using estimated / modelled inland and freight costs.
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      {([
+                        { id: 'cost' as const, label: 'Lowest Cost' },
+                        { id: 'flow' as const, label: 'Flow' },
+                      ]).map((tab) => (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          onClick={() => setAutoRankTab(tab.id)}
+                          className={`px-3 py-1.5 rounded-lg text-sm font-medium border ${autoRankTab === tab.id ? 'border-black bg-gray-50 text-black' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                        >
+                          {tab.label}
+                        </button>
+                      ))}
+                    </div>
+                    {autoLoading && <p className="text-sm text-gray-500">Comparing eligible production assets…</p>}
+                    {!autoLoading && (autoRankTab === 'cost' ? rankedLowestCost : rankedFlow).length === 0 && (
+                      <p className="text-sm text-gray-500">No eligible production assets found for this commodity, specification and destination.</p>
+                    )}
+                    {!autoLoading && (autoRankTab === 'cost' ? rankedLowestCost : rankedFlow).length > 0 && (
+                      <div className="overflow-x-auto border border-gray-200 rounded-lg">
+                        <table className="min-w-full text-xs">
+                          <thead className="bg-gray-50 text-gray-500">
+                            <tr>
+                              <th className="text-left font-medium px-3 py-2">Rank</th>
+                              <th className="text-left font-medium px-3 py-2">Source</th>
+                              <th className="text-left font-medium px-3 py-2">Country</th>
+                              <th className="text-left font-medium px-3 py-2">Export Port</th>
+                              <th className="text-left font-medium px-3 py-2">Inland</th>
+                              {autoRankTab === 'cost' && <th className="text-left font-medium px-3 py-2">Freight</th>}
+                              {autoRankTab === 'cost' && <th className="text-left font-medium px-3 py-2">Delivered</th>}
+                              <th className="text-left font-medium px-3 py-2">Transit</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {(autoRankTab === 'cost' ? rankedLowestCost : rankedFlow).map((row, i) => {
+                              const selected = selectedAsset?.id === row.asset.id
+                              const statusLabel = row.status === 'insufficient' ? 'Insufficient data' : row.status === 'risk' ? 'Delivery risk' : 'Meets delivery'
+                              return (
+                                <tr
+                                  key={row.asset.id}
+                                  onClick={() => {
+                                    if (!Number.isFinite(row.asset.latitude) || !Number.isFinite(row.asset.longitude)) return
+                                    setSelectedAsset(row.asset)
+                                    if (row.asset.country) setOriginCountry(row.asset.country)
+                                    setOriginRegion(row.asset.region || '')
+                                  }}
+                                  className={`cursor-pointer border-t border-gray-100 ${selected ? 'bg-gray-50' : 'hover:bg-gray-50'}`}
+                                >
+                                  <td className="px-3 py-2 align-top font-medium text-black">{i + 1}</td>
+                                  <td className="px-3 py-2 align-top">
+                                    <div className="font-medium text-black">{row.asset.title}</div>
+                                    <div className="text-gray-500">{row.asset.region || '—'}</div>
+                                    <div className="text-gray-500">{row.rankReason}</div>
+                                    <div className="text-gray-500">{statusLabel}</div>
+                                  </td>
+                                  <td className="px-3 py-2 align-top text-black">{row.asset.country || '—'}</td>
+                                  <td className="px-3 py-2 align-top text-black">{row.exportPort ? row.exportPort.name : '—'}</td>
+                                  <td className="px-3 py-2 align-top text-black">
+                                    {row.inlandCostPerMt == null ? '—' : `$${row.inlandCostPerMt.toFixed(2)}/MT`}
+                                    <div className="text-gray-500">
+                                      {row.inlandDistanceKm != null ? `${row.inlandDistanceKm.toFixed(0)} km · ${row.inlandMode}` : 'Insufficient data'}
+                                    </div>
+                                  </td>
+                                  {autoRankTab === 'cost' && (
+                                    <td className="px-3 py-2 align-top text-black">
+                                      {row.freightCostPerMt == null ? '—' : `$${row.freightCostPerMt.toFixed(2)}/MT`}
+                                      <div className="text-gray-500">Estimated</div>
+                                    </td>
+                                  )}
+                                  {autoRankTab === 'cost' && (
+                                    <td className="px-3 py-2 align-top text-black">
+                                      {row.deliveredCostPerMt == null ? '—' : `$${row.deliveredCostPerMt.toFixed(2)}/${row.unitLabel === 'bbls' ? 'bbl' : row.unitLabel}`}
+                                      <div className="text-gray-500">Estimated</div>
+                                    </td>
+                                  )}
+                                  <td className="px-3 py-2 align-top text-black">
+                                    {row.transitDays == null ? '—' : `${row.transitDays.toFixed(0)} days`}
+                                    <div className="text-gray-500">Estimated</div>
+                                  </td>
+                                </tr>
+                              )
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 {sourceMode === 'manual' && (
@@ -1069,7 +1471,7 @@ export default function ShippingDeliveryWizard() {
                 onBack={handleBack}
                 onNext={handleNext}
                 nextDisabled={!canProceedStep3}
-                nextLabel={sourceMode === 'auto' ? 'Find sources' : 'Use this source'}
+                nextLabel="Use this source"
               />
             </FormCard>
           )}
