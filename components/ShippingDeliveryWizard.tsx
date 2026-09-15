@@ -1,10 +1,7 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import {
-  Package, MapPin, Ship, Route, Clock, DollarSign, ChevronRight, ChevronLeft,
-  CheckCircle, AlertTriangle, Navigation, Truck, Anchor, FileSpreadsheet, FileText,
-} from 'lucide-react'
+import { useState, useEffect, type ReactNode } from 'react'
+import { ChevronRight, CheckCircle, Navigation, FileSpreadsheet, FileText } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { supabase } from '@/lib/supabase'
 import {
@@ -91,6 +88,93 @@ function parcelToMt(commodity: string, parcelSize: number): number {
   if (c.unit === 'bbls') return parcelSize / (c.bblPerMt || 7.33)
   if (c.unit === 'mmbtu') return parcelSize * 0.02
   return parcelSize
+}
+
+const STEP_LABELS = ['Commodity', 'Origin', 'Inland', 'Blending', 'Vessel', 'Charter', 'Freight', 'Destination'] as const
+
+const inputClass =
+  'w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-black text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black'
+const labelClass = 'block text-sm font-medium text-gray-700 mb-1.5'
+const primaryBtnClass =
+  'px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-sm font-medium flex items-center gap-2'
+const secondaryBtnClass =
+  'px-4 py-2 bg-white border border-gray-300 text-black rounded-lg hover:bg-gray-50 text-sm font-medium'
+
+function FormCard({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+      <h3 className="text-sm font-semibold text-black mb-4 uppercase tracking-wide">{title}</h3>
+      {children}
+    </div>
+  )
+}
+
+function KpiPanel({ label, value, hint }: { label: string; value: string; hint?: string }) {
+  return (
+    <div className="bg-gray-50 rounded-xl border border-gray-200 px-4 py-3">
+      <div className="text-xs text-gray-500 mb-1">{label}</div>
+      <div className="text-lg font-bold text-black leading-tight">{value}</div>
+      {hint && <div className="text-xs text-gray-500 mt-0.5">{hint}</div>}
+    </div>
+  )
+}
+
+function StepNav({ step }: { step: number }) {
+  return (
+    <nav className="bg-white rounded-xl border border-gray-200 px-5 py-3">
+      <ol className="flex flex-wrap items-end text-sm">
+        {STEP_LABELS.map((label, i) => {
+          const s = i + 1
+          const isActive = step === s
+          const isComplete = step > s
+          return (
+            <li key={label} className="flex items-center">
+              {i > 0 && <span className="text-gray-300 mx-2 select-none">·</span>}
+              <span
+                className={
+                  isActive
+                    ? 'font-semibold text-black border-b-2 border-black pb-0.5'
+                    : isComplete
+                      ? 'text-gray-600'
+                      : 'text-gray-400'
+                }
+              >
+                {isComplete && <CheckCircle size={12} className="inline-block mr-1 -mt-0.5" />}
+                {label}
+              </span>
+            </li>
+          )
+        })}
+      </ol>
+    </nav>
+  )
+}
+
+function StepActions({
+  onBack,
+  onNext,
+  nextDisabled,
+  nextLabel = 'Continue',
+  showBack = true,
+}: {
+  onBack?: () => void
+  onNext: () => void
+  nextDisabled?: boolean
+  nextLabel?: string
+  showBack?: boolean
+}) {
+  return (
+    <div className={`mt-6 flex ${showBack ? 'justify-between' : 'justify-end'}`}>
+      {showBack && onBack && (
+        <button type="button" onClick={onBack} className={secondaryBtnClass}>
+          Back
+        </button>
+      )}
+      <button type="button" onClick={onNext} disabled={nextDisabled} className={primaryBtnClass}>
+        {nextLabel} <ChevronRight size={16} />
+      </button>
+    </div>
+  )
 }
 
 export default function ShippingDeliveryWizard() {
@@ -501,7 +585,7 @@ export default function ShippingDeliveryWizard() {
 
   const costItems = costBreakdown ? [
     { label: 'Inland', value: costBreakdown.inlandCost },
-    { label: 'Port load', value: costBreakdown.port },
+    { label: 'Port', value: costBreakdown.port },
     { label: 'Bunker', value: costBreakdown.bunker },
     { label: 'Freight', value: costBreakdown.freight },
     { label: 'Discharge', value: costBreakdown.dischargePortCost ?? 0 },
@@ -512,43 +596,108 @@ export default function ShippingDeliveryWizard() {
     { label: 'Contingency', value: costBreakdown.contingency ?? 0 },
   ].filter(i => i.value > 0) : []
 
-  return (
-    <div className={showMap && mapFullScreen ? 'h-screen flex flex-col overflow-hidden bg-zinc-900' : 'bg-zinc-900 min-h-screen text-zinc-100'}>
-      <div className="border-b border-zinc-700 px-8 py-6 flex-shrink-0 bg-zinc-900/95">
-        <h1 className="text-3xl font-bold text-white mb-2">Physical Delivery Cost Model</h1>
-        <p className="text-zinc-400">End-to-end delivered cost from mine/field → port → destination. Data: commodity_locations, coal_mines, gold_mines.</p>
-      </div>
+  const inlandRatePerKm =
+    inlandMode === 'truck' ? INLAND_COST_PER_KM_Truck
+    : inlandMode === 'rail' ? INLAND_COST_PER_KM_Rail
+    : inlandMode === 'conveyor' ? INLAND_COST_PER_KM_Conveyor
+    : INLAND_COST_PER_KM_Pipeline
 
-      {!showMap ? (
-        <div className="flex flex-1 min-h-0">
-        <div className="flex-1 overflow-y-auto max-w-3xl mx-auto px-8 py-8">
-          <div className="flex items-center justify-between mb-6">
-            {Array.from({ length: STEPS }, (_, i) => i + 1).map((s) => (
-              <div key={s} className="flex items-center flex-1">
-                <div className={`flex items-center justify-center w-8 h-8 rounded-full border-2 text-sm ${step >= s ? 'bg-amber-500 border-amber-500 text-black' : 'border-zinc-600 text-zinc-500'}`}>
-                  {step > s ? <CheckCircle size={16} /> : s}
-                </div>
-                {s < STEPS && <div className={`flex-1 h-0.5 mx-1 ${step > s ? 'bg-amber-500' : 'bg-zinc-600'}`} />}
+  const costBuildUpCard = (
+    <FormCard title="Cost build-up">
+      {costBreakdown ? (
+        <div>
+          <div className="space-y-2 text-sm">
+            {costItems.map(({ label, value }) => (
+              <div key={label} className="flex justify-between">
+                <span className="text-gray-500">{label}</span>
+                <span className="text-black font-medium">${(value / 1000).toFixed(1)}k</span>
               </div>
             ))}
           </div>
+          <div className="border-t border-gray-200 pt-4 mt-4">
+            <div className="text-xs text-gray-500 mb-1">Delivered cost / {costBreakdown.unitLabel}</div>
+            <div className="text-2xl font-bold text-black">${costBreakdown.unitCost.toFixed(2)}</div>
+            <div className="text-sm text-gray-500 mt-1">
+              Total transaction cost ${(costBreakdown.totalCost / 1e6).toFixed(2)}M
+            </div>
+          </div>
+          {costBreakdown.totalDays > 0 && (
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <KpiPanel label="ETA" value={`${costBreakdown.totalDays.toFixed(0)} days`} />
+              {costBreakdown.seaDistNm > 0 && (
+                <KpiPanel label="Sea distance" value={`${costBreakdown.seaDistNm.toFixed(0)} nm`} />
+              )}
+            </div>
+          )}
+        </div>
+      ) : (
+        <p className="text-gray-500 text-sm">Complete origin, destination, vessel and volume to see cost breakdown.</p>
+      )}
+    </FormCard>
+  )
+
+  const calculatedInfoCard = (selectedCommodity || nearestPort) ? (
+    <FormCard title="Calculated">
+      <div className="space-y-3">
+        {selectedCommodity && spec && (
+          <div>
+            <div className="text-xs text-gray-500 mb-0.5">Commodity</div>
+            <div className="text-base font-bold text-black">{selectedCommodity}</div>
+            <p className="text-xs text-gray-500 mt-1">
+              Source: database · Unit: {spec.unit} · Compatible vessels: {spec.vesselTypes.join(', ')}
+            </p>
+          </div>
+        )}
+        {nearestPort && selectedAsset && (
+          <div className="grid grid-cols-1 gap-3 pt-1">
+            <KpiPanel
+              label="Nearest export port"
+              value={`${nearestPort.port.name}, ${nearestPort.port.country}`}
+            />
+            <KpiPanel
+              label="Distance"
+              value={`${nearestPort.distanceKm.toFixed(0)} km`}
+              hint={selectedAsset.title}
+            />
+            <KpiPanel
+              label="Estimated inland cost"
+              value={`$${(nearestPort.distanceKm * inlandRatePerKm).toFixed(2)} / MT`}
+            />
+          </div>
+        )}
+      </div>
+    </FormCard>
+  ) : null
+
+  return (
+    <div className={showMap && mapFullScreen ? 'h-[calc(100vh-73px)] flex flex-col overflow-hidden bg-gray-50' : 'bg-gray-50'}>
+      {!showMap ? (
+        <div className="max-w-7xl mx-auto px-8 py-8 pb-16 space-y-6">
+          <div>
+            <h2 className="text-3xl font-bold text-black">Physical Delivery Modeling</h2>
+            <p className="text-gray-600 mt-1">Model the full delivered cost from production asset to destination</p>
+          </div>
+
+          <StepNav step={step} />
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
 
           {/* Step 1: Commodity */}
           {step === 1 && (
-            <div className="bg-zinc-800/80 rounded-xl border border-zinc-700 p-6">
-              <h2 className="text-lg font-semibold flex items-center gap-2 mb-4 text-amber-400"><Package size={20} />Commodity</h2>
+            <FormCard title="Commodity">
               {commodities.length > 0 && (
-                <div className="mb-4 p-3 bg-emerald-900/30 border border-emerald-700/50 rounded-lg text-sm text-emerald-200">
-                  ✓ Auto-populated from DB: {commodities.map(c => c.name).join(', ')}
-                </div>
+                <p className="mb-4 text-xs text-gray-500">
+                  Source: database · {commodities.map(c => c.name).join(', ')}
+                </p>
               )}
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">Commodity (from DB)</label>
+                  <label className={labelClass}>Commodity (from DB)</label>
                   <select
                     value={selectedCommodity}
                     onChange={(e) => { setSelectedCommodity(e.target.value); setOriginCountry(''); setSelectedAsset(null) }}
-                    className="w-full px-4 py-2.5 bg-zinc-700 border border-zinc-600 rounded-lg text-zinc-100 focus:ring-2 focus:ring-amber-500"
+                    className={inputClass}
                   >
                     <option value="">Select...</option>
                     {commodities.map((c) => (
@@ -556,62 +705,61 @@ export default function ShippingDeliveryWizard() {
                     ))}
                   </select>
                   {spec && (
-                    <p className="mt-2 text-sm text-zinc-400">Unit: {spec.unit} • Vessels: {spec.vesselTypes.join(', ')}</p>
+                    <p className="mt-1.5 text-xs text-gray-500">
+                      Source: database · Unit: {spec.unit} · Compatible vessels: {spec.vesselTypes.join(', ')}
+                    </p>
                   )}
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300 mb-2">Incoterms</label>
-                    <select value={incoterm} onChange={(e) => setIncoterm(e.target.value)} className="w-full px-4 py-2.5 bg-zinc-700 border border-zinc-600 rounded-lg text-zinc-100">
+                    <label className={labelClass}>Incoterms</label>
+                    <select value={incoterm} onChange={(e) => setIncoterm(e.target.value)} className={inputClass}>
                       {INCOTERMS.map((t) => <option key={t} value={t}>{t}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300 mb-2">Currency</label>
-                    <select value={currency} onChange={(e) => setCurrency(e.target.value)} className="w-full px-4 py-2.5 bg-zinc-700 border border-zinc-600 rounded-lg text-zinc-100">
+                    <label className={labelClass}>Currency</label>
+                    <select value={currency} onChange={(e) => setCurrency(e.target.value)} className={inputClass}>
                       <option value="USD">USD</option>
                       <option value="EUR">EUR</option>
                     </select>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300 mb-2">Marine insurance %</label>
-                    <input type="number" step={0.05} value={marineInsurancePct} onChange={(e) => setMarineInsurancePct(Number(e.target.value))} className="w-full px-4 py-2.5 bg-zinc-700 border border-zinc-600 rounded-lg text-zinc-100" />
+                    <label className={labelClass}>Marine insurance %</label>
+                    <input type="number" step={0.05} value={marineInsurancePct} onChange={(e) => setMarineInsurancePct(Number(e.target.value))} className={inputClass} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300 mb-2">Contingency buffer %</label>
-                    <input type="number" step={0.5} value={contingencyPct} onChange={(e) => setContingencyPct(Number(e.target.value))} className="w-full px-4 py-2.5 bg-zinc-700 border border-zinc-600 rounded-lg text-zinc-100" />
+                    <label className={labelClass}>Contingency buffer %</label>
+                    <input type="number" step={0.5} value={contingencyPct} onChange={(e) => setContingencyPct(Number(e.target.value))} className={inputClass} />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300 mb-2">Laycan start</label>
-                    <input type="date" value={laycanStart} onChange={(e) => setLaycanStart(e.target.value)} className="w-full px-4 py-2.5 bg-zinc-700 border border-zinc-600 rounded-lg text-zinc-100" />
+                    <label className={labelClass}>Laycan start</label>
+                    <input type="date" value={laycanStart} onChange={(e) => setLaycanStart(e.target.value)} className={inputClass} />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300 mb-2">Laycan end</label>
-                    <input type="date" value={laycanEnd} onChange={(e) => setLaycanEnd(e.target.value)} className="w-full px-4 py-2.5 bg-zinc-700 border border-zinc-600 rounded-lg text-zinc-100" />
+                    <label className={labelClass}>Laycan end</label>
+                    <input type="date" value={laycanEnd} onChange={(e) => setLaycanEnd(e.target.value)} className={inputClass} />
                   </div>
                 </div>
               </div>
-              <div className="mt-6 flex justify-end">
-                <button onClick={handleNext} disabled={!canProceedStep1} className="px-6 py-2.5 bg-amber-500 text-black rounded-lg disabled:opacity-50 flex items-center gap-2 font-medium">Next <ChevronRight size={18} /></button>
-              </div>
-            </div>
+              <StepActions onNext={handleNext} nextDisabled={!canProceedStep1} showBack={false} />
+            </FormCard>
           )}
 
           {/* Step 2: Origin country & asset */}
           {step === 2 && (
-            <div className="bg-zinc-800/80 rounded-xl border border-zinc-700 p-6">
-              <h2 className="text-lg font-semibold flex items-center gap-2 mb-4 text-amber-400"><MapPin size={20} />Origin country & asset</h2>
+            <FormCard title="Origin">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">Origin country</label>
+                  <label className={labelClass}>Origin country</label>
                   <select
                     value={originCountry}
                     onChange={(e) => { setOriginCountry(e.target.value); setSelectedAsset(null) }}
-                    className="w-full px-4 py-2.5 bg-zinc-700 border border-zinc-600 rounded-lg text-zinc-100"
+                    className={inputClass}
                   >
                     <option value="">Select...</option>
                     {originCountries.map((c) => (
@@ -621,11 +769,11 @@ export default function ShippingDeliveryWizard() {
                 </div>
                 {originRegions.length > 0 && (
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300 mb-2">Region</label>
+                    <label className={labelClass}>Region</label>
                     <select
                       value={originRegion}
                       onChange={(e) => { setOriginRegion(e.target.value); setSelectedAsset(null) }}
-                      className="w-full px-4 py-2.5 bg-zinc-700 border border-zinc-600 rounded-lg text-zinc-100"
+                      className={inputClass}
                     >
                       <option value="">All regions</option>
                       {originRegions.map((r) => (
@@ -636,14 +784,14 @@ export default function ShippingDeliveryWizard() {
                 )}
                 {originCountry && (
                   <div>
-                    <label className="block text-sm font-medium text-zinc-300 mb-2">Mine/field</label>
+                    <label className={labelClass}>Mine/field</label>
                     <select
                       value={selectedAsset?.id || ''}
                       onChange={(e) => {
                         const a = filteredAssets.find(x => x.id === e.target.value)
                         setSelectedAsset(a || null)
                       }}
-                      className="w-full px-4 py-2.5 bg-zinc-700 border border-zinc-600 rounded-lg text-zinc-100"
+                      className={inputClass}
                     >
                       <option value="">Select...</option>
                       {filteredAssets.map((a) => (
@@ -651,130 +799,125 @@ export default function ShippingDeliveryWizard() {
                       ))}
                     </select>
                     {selectedAsset && (
-                      <div className="mt-2 p-3 bg-zinc-700/50 rounded-lg text-sm space-y-1">
-                        <div>Operator: {selectedAsset.operator || '—'}</div>
-                        {selectedAsset.grade && <div>Grade: {selectedAsset.grade}</div>}
-                        {(selectedAsset.api_gravity != null || selectedAsset.calorific_value_kcal_kg) && (
-                          <div>{selectedAsset.calorific_value_kcal_kg ? `CV: ${selectedAsset.calorific_value_kcal_kg} kcal/kg` : `API: ${selectedAsset.api_gravity}`}</div>
-                        )}
-                        {selectedAsset.production_capacity && <div>Capacity: {Number(selectedAsset.production_capacity).toLocaleString()}/yr</div>}
-                        <div className="mt-3 text-xs text-zinc-400 font-medium">Quality overrides (optional)</div>
-                        <div className="grid grid-cols-2 gap-2 mt-1">
-                          <input type="number" placeholder="Calorific" value={qualityOverrideCal} onChange={(e) => setQualityOverrideCal(e.target.value ? Number(e.target.value) : '')} className="px-2 py-1.5 bg-zinc-600 rounded text-sm" />
-                          <input type="number" placeholder="Moisture %" value={qualityOverrideMoisture} onChange={(e) => setQualityOverrideMoisture(e.target.value ? Number(e.target.value) : '')} className="px-2 py-1.5 bg-zinc-600 rounded text-sm" />
-                          <input type="number" placeholder="Sulfur %" value={qualityOverrideSulfur} onChange={(e) => setQualityOverrideSulfur(e.target.value ? Number(e.target.value) : '')} className="px-2 py-1.5 bg-zinc-600 rounded text-sm" />
-                          <input type="number" placeholder="Ash %" value={qualityOverrideAsh} onChange={(e) => setQualityOverrideAsh(e.target.value ? Number(e.target.value) : '')} className="px-2 py-1.5 bg-zinc-600 rounded text-sm" />
+                      <div className="mt-3 space-y-3">
+                        <div className="grid grid-cols-2 gap-3">
+                          <KpiPanel label="Operator" value={selectedAsset.operator || '—'} />
+                          {selectedAsset.grade && <KpiPanel label="Grade" value={String(selectedAsset.grade)} />}
+                          {(selectedAsset.api_gravity != null || selectedAsset.calorific_value_kcal_kg) && (
+                            <KpiPanel
+                              label={selectedAsset.calorific_value_kcal_kg ? 'Calorific value' : 'API gravity'}
+                              value={selectedAsset.calorific_value_kcal_kg ? `${selectedAsset.calorific_value_kcal_kg} kcal/kg` : String(selectedAsset.api_gravity)}
+                            />
+                          )}
+                          {selectedAsset.production_capacity && (
+                            <KpiPanel label="Capacity" value={`${Number(selectedAsset.production_capacity).toLocaleString()}/yr`} />
+                          )}
+                        </div>
+                        <div>
+                          <div className="text-xs text-gray-500 mb-1.5">Quality overrides (optional)</div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <input type="number" placeholder="Calorific" value={qualityOverrideCal} onChange={(e) => setQualityOverrideCal(e.target.value ? Number(e.target.value) : '')} className={inputClass} />
+                            <input type="number" placeholder="Moisture %" value={qualityOverrideMoisture} onChange={(e) => setQualityOverrideMoisture(e.target.value ? Number(e.target.value) : '')} className={inputClass} />
+                            <input type="number" placeholder="Sulfur %" value={qualityOverrideSulfur} onChange={(e) => setQualityOverrideSulfur(e.target.value ? Number(e.target.value) : '')} className={inputClass} />
+                            <input type="number" placeholder="Ash %" value={qualityOverrideAsh} onChange={(e) => setQualityOverrideAsh(e.target.value ? Number(e.target.value) : '')} className={inputClass} />
+                          </div>
                         </div>
                       </div>
                     )}
                   </div>
                 )}
               </div>
-              <div className="mt-6 flex justify-between">
-                <button onClick={handleBack} className="px-6 py-2.5 border border-zinc-600 rounded-lg text-zinc-300 hover:bg-zinc-800">Back</button>
-                <button onClick={handleNext} disabled={!canProceedStep2} className="px-6 py-2.5 bg-amber-500 text-black rounded-lg disabled:opacity-50 flex items-center gap-2 font-medium">Next <ChevronRight size={18} /></button>
-              </div>
-            </div>
+              <StepActions onBack={handleBack} onNext={handleNext} nextDisabled={!canProceedStep2} />
+            </FormCard>
           )}
 
           {/* Step 3: Nearest port + inland */}
           {step === 3 && selectedAsset && nearestPort && (
-            <div className="bg-zinc-800/80 rounded-xl border border-zinc-700 p-6">
-              <h2 className="text-lg font-semibold flex items-center gap-2 mb-4 text-amber-400"><Anchor size={20} />Export port & inland transport</h2>
-              <div className="p-4 bg-zinc-700/50 rounded-lg mb-4">
-                <div className="font-medium">Nearest port: {nearestPort.port.name}, {nearestPort.port.country}</div>
-                <div className="text-sm text-zinc-400">{nearestPort.distanceKm.toFixed(0)} km from {selectedAsset.title}</div>
+            <FormCard title="Inland">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
+                <KpiPanel label="Nearest export port" value={`${nearestPort.port.name}, ${nearestPort.port.country}`} />
+                <KpiPanel label="Distance" value={`${nearestPort.distanceKm.toFixed(0)} km`} hint={selectedAsset.title} />
+                <KpiPanel label="Estimated inland cost" value={`$${(nearestPort.distanceKm * inlandRatePerKm).toFixed(2)} / MT`} />
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-zinc-300 mb-2">Inland transport mode</label>
-                <select value={inlandMode} onChange={(e) => setInlandMode(e.target.value as any)} className="w-full px-4 py-2.5 bg-zinc-700 border border-zinc-600 rounded-lg text-zinc-100">
+                <label className={labelClass}>Inland transport mode</label>
+                <select value={inlandMode} onChange={(e) => setInlandMode(e.target.value as any)} className={inputClass}>
                   {allowedInlandModes.includes('truck') && <option value="truck">Truck</option>}
                   {allowedInlandModes.includes('rail') && <option value="rail">Rail</option>}
                   {allowedInlandModes.includes('conveyor') && <option value="conveyor">Conveyor</option>}
                   {allowedInlandModes.includes('pipeline') && <option value="pipeline">Pipeline</option>}
                 </select>
-                <p className="mt-1 text-xs text-zinc-400">
-                  Est. ${(nearestPort.distanceKm * (inlandMode === 'truck' ? INLAND_COST_PER_KM_Truck : inlandMode === 'rail' ? INLAND_COST_PER_KM_Rail : inlandMode === 'conveyor' ? INLAND_COST_PER_KM_Conveyor : INLAND_COST_PER_KM_Pipeline) * 1000).toFixed(0)}/1,000 MT
-                </p>
               </div>
               <div className="space-y-3 mb-4">
-                <div className="text-sm font-medium text-zinc-300">Port charges ($/MT)</div>
-                <div className="grid grid-cols-2 gap-3">
-                  <input type="number" placeholder="Loading rate MT/day" value={loadingRateMtDay || ''} onChange={(e) => setLoadingRateMtDay(Number(e.target.value) || 0)} className="px-3 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-zinc-100" />
-                  <input type="number" placeholder="Port dues" value={portDuesPerMt || ''} onChange={(e) => setPortDuesPerMt(Number(e.target.value) || 0)} className="px-3 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-zinc-100" />
-                  <input type="number" placeholder="Stevedoring" value={stevedoringPerMt || ''} onChange={(e) => setStevedoringPerMt(Number(e.target.value) || 0)} className="px-3 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-zinc-100" />
-                  <input type="number" placeholder="Wharfage" value={wharfagePerMt || ''} onChange={(e) => setWharfagePerMt(Number(e.target.value) || 0)} className="px-3 py-2 bg-zinc-700 border border-zinc-600 rounded-lg text-zinc-100" />
+                <div className="text-sm font-medium text-gray-700">Port charges ($/MT)</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <input type="number" placeholder="Loading rate MT/day" value={loadingRateMtDay || ''} onChange={(e) => setLoadingRateMtDay(Number(e.target.value) || 0)} className={inputClass} />
+                  <input type="number" placeholder="Port dues" value={portDuesPerMt || ''} onChange={(e) => setPortDuesPerMt(Number(e.target.value) || 0)} className={inputClass} />
+                  <input type="number" placeholder="Stevedoring" value={stevedoringPerMt || ''} onChange={(e) => setStevedoringPerMt(Number(e.target.value) || 0)} className={inputClass} />
+                  <input type="number" placeholder="Wharfage" value={wharfagePerMt || ''} onChange={(e) => setWharfagePerMt(Number(e.target.value) || 0)} className={inputClass} />
                 </div>
                 <div className="flex flex-wrap gap-4">
-                  <label className="flex items-center gap-2 text-sm cursor-pointer">
-                    <input type="checkbox" checked={surveyorFee} onChange={(e) => setSurveyorFee(e.target.checked)} className="rounded" />
+                  <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                    <input type="checkbox" checked={surveyorFee} onChange={(e) => setSurveyorFee(e.target.checked)} className="rounded border-gray-300" />
                     <span>Surveyor</span>
                   </label>
-                  <label className="flex items-center gap-2 text-sm cursor-pointer">
-                    <input type="checkbox" checked={inspectionFee} onChange={(e) => setInspectionFee(e.target.checked)} className="rounded" />
+                  <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                    <input type="checkbox" checked={inspectionFee} onChange={(e) => setInspectionFee(e.target.checked)} className="rounded border-gray-300" />
                     <span>Inspection</span>
                   </label>
-                  <label className="flex items-center gap-2 text-sm cursor-pointer">
-                    <input type="checkbox" checked={fumigationFee} onChange={(e) => setFumigationFee(e.target.checked)} className="rounded" />
+                  <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                    <input type="checkbox" checked={fumigationFee} onChange={(e) => setFumigationFee(e.target.checked)} className="rounded border-gray-300" />
                     <span>Fumigation</span>
                   </label>
                 </div>
               </div>
-              <div className="mt-6 flex justify-between">
-                <button onClick={handleBack} className="px-6 py-2.5 border border-zinc-600 rounded-lg text-zinc-300 hover:bg-zinc-800">Back</button>
-                <button onClick={handleNext} className="px-6 py-2.5 bg-amber-500 text-black rounded-lg flex items-center gap-2 font-medium">Next <ChevronRight size={18} /></button>
-              </div>
-            </div>
+              <StepActions onBack={handleBack} onNext={handleNext} />
+            </FormCard>
           )}
 
           {/* Step 4: Blending */}
           {step === 4 && (
-            <div className="bg-zinc-800/80 rounded-xl border border-zinc-700 p-6">
-              <h2 className="text-lg font-semibold flex items-center gap-2 mb-4 text-amber-400">Optional blending</h2>
+            <FormCard title="Blending">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">Blending mode</label>
+                  <label className={labelClass}>Blending mode</label>
                   <div className="space-y-2">
                     {(['none', 'fixed', 'optimise'] as const).map((m) => (
-                      <label key={m} className="flex items-center gap-3 p-3 border border-zinc-600 rounded-lg cursor-pointer hover:bg-zinc-700/50">
+                      <label key={m} className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer ${blendingMode === m ? 'border-black bg-gray-50' : 'border-gray-200 hover:bg-gray-50'}`}>
                         <input type="radio" name="blend" checked={blendingMode === m} onChange={() => setBlendingMode(m)} />
-                        <span className="capitalize">{m === 'none' ? 'No blending' : m === 'fixed' ? 'Fixed ratio' : 'Optimise to spec'}</span>
+                        <span className="text-sm text-black">{m === 'none' ? 'No blending' : m === 'fixed' ? 'Fixed ratio' : 'Optimise to spec'}</span>
                       </label>
                     ))}
                   </div>
                 </div>
                 {blendingMode !== 'none' && (
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-zinc-300 mb-2">Stockpile cost ($)</label>
-                      <input type="number" value={stockpileCost || ''} onChange={(e) => setStockpileCost(Number(e.target.value) || 0)} className="w-full px-4 py-2.5 bg-zinc-700 border border-zinc-600 rounded-lg text-zinc-100" />
+                      <label className={labelClass}>Stockpile cost ($)</label>
+                      <input type="number" value={stockpileCost || ''} onChange={(e) => setStockpileCost(Number(e.target.value) || 0)} className={inputClass} />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-zinc-300 mb-2">Blending fee ($)</label>
-                      <input type="number" value={blendingFee || ''} onChange={(e) => setBlendingFee(Number(e.target.value) || 0)} className="w-full px-4 py-2.5 bg-zinc-700 border border-zinc-600 rounded-lg text-zinc-100" />
+                      <label className={labelClass}>Blending fee ($)</label>
+                      <input type="number" value={blendingFee || ''} onChange={(e) => setBlendingFee(Number(e.target.value) || 0)} className={inputClass} />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-zinc-300 mb-2">Max storage days</label>
-                      <input type="number" value={maxStorageDays || ''} onChange={(e) => setMaxStorageDays(Number(e.target.value) || 0)} className="w-full px-4 py-2.5 bg-zinc-700 border border-zinc-600 rounded-lg text-zinc-100" />
+                      <label className={labelClass}>Max storage days</label>
+                      <input type="number" value={maxStorageDays || ''} onChange={(e) => setMaxStorageDays(Number(e.target.value) || 0)} className={inputClass} />
                     </div>
                   </div>
                 )}
               </div>
-              <div className="mt-6 flex justify-between">
-                <button onClick={handleBack} className="px-6 py-2.5 border border-zinc-600 rounded-lg text-zinc-300 hover:bg-zinc-800">Back</button>
-                <button onClick={handleNext} className="px-6 py-2.5 bg-amber-500 text-black rounded-lg flex items-center gap-2 font-medium">Next <ChevronRight size={18} /></button>
-              </div>
-            </div>
+              <StepActions onBack={handleBack} onNext={handleNext} />
+            </FormCard>
           )}
 
           {/* Step 5: Volume & vessel */}
           {step === 5 && spec && (
-            <div className="bg-zinc-800/80 rounded-xl border border-zinc-700 p-6">
-              <h2 className="text-lg font-semibold flex items-center gap-2 mb-4 text-amber-400"><Ship size={20} />Volume & vessel</h2>
+            <FormCard title="Vessel">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">Volume (MT)</label>
-                  <select value={volume} onChange={(e) => setVolume(Number(e.target.value))} className="w-full px-4 py-2.5 bg-zinc-700 border border-zinc-600 rounded-lg text-zinc-100">
+                  <label className={labelClass}>Volume (MT)</label>
+                  <select value={volume} onChange={(e) => setVolume(Number(e.target.value))} className={inputClass}>
                     <option value={0}>Select...</option>
                     {parcelOptions.map((p) => (
                       <option key={p.size} value={p.size}>{p.label}</option>
@@ -782,8 +925,8 @@ export default function ShippingDeliveryWizard() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">Vessel class</label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <label className={labelClass}>Vessel class</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {availableVessels.map((v) => {
                       const vc = vesselClasses[v]
                       const baltic = balticRoutes.find(b => b.vesselClass === v)
@@ -792,35 +935,31 @@ export default function ShippingDeliveryWizard() {
                           key={v}
                           type="button"
                           onClick={() => setVesselClass(v)}
-                          className={`p-4 rounded-lg border text-left transition ${vesselClass === v ? 'border-amber-500 bg-amber-500/10' : 'border-zinc-600 hover:border-zinc-500'}`}
+                          className={`p-4 rounded-xl border text-left transition ${vesselClass === v ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-300 bg-white'}`}
                         >
-                          <div className="font-medium">{v}</div>
-                          <div className="text-sm text-zinc-400">{vc.dwtMin.toLocaleString()}-{vc.dwtMax.toLocaleString()} DWT</div>
-                          {baltic && <div className="text-xs text-amber-400 mt-1">~${baltic.avg30dUsdPerMt}/MT (30d avg)</div>}
+                          <div className="font-medium text-black">{v}</div>
+                          <div className="text-sm text-gray-500">{vc.dwtMin.toLocaleString()}-{vc.dwtMax.toLocaleString()} DWT</div>
+                          {baltic && <div className="text-xs text-gray-500 mt-1">~${baltic.avg30dUsdPerMt}/MT (30d avg)</div>}
                         </button>
                       )
                     })}
                   </div>
                 </div>
               </div>
-              <div className="mt-6 flex justify-between">
-                <button onClick={handleBack} className="px-6 py-2.5 border border-zinc-600 rounded-lg text-zinc-300 hover:bg-zinc-800">Back</button>
-                <button onClick={handleNext} disabled={!canProceedStep5} className="px-6 py-2.5 bg-amber-500 text-black rounded-lg disabled:opacity-50 flex items-center gap-2 font-medium">Next <ChevronRight size={18} /></button>
-              </div>
-            </div>
+              <StepActions onBack={handleBack} onNext={handleNext} nextDisabled={!canProceedStep5} />
+            </FormCard>
           )}
 
           {/* Step 6: Charter type */}
           {step === 6 && (
-            <div className="bg-zinc-800/80 rounded-xl border border-zinc-700 p-6">
-              <h2 className="text-lg font-semibold flex items-center gap-2 mb-4 text-amber-400">Charter type</h2>
+            <FormCard title="Charter">
               <div className="space-y-2 mb-4">
                 {(['voyage', 'time', 'bareboat'] as CharterType[]).map((t) => (
-                  <label key={t} className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer ${charterType === t ? 'border-amber-500 bg-amber-500/10' : 'border-zinc-600 hover:bg-zinc-700/50'}`}>
+                  <label key={t} className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer ${charterType === t ? 'border-black bg-gray-50' : 'border-gray-200 hover:bg-gray-50'}`}>
                     <input type="radio" name="charter" checked={charterType === t} onChange={() => setCharterType(t)} />
                     <div>
-                      <span className="capitalize font-medium">{t} charter</span>
-                      <div className="text-xs text-zinc-400">
+                      <span className="capitalize font-medium text-black text-sm">{t} charter</span>
+                      <div className="text-xs text-gray-500">
                         {t === 'voyage' && '— $/ton or lumpsum + port costs'}
                         {t === 'time' && '— $/day hire + bunker'}
                         {t === 'bareboat' && '— $/day + crew/insurance'}
@@ -829,79 +968,71 @@ export default function ShippingDeliveryWizard() {
                   </label>
                 ))}
               </div>
-              <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
                 <div>
-                  <label className="block text-sm text-zinc-400 mb-1">Address commission %</label>
-                  <input type="number" step={0.25} value={addressCommissionPct} onChange={(e) => setAddressCommissionPct(Number(e.target.value))} className="w-full px-3 py-2 bg-zinc-700 rounded-lg text-zinc-100" />
+                  <label className={labelClass}>Address commission %</label>
+                  <input type="number" step={0.25} value={addressCommissionPct} onChange={(e) => setAddressCommissionPct(Number(e.target.value))} className={inputClass} />
                 </div>
                 <div>
-                  <label className="block text-sm text-zinc-400 mb-1">Brokerage %</label>
-                  <input type="number" step={0.25} value={brokeragePct} onChange={(e) => setBrokeragePct(Number(e.target.value))} className="w-full px-3 py-2 bg-zinc-700 rounded-lg text-zinc-100" />
+                  <label className={labelClass}>Brokerage %</label>
+                  <input type="number" step={0.25} value={brokeragePct} onChange={(e) => setBrokeragePct(Number(e.target.value))} className={inputClass} />
                 </div>
                 <div>
-                  <label className="block text-sm text-zinc-400 mb-1">Canal toll</label>
-                  <select value={canalToll} onChange={(e) => setCanalToll(e.target.value as any)} className="w-full px-3 py-2 bg-zinc-700 rounded-lg text-zinc-100">
+                  <label className={labelClass}>Canal toll</label>
+                  <select value={canalToll} onChange={(e) => setCanalToll(e.target.value as any)} className={inputClass}>
                     <option value="none">Auto / None</option>
                     <option value="suez">Suez</option>
                     <option value="panama">Panama</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm text-zinc-400 mb-1">War risk premium %</label>
-                  <input type="number" step={0.1} value={warRiskPct} onChange={(e) => setWarRiskPct(Number(e.target.value))} className="w-full px-3 py-2 bg-zinc-700 rounded-lg text-zinc-100" />
+                  <label className={labelClass}>War risk premium %</label>
+                  <input type="number" step={0.1} value={warRiskPct} onChange={(e) => setWarRiskPct(Number(e.target.value))} className={inputClass} />
                 </div>
               </div>
-              <div className="mt-6 flex justify-between">
-                <button onClick={handleBack} className="px-6 py-2.5 border border-zinc-600 rounded-lg text-zinc-300 hover:bg-zinc-800">Back</button>
-                <button onClick={handleNext} className="px-6 py-2.5 bg-amber-500 text-black rounded-lg flex items-center gap-2 font-medium">Next <ChevronRight size={18} /></button>
-              </div>
-            </div>
+              <StepActions onBack={handleBack} onNext={handleNext} />
+            </FormCard>
           )}
 
           {/* Step 7: Freight rate */}
           {step === 7 && (
-            <div className="bg-zinc-800/80 rounded-xl border border-zinc-700 p-6">
-              <h2 className="text-lg font-semibold flex items-center gap-2 mb-4 text-amber-400">Freight rate</h2>
+            <FormCard title="Freight">
               <div className="space-y-2 mb-4">
-                <label className="flex items-center gap-2 cursor-pointer">
+                <label className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer ${freightRate === 'market' ? 'border-black bg-gray-50' : 'border-gray-200 hover:bg-gray-50'}`}>
                   <input type="radio" checked={freightRate === 'market'} onChange={() => setFreightRate('market')} />
-                  <span>Use market rate (TCE-based)</span>
+                  <span className="text-sm text-black">Use market rate (TCE-based)</span>
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer">
+                <label className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer ${freightRate === 'custom' ? 'border-black bg-gray-50' : 'border-gray-200 hover:bg-gray-50'}`}>
                   <input type="radio" checked={freightRate === 'custom'} onChange={() => setFreightRate('custom')} />
-                  <span>Enter negotiated rate</span>
+                  <span className="text-sm text-black">Enter negotiated rate</span>
                 </label>
               </div>
               {freightRate === 'market' && vesselClass && (
-                <div className="mb-4 p-3 bg-zinc-700/50 rounded-lg">
-                  <div className="text-sm font-medium text-zinc-300 mb-2">Baltic benchmarks (30d avg)</div>
+                <div className="mb-4 bg-gray-50 rounded-xl border border-gray-200 p-4">
+                  <div className="text-xs text-gray-500 mb-2 uppercase tracking-wide font-semibold">Baltic benchmarks (30d avg)</div>
                   {balticRoutes.filter(b => b.vesselClass === vesselClass).map((r) => (
                     <div key={r.id} className="flex justify-between text-sm py-1">
-                      <span className="text-zinc-400">{r.name}</span>
-                      <span className="text-amber-400">${r.avg30dUsdPerMt}/MT</span>
+                      <span className="text-gray-500">{r.name}</span>
+                      <span className="text-black font-medium">${r.avg30dUsdPerMt}/MT</span>
                     </div>
                   ))}
                 </div>
               )}
               {freightRate === 'custom' && (
                 <div className="mb-4">
-                  <input type="number" value={customRate || ''} onChange={(e) => setCustomRate(Number(e.target.value))} placeholder="$/MT or lumpsum" className="w-full px-4 py-2.5 bg-zinc-700 border border-zinc-600 rounded-lg text-zinc-100" />
+                  <input type="number" value={customRate || ''} onChange={(e) => setCustomRate(Number(e.target.value))} placeholder="$/MT or lumpsum" className={inputClass} />
                 </div>
               )}
-              <div className="mt-6 flex justify-between">
-                <button onClick={handleBack} className="px-6 py-2.5 border border-zinc-600 rounded-lg text-zinc-300 hover:bg-zinc-800">Back</button>
-                <button onClick={handleNext} className="px-6 py-2.5 bg-amber-500 text-black rounded-lg flex items-center gap-2 font-medium">Next <ChevronRight size={18} /></button>
-              </div>
-            </div>
+              <StepActions onBack={handleBack} onNext={handleNext} />
+            </FormCard>
           )}
 
           {/* Step 8: Destination & penalties */}
           {step === 8 && (
-            <div className="bg-zinc-800/80 rounded-xl border border-zinc-700 p-6">
-              <h2 className="text-lg font-semibold flex items-center gap-2 mb-4 text-amber-400"><Route size={20} />Destination & penalties</h2>
+            <FormCard title="Destination">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">Destination port</label>
+                  <label className={labelClass}>Destination port</label>
                   <select
                     value={destinationPort ? `${destinationPort.name}-${destinationPort.country}` : ''}
                     onChange={(e) => {
@@ -909,7 +1040,7 @@ export default function ShippingDeliveryWizard() {
                       const p = majorPorts.find(x => `${x.name}-${x.country}` === v)
                       setDestinationPort(p || null)
                     }}
-                    className="w-full px-4 py-2.5 bg-zinc-700 border border-zinc-600 rounded-lg text-zinc-100"
+                    className={inputClass}
                   >
                     <option value="">Select...</option>
                     {majorPorts.filter(p => !nearestPort || p.name !== nearestPort.port.name).map((p) => (
@@ -918,112 +1049,69 @@ export default function ShippingDeliveryWizard() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-zinc-300 mb-2">Discharge rate (MT/day)</label>
-                  <input type="number" value={dischargeRateMtDay || ''} onChange={(e) => setDischargeRateMtDay(Number(e.target.value))} placeholder="Default from commodity" className="w-full px-4 py-2.5 bg-zinc-700 border border-zinc-600 rounded-lg text-zinc-100" />
+                  <label className={labelClass}>Discharge rate (MT/day)</label>
+                  <input type="number" value={dischargeRateMtDay || ''} onChange={(e) => setDischargeRateMtDay(Number(e.target.value))} placeholder="Default from commodity" className={inputClass} />
                 </div>
-                <div className="text-sm font-medium text-zinc-300">Demurrage terms</div>
-                <div className="grid grid-cols-2 gap-3">
-                  <input type="number" placeholder="Rate $/day" value={demurrageRatePerDay || ''} onChange={(e) => setDemurrageRatePerDay(Number(e.target.value))} className="px-3 py-2 bg-zinc-700 rounded-lg text-zinc-100" />
-                  <input type="number" placeholder="Grace period days" value={demurrageGraceDays || ''} onChange={(e) => setDemurrageGraceDays(Number(e.target.value))} className="px-3 py-2 bg-zinc-700 rounded-lg text-zinc-100" />
-                  <input type="number" placeholder="Dispatch rate" value={dispatchDemurrage || ''} onChange={(e) => setDispatchDemurrage(Number(e.target.value))} className="px-3 py-2 bg-zinc-700 rounded-lg text-zinc-100" />
+                <div className="text-sm font-medium text-gray-700">Demurrage terms</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <input type="number" placeholder="Rate $/day" value={demurrageRatePerDay || ''} onChange={(e) => setDemurrageRatePerDay(Number(e.target.value))} className={inputClass} />
+                  <input type="number" placeholder="Grace period days" value={demurrageGraceDays || ''} onChange={(e) => setDemurrageGraceDays(Number(e.target.value))} className={inputClass} />
+                  <input type="number" placeholder="Dispatch rate" value={dispatchDemurrage || ''} onChange={(e) => setDispatchDemurrage(Number(e.target.value))} className={inputClass} />
                 </div>
-                <div className="text-sm font-medium text-zinc-300">Late delivery</div>
-                <div className="grid grid-cols-2 gap-3">
-                  <input type="number" placeholder="Penalty $/day" value={latePenaltyPerDay || ''} onChange={(e) => setLatePenaltyPerDay(Number(e.target.value))} className="px-3 py-2 bg-zinc-700 rounded-lg text-zinc-100" />
-                  <input type="number" placeholder="Expected delay risk (days)" value={expectedDelayDays || ''} onChange={(e) => setExpectedDelayDays(Number(e.target.value))} className="px-3 py-2 bg-zinc-700 rounded-lg text-zinc-100" />
+                <div className="text-sm font-medium text-gray-700">Late delivery</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <input type="number" placeholder="Penalty $/day" value={latePenaltyPerDay || ''} onChange={(e) => setLatePenaltyPerDay(Number(e.target.value))} className={inputClass} />
+                  <input type="number" placeholder="Expected delay risk (days)" value={expectedDelayDays || ''} onChange={(e) => setExpectedDelayDays(Number(e.target.value))} className={inputClass} />
                 </div>
-                <div className="text-sm font-medium text-zinc-300">Discharge port charges ($/MT)</div>
-                <div className="grid grid-cols-3 gap-3">
-                  <input type="number" placeholder="Port dues" value={dischargePortDues || ''} onChange={(e) => setDischargePortDues(Number(e.target.value))} className="px-3 py-2 bg-zinc-700 rounded-lg text-zinc-100" />
-                  <input type="number" placeholder="Unload/grab" value={dischargeUnloadGrab || ''} onChange={(e) => setDischargeUnloadGrab(Number(e.target.value))} className="px-3 py-2 bg-zinc-700 rounded-lg text-zinc-100" />
-                  <input type="number" placeholder="Customs & clearance" value={dischargeCustomsClearance || ''} onChange={(e) => setDischargeCustomsClearance(Number(e.target.value))} className="px-3 py-2 bg-zinc-700 rounded-lg text-zinc-100" />
+                <div className="text-sm font-medium text-gray-700">Discharge port charges ($/MT)</div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <input type="number" placeholder="Port dues" value={dischargePortDues || ''} onChange={(e) => setDischargePortDues(Number(e.target.value))} className={inputClass} />
+                  <input type="number" placeholder="Unload/grab" value={dischargeUnloadGrab || ''} onChange={(e) => setDischargeUnloadGrab(Number(e.target.value))} className={inputClass} />
+                  <input type="number" placeholder="Customs & clearance" value={dischargeCustomsClearance || ''} onChange={(e) => setDischargeCustomsClearance(Number(e.target.value))} className={inputClass} />
                 </div>
               </div>
-              {costBreakdown && (
-                <div className="mt-6 p-4 bg-zinc-700/50 rounded-lg border border-zinc-600">
-                  <h3 className="font-semibold mb-3 text-amber-400">Cost build-up (live preview)</h3>
-                  <div className="space-y-1 text-sm">
-                    <div className="flex justify-between"><span className="text-zinc-400">Inland</span><span>${(costBreakdown.inlandCost/1000).toFixed(1)}k</span></div>
-                    <div className="flex justify-between"><span className="text-zinc-400">Freight</span><span>${(costBreakdown.freight/1000).toFixed(0)}k</span></div>
-                    <div className="flex justify-between"><span className="text-zinc-400">Bunker</span><span>${(costBreakdown.bunker/1000).toFixed(0)}k</span></div>
-                    <div className="flex justify-between"><span className="text-zinc-400">Port</span><span>${(costBreakdown.port/1000).toFixed(0)}k</span></div>
-                    <div className="flex justify-between"><span className="text-zinc-400">Discharge</span><span>${((costBreakdown.dischargePortCost || 0)/1000).toFixed(1)}k</span></div>
-                    <div className="flex justify-between font-bold border-t border-zinc-600 pt-2 mt-2"><span>Total</span><span>${(costBreakdown.totalCost/1e6).toFixed(2)}M</span></div>
-                    <div className="text-zinc-400">${costBreakdown.unitCost.toFixed(2)}/{costBreakdown.unitLabel}</div>
-                  </div>
-                </div>
-              )}
               <div className="mt-6 flex justify-between">
-                <button onClick={handleBack} className="px-6 py-2.5 border border-zinc-600 rounded-lg text-zinc-300 hover:bg-zinc-800">Back</button>
-                <button onClick={handleNext} disabled={!canProceedStep8} className="px-6 py-2.5 bg-amber-500 text-black rounded-lg disabled:opacity-50 flex items-center gap-2 font-medium">View on map <Navigation size={18} /></button>
+                <button type="button" onClick={handleBack} className={secondaryBtnClass}>Back</button>
+                <button type="button" onClick={handleNext} disabled={!canProceedStep8} className={primaryBtnClass}>View on map <Navigation size={16} /></button>
               </div>
-            </div>
+            </FormCard>
           )}
-        </div>
+          </div>
 
-        {/* Always-visible right sidebar */}
-        <aside className="w-80 flex-shrink-0 border-l border-zinc-700 bg-zinc-800/50 p-6 overflow-y-auto hidden lg:block">
-          <h3 className="font-semibold text-amber-400 mb-4">Running Cost Estimate</h3>
-          {costBreakdown ? (
-            <>
-              {costItems.map(({ label, value }) => (
-                <div key={label} className="mb-3">
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-zinc-400">{label}</span>
-                    <span>${(value / 1000).toFixed(1)}k</span>
-                  </div>
-                  <div className="h-1.5 bg-zinc-700 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-amber-500/70 rounded-full"
-                      style={{ width: `${Math.min(100, (value / costBreakdown.totalCost) * 100)}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-              <div className="border-t border-zinc-600 pt-4 mt-4">
-                <div className="flex justify-between font-bold text-lg">
-                  <span>Total</span>
-                  <span>${(costBreakdown.totalCost / 1e6).toFixed(2)}M</span>
-                </div>
-                <div className="text-zinc-400 text-sm">${costBreakdown.unitCost.toFixed(2)}/{costBreakdown.unitLabel}</div>
-              </div>
-              {costBreakdown.totalDays > 0 && (
-                <div className="mt-4 p-3 bg-zinc-700/50 rounded-lg">
-                  <div className="text-xs text-zinc-400">ETA</div>
-                  <div className="font-medium">{costBreakdown.totalDays.toFixed(0)} days</div>
-                </div>
-              )}
-            </>
-          ) : (
-            <p className="text-zinc-500 text-sm">Complete origin, destination, vessel and volume to see cost breakdown.</p>
-          )}
-        </aside>
+          <aside className="space-y-4 lg:sticky lg:top-8 self-start">
+            {calculatedInfoCard}
+            {costBuildUpCard}
+          </aside>
+          </div>
         </div>
       ) : (
-        <div className={`flex flex-col bg-zinc-900 ${mapFullScreen ? 'flex-1 min-h-0' : ''}`}>
-          <div className="border-b border-zinc-700 px-8 py-4 flex justify-between items-center flex-shrink-0 bg-zinc-900">
+        <div className={`flex flex-col bg-gray-50 ${mapFullScreen ? 'flex-1 min-h-0' : ''}`}>
+          <div className="border-b border-gray-200 px-8 py-4 flex flex-wrap justify-between items-center gap-3 flex-shrink-0 bg-white">
             <div>
-              <h2 className="text-xl font-semibold text-white">{selectedAsset?.title} → {nearestPort?.port.name} → {destinationPort?.name}</h2>
-              <p className="text-sm text-zinc-400">{selectedCommodity} • {vesselClass} • {inlandMode} • ${costBreakdown ? (costBreakdown.totalCost/1e6).toFixed(2) : '—'}M</p>
+              <h2 className="text-xl font-semibold text-black">{selectedAsset?.title} → {nearestPort?.port.name} → {destinationPort?.name}</h2>
+              <p className="text-sm text-gray-500">{selectedCommodity} • {vesselClass} • {inlandMode} • ${costBreakdown ? (costBreakdown.totalCost/1e6).toFixed(2) : '—'}M</p>
             </div>
-            <div className="flex gap-2">
-              <button onClick={() => window.print()} className="px-4 py-2 border border-zinc-600 rounded-lg text-sm text-zinc-300 hover:bg-zinc-800 flex items-center gap-2"><FileText size={16} /> PDF</button>
-              <button onClick={() => costBreakdown && navigator.clipboard.writeText('component,amount\n' + costItems.map(i => `${i.label},${i.value}`).join('\n') + `\nTotal,${costBreakdown.totalCost}`)} className="px-4 py-2 border border-zinc-600 rounded-lg text-sm text-zinc-300 hover:bg-zinc-800 flex items-center gap-2"><FileSpreadsheet size={16} /> Excel</button>
-              <button onClick={() => setMapFullScreen(!mapFullScreen)} className="px-4 py-2 border border-amber-500 rounded-lg text-sm text-amber-400 hover:bg-amber-500/10">{mapFullScreen ? 'Minimize' : 'Full screen'}</button>
-              <button onClick={reset} className="px-4 py-2 border border-zinc-600 rounded-lg text-sm text-zinc-300 hover:bg-zinc-800">New scenario</button>
+            <div className="flex flex-wrap gap-2">
+              <button onClick={() => window.print()} className={`${secondaryBtnClass} flex items-center gap-2`}><FileText size={16} /> PDF</button>
+              <button onClick={() => costBreakdown && navigator.clipboard.writeText('component,amount\n' + costItems.map(i => `${i.label},${i.value}`).join('\n') + `\nTotal,${costBreakdown.totalCost}`)} className={`${secondaryBtnClass} flex items-center gap-2`}><FileSpreadsheet size={16} /> Excel</button>
+              <button onClick={() => setMapFullScreen(!mapFullScreen)} className={secondaryBtnClass}>{mapFullScreen ? 'Minimize' : 'Full screen'}</button>
+              <button onClick={reset} className={primaryBtnClass}>New scenario</button>
             </div>
           </div>
           <div className="flex-1 flex min-h-0 relative">
             {costBreakdown && (
-              <div className={`absolute left-4 top-4 z-10 bg-zinc-800/95 rounded-xl border border-zinc-600 shadow-xl p-4 max-w-xs ${mapFullScreen ? 'bottom-4' : 'max-h-[80vh] overflow-y-auto'}`}>
-                <h3 className="font-semibold mb-3 text-amber-400">Cost breakdown</h3>
-                <div className="space-y-1 text-sm">
+              <div className={`absolute left-4 top-4 z-10 bg-white rounded-xl border border-gray-200 shadow-sm p-4 max-w-xs ${mapFullScreen ? 'bottom-4 overflow-y-auto' : 'max-h-[80vh] overflow-y-auto'}`}>
+                <h3 className="text-sm font-semibold text-black mb-3 uppercase tracking-wide">Cost build-up</h3>
+                <div className="space-y-1.5 text-sm">
                   {costItems.map(({ label, value }) => (
-                    <div key={label} className="flex justify-between"><span className="text-zinc-400">{label}</span><span>${(value/1000).toFixed(1)}k</span></div>
+                    <div key={label} className="flex justify-between"><span className="text-gray-500">{label}</span><span className="text-black font-medium">${(value/1000).toFixed(1)}k</span></div>
                   ))}
-                  <div className="flex justify-between font-bold border-t border-zinc-600 pt-2 mt-2"><span>Total</span><span>${(costBreakdown.totalCost/1e6).toFixed(2)}M</span></div>
-                  <div className="text-zinc-400">${costBreakdown.unitCost.toFixed(2)}/{costBreakdown.unitLabel}</div>
-                  <div className="text-xs text-zinc-500 mt-2">ETA: {costBreakdown.totalDays.toFixed(0)} days</div>
+                  <div className="border-t border-gray-200 pt-3 mt-3">
+                    <div className="text-xs text-gray-500 mb-1">Delivered cost / {costBreakdown.unitLabel}</div>
+                    <div className="text-2xl font-bold text-black">${costBreakdown.unitCost.toFixed(2)}</div>
+                    <div className="text-sm text-gray-500 mt-1">Total transaction cost ${(costBreakdown.totalCost/1e6).toFixed(2)}M</div>
+                    <div className="text-xs text-gray-500 mt-2">ETA: {costBreakdown.totalDays.toFixed(0)} days</div>
+                  </div>
                 </div>
               </div>
             )}
