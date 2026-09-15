@@ -9,8 +9,6 @@ import {
   LineChart,
   DollarSign,
   BarChart3,
-  FileText,
-  Gamepad2,
   User,
   Mail,
   LogOut,
@@ -29,8 +27,6 @@ const menuItems = [
   { href: '/platform/market', label: 'Commodity Market Levels', icon: LineChart },
   { href: '/platform/futures', label: 'Commodity Comparison', icon: BarChart3 },
   { href: '/platform/shipping', label: 'Physical Delivery Modeling', icon: DollarSign },
-  { href: '/platform/research', label: 'Research', icon: FileText },
-  { href: '/platform/game', label: 'Commodity Game', icon: Gamepad2 },
 ]
 
 export default function PlatformSidebar({ userEmail }: PlatformSidebarProps) {
