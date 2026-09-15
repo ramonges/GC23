@@ -215,6 +215,8 @@ export default function ShippingDeliveryWizard() {
   const [volume, setVolume] = useState(0)
   const [quantityUnit, setQuantityUnit] = useState('MT')
   const [showAdvanced, setShowAdvanced] = useState(false)
+  const [selectedApiGravity, setSelectedApiGravity] = useState('')
+  const [apiGravityOptions, setApiGravityOptions] = useState<string[]>([])
   const [vesselClass, setVesselClass] = useState('')
   const [charterType, setCharterType] = useState<CharterType>('voyage')
   const [freightRate, setFreightRate] = useState<'market' | 'custom'>('market')
@@ -303,9 +305,26 @@ export default function ShippingDeliveryWizard() {
   useEffect(() => {
     if (!selectedCommodity) {
       setQuantityUnit('MT')
+      setSelectedApiGravity('')
+      setApiGravityOptions([])
       return
     }
     setQuantityUnit(DEFAULT_QUANTITY_UNIT[selectedCommodity] || displaySpecUnit(commoditySpecs[selectedCommodity]?.unit))
+    setSelectedApiGravity('')
+    if (selectedCommodity !== 'Crude Oil') {
+      setApiGravityOptions([])
+      return
+    }
+    async function loadApiGravity() {
+      const { data } = await supabase
+        .from('commodity_locations')
+        .select('api_gravity')
+        .eq('commodity_name', 'Crude Oil')
+        .not('api_gravity', 'is', null)
+      const values = [...new Set((data || []).map((r: any) => r.api_gravity).filter((v: any) => v != null).map((v: any) => String(v)))]
+      setApiGravityOptions(values.sort((a, b) => Number(a) - Number(b)))
+    }
+    loadApiGravity()
   }, [selectedCommodity])
 
   // Reset region when country changes
@@ -569,6 +588,8 @@ export default function ShippingDeliveryWizard() {
     setVolume(0)
     setQuantityUnit('MT')
     setShowAdvanced(false)
+    setSelectedApiGravity('')
+    setApiGravityOptions([])
     setVesselClass('')
     setDestinationPort(null)
     setCostBreakdown(null)
@@ -743,6 +764,21 @@ export default function ShippingDeliveryWizard() {
                     </p>
                   )}
                 </div>
+                {selectedCommodity === 'Crude Oil' && (
+                  <div>
+                    <label className={labelClass}>API gravity</label>
+                    <select
+                      value={selectedApiGravity}
+                      onChange={(e) => setSelectedApiGravity(e.target.value)}
+                      className={inputClass}
+                    >
+                      <option value="">Select API gravity...</option>
+                      {apiGravityOptions.map((g) => (
+                        <option key={g} value={g}>{g}° API</option>
+                      ))}
+                    </select>
+                  </div>
+                )}
                 <div>
                   <label className={labelClass}>Quantity</label>
                   <div className="flex gap-2">
