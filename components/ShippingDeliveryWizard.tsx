@@ -106,6 +106,35 @@ function displaySpecUnit(specUnit?: string): string {
   return specUnit || 'MT'
 }
 
+const API_GRAVITY_RANGES = [
+  { id: 'any', label: 'Any API gravity' },
+  { id: 'heavy', label: 'Heavy · < 25° API' },
+  { id: 'medium', label: 'Medium · 25–35° API' },
+  { id: 'light', label: 'Light · 35–45° API' },
+  { id: 'condensate', label: 'Very light / Condensate · > 45° API' },
+] as const
+
+function applyApiGravityFilter(query: any, range: string) {
+  if (!range || range === 'any') return query
+  query = query.not('api_gravity', 'is', null)
+  if (range === 'heavy') return query.lt('api_gravity', 25)
+  if (range === 'medium') return query.gte('api_gravity', 25).lt('api_gravity', 35)
+  if (range === 'light') return query.gte('api_gravity', 35).lte('api_gravity', 45)
+  if (range === 'condensate') return query.gt('api_gravity', 45)
+  return query
+}
+
+function assetMatchesApiRange(apiGravity: any, range: string): boolean {
+  if (!range || range === 'any') return true
+  const n = Number(apiGravity)
+  if (apiGravity == null || apiGravity === '' || Number.isNaN(n)) return false
+  if (range === 'heavy') return n < 25
+  if (range === 'medium') return n >= 25 && n < 35
+  if (range === 'light') return n >= 35 && n <= 45
+  if (range === 'condensate') return n > 45
+  return true
+}
+
 function parcelToMt(commodity: string, parcelSize: number): number {
   const c = commoditySpecs[commodity]
   if (!c) return parcelSize
@@ -215,8 +244,7 @@ export default function ShippingDeliveryWizard() {
   const [volume, setVolume] = useState(0)
   const [quantityUnit, setQuantityUnit] = useState('MT')
   const [showAdvanced, setShowAdvanced] = useState(false)
-  const [selectedApiGravity, setSelectedApiGravity] = useState('')
-  const [apiGravityOptions, setApiGravityOptions] = useState<string[]>([])
+  const [selectedApiGravity, setSelectedApiGravity] = useState('any')
   const [vesselClass, setVesselClass] = useState('')
   const [charterType, setCharterType] = useState<CharterType>('voyage')
   const [freightRate, setFreightRate] = useState<'market' | 'custom'>('market')
@@ -305,26 +333,11 @@ export default function ShippingDeliveryWizard() {
   useEffect(() => {
     if (!selectedCommodity) {
       setQuantityUnit('MT')
-      setSelectedApiGravity('')
-      setApiGravityOptions([])
+      setSelectedApiGravity('any')
       return
     }
     setQuantityUnit(DEFAULT_QUANTITY_UNIT[selectedCommodity] || displaySpecUnit(commoditySpecs[selectedCommodity]?.unit))
-    setSelectedApiGravity('')
-    if (selectedCommodity !== 'Crude Oil') {
-      setApiGravityOptions([])
-      return
-    }
-    async function loadApiGravity() {
-      const { data } = await supabase
-        .from('commodity_locations')
-        .select('api_gravity')
-        .eq('commodity_name', 'Crude Oil')
-        .not('api_gravity', 'is', null)
-      const values = [...new Set((data || []).map((r: any) => r.api_gravity).filter((v: any) => v != null).map((v: any) => String(v)))]
-      setApiGravityOptions(values.sort((a, b) => Number(a) - Number(b)))
-    }
-    loadApiGravity()
+    if (selectedCommodity !== 'Crude Oil') setSelectedApiGravity('any')
   }, [selectedCommodity])
 
   // Reset region when country changes
@@ -401,10 +414,15 @@ export default function ShippingDeliveryWizard() {
           'Sugar': 'Agricultural',
         }
         const type = typeMap[selectedCommodity] || 'Energy'
-        const { data } = await supabase.from('commodity_locations').select('*')
+        let assetQuery = supabase.from('commodity_locations').select('*')
           .eq('commodity_type', type).eq('commodity_name', selectedCommodity)
           .eq('country', originCountry).not('latitude', 'is', null)
+        if (selectedCommodity === 'Crude Oil') {
+          assetQuery = applyApiGravityFilter(assetQuery, selectedApiGravity)
+        }
+        const { data } = await assetQuery
         for (const r of data || []) {
+          if (selectedCommodity === 'Crude Oil' && !assetMatchesApiRange(r.api_gravity, selectedApiGravity)) continue
           list.push({
             id: r.id,
             title: r.title || 'Site',
@@ -425,7 +443,7 @@ export default function ShippingDeliveryWizard() {
       setSelectedAsset(null)
     }
     loadAssets()
-  }, [selectedCommodity, originCountry, commodities])
+  }, [selectedCommodity, originCountry, commodities, selectedApiGravity])
 
   // Nearest port when asset selected
   useEffect(() => {
@@ -479,14 +497,18 @@ export default function ShippingDeliveryWizard() {
           'Sugar': 'Agricultural',
         }
         const type = typeMap[selectedCommodity] || 'Energy'
-        const { data } = await supabase.from('commodity_locations').select('country')
+        let countryQuery = supabase.from('commodity_locations').select('country')
           .eq('commodity_type', type).eq('commodity_name', selectedCommodity)
+        if (selectedCommodity === 'Crude Oil') {
+          countryQuery = applyApiGravityFilter(countryQuery, selectedApiGravity)
+        }
+        const { data } = await countryQuery
         countries = [...new Set((data || []).map((r: any) => r.country))]
       }
       setOriginCountries(countries.sort())
     }
     load()
-  }, [selectedCommodity, commodities])
+  }, [selectedCommodity, commodities, selectedApiGravity])
 
   const spec = selectedCommodity ? commoditySpecs[selectedCommodity] : null
 
@@ -588,8 +610,7 @@ export default function ShippingDeliveryWizard() {
     setVolume(0)
     setQuantityUnit('MT')
     setShowAdvanced(false)
-    setSelectedApiGravity('')
-    setApiGravityOptions([])
+    setSelectedApiGravity('any')
     setVesselClass('')
     setDestinationPort(null)
     setCostBreakdown(null)
@@ -766,17 +787,17 @@ export default function ShippingDeliveryWizard() {
                 </div>
                 {selectedCommodity === 'Crude Oil' && (
                   <div>
-                    <label className={labelClass}>API gravity</label>
+                    <label className={labelClass}>API Gravity</label>
                     <select
                       value={selectedApiGravity}
                       onChange={(e) => setSelectedApiGravity(e.target.value)}
                       className={inputClass}
                     >
-                      <option value="">Select API gravity...</option>
-                      {apiGravityOptions.map((g) => (
-                        <option key={g} value={g}>{g}° API</option>
+                      {API_GRAVITY_RANGES.map((r) => (
+                        <option key={r.id} value={r.id}>{r.label}</option>
                       ))}
                     </select>
+                    <p className="mt-1.5 text-xs text-gray-500">Filters available production assets by API gravity</p>
                   </div>
                 )}
                 <div>
