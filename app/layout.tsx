@@ -1,9 +1,25 @@
 import type { Metadata } from 'next'
+import { IBM_Plex_Mono, Inter_Tight } from 'next/font/google'
 import './globals.css'
 
+const grotesk = Inter_Tight({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600'],
+  variable: '--font-grotesk',
+  display: 'swap',
+})
+
+const mono = IBM_Plex_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-mono',
+  display: 'swap',
+})
+
 export const metadata: Metadata = {
-  title: 'Commodities Earth - Platform for Producers and Traders',
-  description: 'World Energy, Metals and Agriculture producers Analytics',
+  title: 'Vulcan Trade — Supply-chain intelligence for the materials that build the future',
+  description:
+    'Vulcan Trade traces the raw materials, routes, risks, and decisions behind industrial and robotics production — from mine to machine.',
 }
 
 export default function RootLayout({
@@ -12,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${grotesk.variable} ${mono.variable}`}>
       <head>
         <link
           rel="stylesheet"

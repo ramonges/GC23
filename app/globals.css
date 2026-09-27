@@ -94,3 +94,68 @@ body {
 .bg-gradient-radial {
   background: radial-gradient(circle, var(--tw-gradient-stops));
 }
+
+/* Vulcan Trade front page */
+html:has(.vulcan),
+html:has(.vulcan) body {
+  background: #0b0b0d;
+}
+
+.vulcan-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 96px 96px;
+  mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent);
+}
+
+@keyframes vulcanChevron {
+  0%, 100% { transform: translateY(-2px); opacity: 0.5; }
+  50% { transform: translateY(3px); opacity: 1; }
+}
+
+.vulcan-chevron {
+  animation: vulcanChevron 2.4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+.vulcan-tooltip {
+  min-width: 15rem;
+  padding: 0.75rem 0.85rem;
+  background: rgba(11, 11, 13, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  font-family: var(--font-grotesk), system-ui, sans-serif;
+  color: #fff;
+}
+
+.vulcan-tooltip-row {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr;
+  gap: 0.5rem;
+  padding: 0.15rem 0;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.vulcan-tooltip-row span {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #a3a7ae;
+}
+
+.vulcan-tooltip-row strong {
+  font-weight: 500;
+}
+
+.vulcan .float-tooltip-kap {
+  background: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vulcan-chevron {
+    animation: none;
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "width": 1920,
+  "height": 1080,
+  "cx": 1250,
+  "cy": 610,
+  "radius": 450,
+  "viewLatDeg": 12,
+  "rollDeg": -16,
+  "startLonDeg": 20,
+  "periodSec": 30,
+  "fps": 24
+}
