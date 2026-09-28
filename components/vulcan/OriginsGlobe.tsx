@@ -113,10 +113,18 @@ export default function OriginsGlobe({ activeMaterial, selected, onSelect, reduc
   }, [reducedMotion])
 
   const points = useMemo(() => [...MINES, ...HUBS], [])
-  const rings = useMemo(
+  const pulses = useMemo(
     () => MINES.filter((m) => (activeMaterial ? m.material === activeMaterial : true)),
     [activeMaterial],
   )
+  const pulseElement = useCallback((d: object) => {
+    const node = d as NetworkNode
+    const el = document.createElement('div')
+    el.className = 'vulcan-globe-pulse'
+    el.style.color = MATERIAL_BY_ID[node.material!].color
+    el.style.animationDelay = `${(MINES.indexOf(node) % 6) * 0.3}s`
+    return el
+  }, [])
   const arcs = useMemo(
     () => ROUTES.map((r, index) => ({ ...r, index, a: NODE_BY_ID[r.from], b: NODE_BY_ID[r.to] })),
     [],
@@ -171,16 +179,14 @@ export default function OriginsGlobe({ activeMaterial, selected, onSelect, reduc
           onPointClick={(d: object) => onSelect(d as NetworkNode)}
           onGlobeClick={() => onSelect(null)}
           pointsTransitionDuration={reducedMotion ? 0 : 600}
-          ringsData={reducedMotion ? [] : rings}
-          ringLat={(d: object) => (d as NetworkNode).lat}
-          ringLng={(d: object) => (d as NetworkNode).lng}
-          ringColor={(d: object) => {
-            const color = MATERIAL_BY_ID[(d as NetworkNode).material!].color
-            return (t: number) => withAlpha(color, 0.7 * (1 - t))
+          htmlElementsData={reducedMotion ? [] : pulses}
+          htmlLat={(d: object) => (d as NetworkNode).lat}
+          htmlLng={(d: object) => (d as NetworkNode).lng}
+          htmlAltitude={0.01}
+          htmlElement={pulseElement}
+          htmlElementVisibilityModifier={(el: HTMLElement, visible: boolean) => {
+            el.style.opacity = visible ? '1' : '0'
           }}
-          ringMaxRadius={3.2}
-          ringPropagationSpeed={1.6}
-          ringRepeatPeriod={1800}
           arcsData={arcs}
           arcStartLat={(d: object) => (d as (typeof arcs)[number]).a.lat}
           arcStartLng={(d: object) => (d as (typeof arcs)[number]).a.lng}

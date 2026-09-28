@@ -159,3 +159,24 @@ html:has(.vulcan) body {
     animation: none;
   }
 }
+
+@keyframes vulcanGlobePulse {
+  0% { transform: scale(0.25); opacity: 0.9; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+.vulcan-globe-pulse {
+  width: 34px;
+  height: 34px;
+  border: 1px solid currentColor;
+  border-radius: 9999px;
+  pointer-events: none;
+  animation: vulcanGlobePulse 2.2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  transition: opacity 0.4s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vulcan-globe-pulse {
+    animation: none;
+  }
+}
