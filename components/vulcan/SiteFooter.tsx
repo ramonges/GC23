@@ -5,6 +5,8 @@ const EXPLORE = [
   { label: 'The solution', href: '#solution' },
   { label: 'Team', href: '#team' },
   { label: 'Contact', href: '#contact' },
+  { label: 'Platform', href: '/platform' },
+  { label: 'Map', href: '/platform/map' },
 ]
 
 export default function SiteFooter() {

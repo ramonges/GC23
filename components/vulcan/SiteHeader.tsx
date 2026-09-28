@@ -6,6 +6,11 @@ import { usePrefersReducedMotion } from '@/lib/vulcan/hooks'
 
 type Tone = 'hero' | 'dark' | 'light'
 
+const NAV = [
+  { label: 'Platform', href: '/platform' },
+  { label: 'Map', href: '/platform/map' },
+]
+
 export default function SiteHeader() {
   const [tone, setTone] = useState<Tone>('hero')
   const reducedMotion = usePrefersReducedMotion()
@@ -68,12 +73,23 @@ export default function SiteHeader() {
           />
         </a>
         <div className="flex flex-col items-end gap-2.5">
-          <a
-            href={CONTACT_HREF}
-            className={`group whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.22em] transition-colors duration-500 ${light ? 'hover:text-vulcan-ink/60' : 'hover:text-white'}`}
-          >
-            Get in touch <span className="text-vulcan-signal">↗</span>
-          </a>
+          <nav aria-label="Primary" className="flex items-center gap-5 font-mono text-[11px] uppercase tracking-[0.22em] md:gap-8">
+            {NAV.map((l) => (
+              <a
+                key={l.href}
+                href={l.href}
+                className={`hidden whitespace-nowrap transition-colors duration-500 sm:inline ${light ? 'text-vulcan-ink/70 hover:text-vulcan-ink' : 'text-vulcan-paper/70 hover:text-white'}`}
+              >
+                {l.label}
+              </a>
+            ))}
+            <a
+              href={CONTACT_HREF}
+              className={`group whitespace-nowrap transition-colors duration-500 ${light ? 'hover:text-vulcan-ink/60' : 'hover:text-white'}`}
+            >
+              Get in touch <span className="text-vulcan-signal">↗</span>
+            </a>
+          </nav>
           <div className={`flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] ${light ? 'text-vulcan-ink/55' : 'text-vulcan-aluminum/75'}`}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/brand/baltic-exchange.png" alt="" width={16} height={16} className="h-4 w-4 rounded-[2px]" />
