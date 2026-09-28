@@ -1,9 +1,22 @@
 'use client'
 
-import { animate, motion, useInView, useReducedMotion } from 'framer-motion'
+import { animate, motion, useInView } from 'framer-motion'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 
 export const EASE = [0.22, 1, 0.36, 1] as const
+
+/** Reduced-motion preference that is `false` until mount, so server and first client render match. */
+export function useReducedMotion() {
+  const [reduced, setReduced] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const update = () => setReduced(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
+  return reduced
+}
 
 type Theme = 'light' | 'dark' | 'soft'
 
@@ -80,9 +93,10 @@ export function CountUp({ value, prefix = '', suffix = '' }: { value: number; pr
   const ref = useRef<HTMLSpanElement>(null)
   const inView = useInView(ref, { once: true, margin: '0px 0px -15% 0px' })
   const reduced = useReducedMotion()
-  const [n, setN] = useState(reduced ? value : 0)
+  const [n, setN] = useState(0)
   useEffect(() => {
-    if (!inView || reduced) return
+    if (!inView) return
+    if (reduced) return setN(value)
     const controls = animate(0, value, { duration: 1.8, ease: EASE, onUpdate: (v) => setN(v) })
     return () => controls.stop()
   }, [inView, reduced, value])

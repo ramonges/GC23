@@ -1,8 +1,8 @@
 'use client'
 
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { EXPANSION } from '@/lib/vulcan/content'
-import { EASE, Headline, Label, Reveal, Section } from './ui'
+import { EASE, Headline, Label, Reveal, Section, useReducedMotion } from './ui'
 
 export default function ExpansionSection() {
   const reduced = useReducedMotion()

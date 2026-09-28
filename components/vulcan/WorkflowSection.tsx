@@ -1,8 +1,8 @@
 'use client'
 
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { WORKFLOW } from '@/lib/vulcan/content'
-import { EASE, Label, Reveal, Section } from './ui'
+import { EASE, Label, Reveal, Section, useReducedMotion } from './ui'
 
 export default function WorkflowSection() {
   const reduced = useReducedMotion()

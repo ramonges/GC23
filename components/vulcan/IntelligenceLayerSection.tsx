@@ -1,8 +1,8 @@
 'use client'
 
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { INTELLIGENCE } from '@/lib/vulcan/content'
-import { DrawPath, EASE, Headline, Label, Reveal, Section } from './ui'
+import { DrawPath, EASE, Headline, Label, Reveal, Section, useReducedMotion } from './ui'
 
 function Diagram() {
   const reduced = useReducedMotion()

@@ -1,8 +1,8 @@
 'use client'
 
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { FOUNDER_FIT, FOUNDERS } from '@/lib/vulcan/content'
-import { EASE, Headline, Label, Reveal, Section } from './ui'
+import { EASE, Headline, Label, Reveal, Section, useReducedMotion } from './ui'
 
 function Portrait({ name, photo, delay }: { name: string; photo?: string; delay: number }) {
   const reduced = useReducedMotion()
