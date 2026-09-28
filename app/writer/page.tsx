@@ -187,7 +187,7 @@ export default function WriterPage() {
         <div className="bg-white rounded-xl border border-gray-200 shadow-lg p-8 w-full max-w-sm">
           <div className="text-center mb-6">
             <h1 className="text-2xl font-bold text-black">Writer Login</h1>
-            <p className="text-gray-500 text-sm mt-1">Commodities Earth Research</p>
+            <p className="text-gray-500 text-sm mt-1">Vulcan Trade Research</p>
           </div>
           {loginError && <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-800 mb-4">{loginError}</div>}
           <div className="space-y-4">
@@ -220,7 +220,7 @@ export default function WriterPage() {
           <Link href="/" className="text-gray-500 hover:text-black"><ArrowLeft size={20} /></Link>
           <div>
             <h1 className="text-xl font-bold text-black">Writer Dashboard</h1>
-            <p className="text-xs text-gray-500">Commodities Earth Research</p>
+            <p className="text-xs text-gray-500">Vulcan Trade Research</p>
           </div>
         </div>
         <div className="flex items-center gap-3">

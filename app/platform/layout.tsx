@@ -25,7 +25,7 @@ export default function PlatformLayout({ children }: { children: React.ReactNode
           <div className="flex items-center gap-2 sm:gap-4 min-w-0">
             <div className="w-10 sm:w-12 flex-shrink-0"></div>
             <div className="min-w-0">
-              <h1 className="text-lg sm:text-2xl font-bold text-black truncate">Commodities Earth</h1>
+              <h1 className="text-lg sm:text-2xl font-bold text-black truncate">Vulcan Trade</h1>
               <p className="text-xs text-gray-500 hidden sm:block">Professional Platform</p>
             </div>
           </div>

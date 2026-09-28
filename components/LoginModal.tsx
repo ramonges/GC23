@@ -135,8 +135,8 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         </h2>
         <p className="text-gray-600 mb-8">
           {isSignUp
-            ? 'Create your Commodities Earth account'
-            : 'Access the Commodities Earth Platform'}
+            ? 'Create your Vulcan Trade account'
+            : 'Access the Vulcan Trade Platform'}
         </p>
 
         {error && (

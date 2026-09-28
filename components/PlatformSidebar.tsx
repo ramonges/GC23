@@ -81,7 +81,7 @@ export default function PlatformSidebar({ userEmail }: PlatformSidebarProps) {
         <div className="pt-20 px-6">
           {/* Logo */}
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-black">Commodities Earth</h2>
+            <h2 className="text-2xl font-bold text-black">Vulcan Trade</h2>
             <p className="text-sm text-gray-500 mt-1">Professional Platform</p>
           </div>
 

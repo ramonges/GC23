@@ -21,7 +21,7 @@ export default function PlatformDev() {
             <div className="w-12"></div>
             {/* Logo */}
             <div>
-              <h1 className="text-2xl font-bold text-black">Commodities Earth</h1>
+              <h1 className="text-2xl font-bold text-black">Vulcan Trade</h1>
               <p className="text-xs text-gray-500">Professional Platform <span className="text-orange-500">(DEV MODE)</span></p>
             </div>
           </div>

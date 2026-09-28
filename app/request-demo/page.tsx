@@ -116,7 +116,7 @@ export default function RequestDemo() {
             className="inline-flex items-center gap-2 text-black hover:text-accent transition-colors"
           >
             <ArrowLeft size={20} />
-            <span className="text-xl font-bold">Commodities Earth</span>
+            <span className="text-xl font-bold">Vulcan Trade</span>
           </Link>
         </div>
       </header>
@@ -126,7 +126,7 @@ export default function RequestDemo() {
         <div className="max-w-4xl mx-auto">
           <h1 className="text-6xl font-bold text-black mb-4">Request a Demo</h1>
           <p className="text-xl text-gray-600 mb-12 font-light">
-            Schedule a personalized demo of Commodities Earth platform
+            Schedule a personalized demo of the Vulcan Trade platform
           </p>
 
           {success ? (
