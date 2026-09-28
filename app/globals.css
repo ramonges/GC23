@@ -165,18 +165,26 @@ html:has(.vulcan) body {
   100% { transform: scale(1); opacity: 0; }
 }
 
+/* CSS2DRenderer positions the element via `transform`, so the pulse animates a pseudo-element instead. */
 .vulcan-globe-pulse {
   width: 34px;
   height: 34px;
-  border: 1px solid currentColor;
-  border-radius: 9999px;
   pointer-events: none;
-  animation: vulcanGlobePulse 2.2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
   transition: opacity 0.4s ease;
 }
 
+.vulcan-globe-pulse::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid currentColor;
+  border-radius: 9999px;
+  animation: vulcanGlobePulse 2.2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  animation-delay: inherit;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .vulcan-globe-pulse {
+  .vulcan-globe-pulse::after {
     animation: none;
   }
 }
