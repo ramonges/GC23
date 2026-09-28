@@ -4,56 +4,82 @@ import { useEffect, useState } from 'react'
 import { CONTACT_HREF } from '@/lib/vulcan/content'
 import { usePrefersReducedMotion } from '@/lib/vulcan/hooks'
 
+type Tone = 'hero' | 'dark' | 'light'
+
 export default function SiteHeader() {
-  const [scrolled, setScrolled] = useState(false)
+  const [tone, setTone] = useState<Tone>('hero')
   const reducedMotion = usePrefersReducedMotion()
 
   useEffect(() => {
-    const onScroll = () => {
-      const hero = document.getElementById('top')
-      const threshold = hero ? hero.offsetHeight - window.innerHeight * 0.5 : window.innerHeight
-      setScrolled(window.scrollY > threshold)
+    let raf = 0
+    const update = () => {
+      raf = 0
+      const probe = 36
+      const sections = Array.from(document.querySelectorAll<HTMLElement>('[data-theme]'))
+      const under = sections.find((s) => {
+        const r = s.getBoundingClientRect()
+        return r.top <= probe && r.bottom > probe
+      })
+      if (!under || under.id === 'top') setTone('hero')
+      else setTone(under.dataset.theme === 'light' ? 'light' : 'dark')
     }
-    onScroll()
+    const onScroll = () => {
+      if (!raf) raf = requestAnimationFrame(update)
+    }
+    update()
     window.addEventListener('scroll', onScroll, { passive: true })
     window.addEventListener('resize', onScroll)
     return () => {
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', onScroll)
+      cancelAnimationFrame(raf)
     }
   }, [])
 
+  const light = tone === 'light'
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 transition-colors duration-700 ${
-        scrolled ? 'border-b border-white/10 bg-vulcan-ink/80 backdrop-blur-md' : 'border-b border-transparent'
+      className={`fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,color] duration-700 ${
+        tone === 'hero'
+          ? 'border-b border-transparent text-vulcan-paper'
+          : light
+            ? 'border-b border-vulcan-ink/10 bg-vulcan-paper/85 text-vulcan-ink backdrop-blur-md'
+            : 'border-b border-white/10 bg-vulcan-ink/75 text-vulcan-paper backdrop-blur-md'
       }`}
     >
-      <div className="flex items-center justify-between px-5 py-4 sm:px-8 md:px-12 md:py-6">
+      <div className="mx-auto flex items-center justify-between px-[6vw] py-5 lg:px-[7vw] md:py-7">
         <a
           href="#top"
           onClick={(e) => {
             e.preventDefault()
             window.scrollTo({ top: 0, behavior: reducedMotion ? 'auto' : 'smooth' })
           }}
-          className="group flex items-center gap-3"
+          className="block"
           aria-label="Vulcan Trade — back to top"
         >
-          <svg aria-hidden viewBox="0 0 24 24" className="h-6 w-6 text-vulcan-signal">
-            <path d="M12 2 22 20H2L12 2Z" fill="none" stroke="currentColor" strokeWidth="1.5" />
-            <path d="M12 9 17 18H7l5-9Z" fill="currentColor" />
-          </svg>
-          <span className="flex flex-col leading-none">
-            <span className="font-grotesk text-sm font-semibold tracking-[0.28em] text-white">VULCAN TRADE</span>
-            <span className="mt-1.5 font-mono text-[9px] tracking-[0.24em] text-vulcan-aluminum">SUPPLY-CHAIN INTELLIGENCE</span>
-          </span>
+          {/* The wordmark is white; on light sections it is inverted, with a hue rotation keeping the accent square violet. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/brand/vulcan-trade-logo.png"
+            alt="Vulcan Trade — Supply-chain intelligence"
+            width={837}
+            height={120}
+            className={`h-6 w-auto transition-[filter] duration-700 md:h-8 ${light ? 'invert hue-rotate-180' : ''}`}
+          />
         </a>
-        <a
-          href={CONTACT_HREF}
-          className="whitespace-nowrap border border-white/25 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.16em] text-white sm:px-4 sm:text-[11px] sm:tracking-[0.18em] transition-colors duration-500 hover:border-vulcan-signal hover:text-vulcan-signal"
-        >
-          Get in touch ↗
-        </a>
+        <div className="flex flex-col items-end gap-2.5">
+          <a
+            href={CONTACT_HREF}
+            className={`group whitespace-nowrap font-mono text-[11px] uppercase tracking-[0.22em] transition-colors duration-500 ${light ? 'hover:text-vulcan-ink/60' : 'hover:text-white'}`}
+          >
+            Get in touch <span className="text-vulcan-signal">↗</span>
+          </a>
+          <div className={`flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] ${light ? 'text-vulcan-ink/55' : 'text-vulcan-aluminum/75'}`}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/brand/baltic-exchange.png" alt="" width={16} height={16} className="h-4 w-4 rounded-[2px]" />
+            <span>Endorsed by Baltic Exchange</span>
+          </div>
+        </div>
       </div>
     </header>
   )

@@ -1,22 +1,29 @@
 import SiteHeader from '@/components/vulcan/SiteHeader'
-import CinematicExperience from '@/components/vulcan/cinematic/CinematicExperience'
+import HeroExperience from '@/components/vulcan/hero/HeroExperience'
 import ProblemSection from '@/components/vulcan/ProblemSection'
-import OriginsSection from '@/components/vulcan/OriginsSection'
-import ClosingSection from '@/components/vulcan/ClosingSection'
-import CredibilitySection from '@/components/vulcan/CredibilitySection'
+import IntelligenceLayerSection from '@/components/vulcan/IntelligenceLayerSection'
+import WorkflowSection from '@/components/vulcan/WorkflowSection'
+import ScenariosSection from '@/components/vulcan/ScenariosSection'
+import ExpansionSection from '@/components/vulcan/ExpansionSection'
+import MarketSection from '@/components/vulcan/MarketSection'
+import TeamSection from '@/components/vulcan/TeamSection'
+import AskSection from '@/components/vulcan/AskSection'
 import SiteFooter from '@/components/vulcan/SiteFooter'
 
 export default function Home() {
   return (
-    <div className="vulcan min-h-screen bg-vulcan-ink font-grotesk text-white antialiased selection:bg-vulcan-signal selection:text-white">
+    <div className="vulcan min-h-screen bg-vulcan-ink font-grotesk text-vulcan-paper antialiased selection:bg-vulcan-signal selection:text-white">
       <SiteHeader />
       <main>
-        <CinematicExperience>
-          <ProblemSection />
-          <OriginsSection />
-        </CinematicExperience>
-        <ClosingSection />
-        <CredibilitySection />
+        <HeroExperience />
+        <ProblemSection />
+        <IntelligenceLayerSection />
+        <WorkflowSection />
+        <ScenariosSection />
+        <ExpansionSection />
+        <MarketSection />
+        <TeamSection />
+        <AskSection />
       </main>
       <SiteFooter />
     </div>

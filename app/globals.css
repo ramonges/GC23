@@ -98,93 +98,42 @@ body {
 /* Vulcan Trade front page */
 html:has(.vulcan),
 html:has(.vulcan) body {
-  background: #0b0b0d;
+  background: #080909;
 }
 
-.vulcan-grid {
+.vulcan-grid-lines {
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-  background-size: 96px 96px;
-  mask-image: linear-gradient(to bottom, transparent, black 30%, black 70%, transparent);
+    linear-gradient(rgba(48, 52, 49, 0.55) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(48, 52, 49, 0.55) 1px, transparent 1px);
+  background-size: 8.333% 100%, 8.333% 100%;
 }
 
-@keyframes vulcanChevron {
-  0%, 100% { transform: translateY(-2px); opacity: 0.5; }
-  50% { transform: translateY(3px); opacity: 1; }
+@keyframes vulcanScrollCue {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(300%); }
 }
 
-.vulcan-chevron {
-  animation: vulcanChevron 2.4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+.vulcan-scrollcue {
+  animation: vulcanScrollCue 2.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 }
 
-.vulcan-tooltip {
-  min-width: 15rem;
-  padding: 0.75rem 0.85rem;
-  background: rgba(11, 11, 13, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  font-family: var(--font-grotesk), system-ui, sans-serif;
-  color: #fff;
+@keyframes vulcanKenBurns {
+  from { transform: scale(1.0); }
+  to { transform: scale(1.07); }
 }
 
-.vulcan-tooltip-row {
-  display: grid;
-  grid-template-columns: 6.5rem 1fr;
-  gap: 0.5rem;
-  padding: 0.15rem 0;
-  font-size: 12px;
-  line-height: 1.4;
+.vulcan-kenburns {
+  animation: vulcanKenBurns 5s cubic-bezier(0.33, 0, 0.2, 1) forwards;
 }
 
-.vulcan-tooltip-row span {
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 10px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #a3a7ae;
-}
-
-.vulcan-tooltip-row strong {
-  font-weight: 500;
-}
-
-.vulcan .float-tooltip-kap {
-  background: transparent !important;
-  padding: 0 !important;
-  border-radius: 0 !important;
+.hero-capture .hero-ui,
+.hero-capture ~ * {
+  visibility: hidden;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .vulcan-chevron {
-    animation: none;
-  }
-}
-
-@keyframes vulcanGlobePulse {
-  0% { transform: scale(0.25); opacity: 0.9; }
-  100% { transform: scale(1); opacity: 0; }
-}
-
-/* CSS2DRenderer positions the element via `transform`, so the pulse animates a pseudo-element instead. */
-.vulcan-globe-pulse {
-  width: 34px;
-  height: 34px;
-  pointer-events: none;
-  transition: opacity 0.4s ease;
-}
-
-.vulcan-globe-pulse::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border: 1px solid currentColor;
-  border-radius: 9999px;
-  animation: vulcanGlobePulse 2.2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
-  animation-delay: inherit;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .vulcan-globe-pulse::after {
+  .vulcan-scrollcue,
+  .vulcan-kenburns {
     animation: none;
   }
 }

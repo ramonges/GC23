@@ -1,31 +1,4 @@
-export type MaterialId =
-  | 'bauxite'
-  | 'copper'
-  | 'lithium'
-  | 'cobalt'
-  | 'iron'
-  | 'nickel'
-  | 'rareEarths'
-
-export type Material = {
-  id: MaterialId
-  label: string
-  color: string
-}
-
-export const MATERIALS: Material[] = [
-  { id: 'bauxite', label: 'Bauxite / Aluminum', color: '#F28C38' },
-  { id: 'copper', label: 'Copper', color: '#C8794A' },
-  { id: 'lithium', label: 'Lithium', color: '#4E9BFF' },
-  { id: 'cobalt', label: 'Cobalt', color: '#9B7BFF' },
-  { id: 'iron', label: 'Iron ore', color: '#E5484D' },
-  { id: 'nickel', label: 'Nickel', color: '#3FB884' },
-  { id: 'rareEarths', label: 'Rare earth elements', color: '#E6D29A' },
-]
-
-export const MATERIAL_BY_ID = Object.fromEntries(MATERIALS.map((m) => [m.id, m])) as Record<MaterialId, Material>
-
-export type NodeKind = 'mine' | 'port' | 'processing' | 'manufacturing'
+export type MaterialId = 'bauxite' | 'copper' | 'lithium' | 'cobalt' | 'iron' | 'nickel' | 'rareEarths'
 
 export type NetworkNode = {
   id: string
@@ -33,7 +6,7 @@ export type NetworkNode = {
   country: string
   lat: number
   lng: number
-  kind: NodeKind
+  kind: 'mine'
   facility: string
   material?: MaterialId
   nextRoute?: string
@@ -61,219 +34,80 @@ export const MINES: NetworkNode[] = [
   { id: 'mountweld', name: 'Mount Weld', country: 'Australia', lat: -28.86, lng: 122.55, kind: 'mine', material: 'rareEarths', facility: 'Rare earth mine', nextRoute: 'Road → Kalgoorlie → Kuantan, Malaysia' },
 ]
 
-export const HUBS: NetworkNode[] = [
-  { id: 'kamsar', name: 'Kamsar Port', country: 'Guinea', lat: 10.65, lng: -14.61, kind: 'port', facility: 'Bauxite export port' },
-  { id: 'antofagasta', name: 'Antofagasta', country: 'Chile', lat: -23.65, lng: -70.4, kind: 'port', facility: 'Copper & lithium export port' },
-  { id: 'porthedland', name: 'Port Hedland', country: 'Australia', lat: -20.31, lng: 118.58, kind: 'port', facility: 'Iron ore export port' },
-  { id: 'saoluis', name: 'São Luís', country: 'Brazil', lat: -2.57, lng: -44.37, kind: 'port', facility: 'Iron ore export port' },
-  { id: 'daressalaam', name: 'Dar es Salaam', country: 'Tanzania', lat: -6.82, lng: 39.29, kind: 'port', facility: 'Cobalt & copper export port' },
-  { id: 'durban', name: 'Durban', country: 'South Africa', lat: -29.87, lng: 31.03, kind: 'port', facility: 'Copper & cobalt export port' },
-  { id: 'qingdao', name: 'Qingdao', country: 'China', lat: 36.07, lng: 120.38, kind: 'port', facility: 'Bulk import port' },
-  { id: 'rotterdam', name: 'Rotterdam', country: 'Netherlands', lat: 51.95, lng: 4.14, kind: 'port', facility: 'Bulk import port' },
-  { id: 'gladstone', name: 'Gladstone', country: 'Australia', lat: -23.84, lng: 151.26, kind: 'processing', facility: 'Alumina refining' },
-  { id: 'shandong', name: 'Shandong', country: 'China', lat: 37.38, lng: 117.97, kind: 'processing', facility: 'Alumina & aluminum smelting' },
-  { id: 'kwinana', name: 'Kwinana', country: 'Australia', lat: -32.23, lng: 115.78, kind: 'processing', facility: 'Lithium hydroxide refining' },
-  { id: 'baotou', name: 'Baotou', country: 'China', lat: 40.66, lng: 109.84, kind: 'processing', facility: 'Rare earth separation' },
-  { id: 'kuantan', name: 'Kuantan', country: 'Malaysia', lat: 3.97, lng: 103.43, kind: 'processing', facility: 'Rare earth processing' },
-  { id: 'shanghai', name: 'Shanghai', country: 'China', lat: 31.14, lng: 121.58, kind: 'manufacturing', facility: 'Robotics manufacturing cluster' },
-  { id: 'yamanashi', name: 'Yamanashi', country: 'Japan', lat: 35.47, lng: 138.87, kind: 'manufacturing', facility: 'Robotics manufacturing cluster' },
-  { id: 'kitakyushu', name: 'Kitakyushu', country: 'Japan', lat: 33.88, lng: 130.88, kind: 'manufacturing', facility: 'Robotics manufacturing cluster' },
-  { id: 'augsburg', name: 'Augsburg', country: 'Germany', lat: 48.37, lng: 10.89, kind: 'manufacturing', facility: 'Robotics manufacturing cluster' },
-  { id: 'detroit', name: 'Detroit', country: 'United States', lat: 42.33, lng: -83.05, kind: 'manufacturing', facility: 'Industrial automation cluster' },
-]
-
-export const NODE_BY_ID = Object.fromEntries([...MINES, ...HUBS].map((n) => [n.id, n])) as Record<string, NetworkNode>
-
-export type RouteKind = 'export' | 'ocean' | 'delivery'
-
-export type NetworkRoute = {
-  from: string
-  to: string
-  material: MaterialId
-  kind: RouteKind
-  /** Sea-lane waypoints so ocean legs don't cut across continents. */
-  via?: { lat: number; lng: number }[]
-}
-
-export const MARITIME_ROUTE_INDEX = 1
-
-export const ROUTES: NetworkRoute[] = [
-  { from: 'boke', to: 'kamsar', material: 'bauxite', kind: 'export' },
-  {
-    from: 'kamsar',
-    to: 'qingdao',
-    material: 'bauxite',
-    kind: 'ocean',
-    via: [
-      { lat: 8, lng: -17 },
-      { lat: -35.5, lng: 19 },
-      { lat: -24, lng: 62 },
-      { lat: -7, lng: 104.5 },
-      { lat: 6, lng: 110 },
-      { lat: 22, lng: 119.5 },
-    ],
-  },
-  { from: 'qingdao', to: 'shandong', material: 'bauxite', kind: 'ocean' },
-  { from: 'shandong', to: 'shanghai', material: 'bauxite', kind: 'delivery' },
-  {
-    from: 'weipa',
-    to: 'gladstone',
-    material: 'bauxite',
-    kind: 'ocean',
-    via: [{ lat: -10.3, lng: 142.3 }, { lat: -17, lng: 147 }],
-  },
-  { from: 'gladstone', to: 'kitakyushu', material: 'bauxite', kind: 'delivery' },
-  { from: 'escondida', to: 'antofagasta', material: 'copper', kind: 'export' },
-  { from: 'antofagasta', to: 'shanghai', material: 'copper', kind: 'ocean' },
-  { from: 'kamoa', to: 'durban', material: 'copper', kind: 'export' },
-  {
-    from: 'durban',
-    to: 'rotterdam',
-    material: 'copper',
-    kind: 'ocean',
-    via: [{ lat: -35.5, lng: 19 }, { lat: -5, lng: 3 }, { lat: 15, lng: -20 }, { lat: 43, lng: -11 }],
-  },
-  { from: 'atacama', to: 'antofagasta', material: 'lithium', kind: 'export' },
-  { from: 'greenbushes', to: 'kwinana', material: 'lithium', kind: 'export' },
-  { from: 'kwinana', to: 'yamanashi', material: 'lithium', kind: 'delivery' },
-  { from: 'kolwezi', to: 'daressalaam', material: 'cobalt', kind: 'export' },
-  {
-    from: 'daressalaam',
-    to: 'shanghai',
-    material: 'cobalt',
-    kind: 'ocean',
-    via: [{ lat: 5, lng: 78 }, { lat: 5.5, lng: 95 }, { lat: 2, lng: 102.5 }, { lat: 8, lng: 110 }, { lat: 22, lng: 119.5 }],
-  },
-  { from: 'pilbara', to: 'porthedland', material: 'iron', kind: 'export' },
-  {
-    from: 'porthedland',
-    to: 'qingdao',
-    material: 'iron',
-    kind: 'ocean',
-    via: [{ lat: -9, lng: 116 }, { lat: 4, lng: 126 }, { lat: 25, lng: 124 }],
-  },
-  { from: 'carajas', to: 'saoluis', material: 'iron', kind: 'export' },
-  {
-    from: 'saoluis',
-    to: 'rotterdam',
-    material: 'iron',
-    kind: 'ocean',
-    via: [{ lat: 20, lng: -30 }, { lat: 44, lng: -12 }, { lat: 49.5, lng: -4 }],
-  },
-  { from: 'rotterdam', to: 'augsburg', material: 'iron', kind: 'delivery' },
-  { from: 'morowali', to: 'shanghai', material: 'nickel', kind: 'ocean' },
-  { from: 'sudbury', to: 'detroit', material: 'nickel', kind: 'delivery' },
-  { from: 'bayanobo', to: 'baotou', material: 'rareEarths', kind: 'export' },
-  { from: 'baotou', to: 'yamanashi', material: 'rareEarths', kind: 'delivery' },
-  {
-    from: 'mountweld',
-    to: 'kuantan',
-    material: 'rareEarths',
-    kind: 'ocean',
-    via: [{ lat: -31.9, lng: 115.8 }, { lat: -20, lng: 110 }, { lat: -6.5, lng: 105 }, { lat: 2, lng: 106 }],
-  },
-  { from: 'mountainpass', to: 'detroit', material: 'rareEarths', kind: 'delivery' },
-]
-
-export type HeroStage = {
-  id: string
-  number: string
-  label: string
-  headline: string
-  line: string
-}
-
-export const HERO_STAGES: HeroStage[] = [
-  {
-    id: 'origins',
-    number: '01',
-    label: 'Material origins',
-    headline: 'Every robot begins somewhere.',
-    line: 'Trace the raw materials, routes, risks, and decisions behind industrial production.',
-  },
-  {
-    id: 'routes',
-    number: '02',
-    label: 'Routes',
-    headline: 'Every material travels.',
-    line: 'Mines connect to ports, ports to refineries, refineries to factories — across oceans and borders.',
-  },
-  {
-    id: 'transformation',
-    number: '03',
-    label: 'Transformation',
-    headline: 'Ore becomes alloy.',
-    line: 'Refining and smelting turn raw tonnage into the metals, cells, and magnets machines depend on.',
-  },
-  {
-    id: 'robotics',
-    number: '04',
-    label: 'Robotics',
-    headline: 'Alloy becomes motion.',
-    line: 'Every actuator, battery, and magnet carries a supply chain. Vulcan Trade makes it visible.',
-  },
-]
-
-export type JourneyStage = {
-  id: 'extraction' | 'maritime' | 'transformation'
-  step: string
-  title: string
-  place: string
-  copy: string
-  chips?: string[]
-}
-
-export const JOURNEY_STAGES: JourneyStage[] = [
-  {
-    id: 'extraction',
-    step: '01',
-    title: 'Extraction',
-    place: 'Boké, Guinea · 11.10° N · 13.78° W',
-    copy: 'Bauxite is stripped from laterite plateaus in Guinea’s Boké region, stockpiled, and hauled to the railhead — the first node of the aluminum chain.',
-  },
-  {
-    id: 'maritime',
-    step: '02',
-    title: 'Maritime transit',
-    place: 'Kamsar, Guinea → Qingdao, China',
-    copy: 'Loaded at Kamsar, bauxite moves in dry-bulk carriers south around the Cape and across the Indian Ocean toward refineries in China.',
-  },
-  {
-    id: 'transformation',
-    step: '03',
-    title: 'Transformation → product',
-    place: 'Shandong, China · refinery, smelter, assembly',
-    copy: 'Bauxite is refined to alumina, smelted to aluminum, cast, machined, and assembled into the arm of an industrial robot.',
-    chips: ['Bauxite → Alumina → Aluminum', 'Delivered cost · modeled', 'Supply risk · elevated', 'Alternative routes · 3'],
-  },
-]
-
-/** Diorama sites in the cinematic scene. */
-export const DIORAMAS = {
-  pit: { lat: 11.1, lng: -13.78 },
-  port: { lat: 10.65, lng: -14.61 },
-  factory: { lat: 37.1, lng: 118.4 },
-}
-
-export const CYCLING_MATERIALS = ['Bauxite.', 'Copper.', 'Lithium.', 'Rare earths.']
 
 export const CONTACT_EMAIL = 'ram2315@columbia.edu'
 export const CONTACT_HREF = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Vulcan Trade')}`
+export const LINKEDIN_HREF = `https://www.linkedin.com/search/results/all/?keywords=${encodeURIComponent('Vulcan Trade')}`
 
-export type Founder = {
-  name: string
-  credential: string
-  photo?: string
-  linkedin?: string
+export const PROBLEM = {
+  headline: ['The supply chain behind production', 'is still difficult to see.'],
+  copy: 'Manufacturers make critical sourcing decisions across fragmented commodity, supplier, logistics, and market systems.',
+  columns: [
+    { label: 'Origin data', text: 'Where materials come from' },
+    { label: 'Logistics data', text: 'How they move' },
+    { label: 'Market data', text: 'What changes next' },
+  ],
 }
 
-// Fill in with real founder details; the section hides the grid while empty.
-export const FOUNDERS: Founder[] = []
-
-export type PressItem = {
-  outlet: string
-  quote?: string
-  href?: string
+export const INTELLIGENCE = {
+  headline: ['One intelligence layer', 'for the physical supply chain.'],
+  inputs: ['Production', 'Suppliers', 'Routes', 'Markets'],
+  core: 'Vulcan Trade',
+  output: 'Sourcing decisions',
+  values: [
+    { title: 'See true cost', text: 'Compare complete delivered costs.' },
+    { title: 'Anticipate risk', text: 'Identify disruption before production is affected.' },
+    { title: 'Model the future', text: 'Evaluate scenarios across 6, 12, and 24 months.' },
+  ],
 }
 
-export const PRESS: PressItem[] = []
+export const WORKFLOW = [
+  { number: '01', title: 'Connect', text: 'Bring together production, supplier, logistics, and demand data.' },
+  { number: '02', title: 'Model', text: 'Compare origins, routes, costs, risks, and scenarios.' },
+  { number: '03', title: 'Decide', text: 'Secure more competitive, resilient material supply.' },
+]
+
+export type ScenarioLevel = 1 | 2 | 3
+
+export const SCENARIOS = {
+  headline: ['See how a sourcing decision', 'changes before it becomes a problem.'],
+  metrics: ['Delivered cost', 'Transit time', 'Disruption exposure', 'Supplier concentration', 'Confidence'],
+  routes: [
+    { id: 'current', label: 'Current route', path: ['Guinea', 'Port', 'United States'], values: ['$ index 100', '38 days', 'Elevated', 'High', 'Medium'], levels: [2, 2, 3, 3, 2] as ScenarioLevel[] },
+    { id: 'alt-route', label: 'Alternative route', path: ['Guinea', 'Europe', 'United States'], values: ['$ index 106', '47 days', 'Moderate', 'High', 'Medium'], levels: [3, 3, 2, 3, 2] as ScenarioLevel[] },
+    { id: 'alt-origin', label: 'Alternative origin', path: ['Brazil', 'United States'], values: ['$ index 97', '29 days', 'Low', 'Moderate', 'Low'], levels: [1, 1, 1, 2, 1] as ScenarioLevel[] },
+  ],
+}
+
+export const EXPANSION = {
+  headline: ['Start with one corridor.', 'Expand across the organization.'],
+  path: ['One commodity', 'One region', 'One facility', 'Multiple corridors', 'Enterprise visibility'],
+  timeline: ['Configure', 'Prove value', 'Expand annually'],
+}
+
+export const MARKET = [
+  { value: 37, prefix: '$', suffix: 'B', label: 'TAM', text: 'Supply-chain intelligence across industrial manufacturing' },
+  { value: 6, prefix: '$', suffix: 'B', label: 'SAM', text: 'Critical-material sourcing for robotics and automation' },
+  { value: 150, prefix: '$', suffix: 'M', label: 'SOM', text: 'Initial corridors with early customers' },
+]
+
+export type Founder = { name: string; role: string; bio?: string; photo?: string; linkedin?: string }
+
+/** Drop portraits into /public/team and set `photo` to show them with the site's monochrome treatment. */
+export const FOUNDERS: Founder[] = [
+  {
+    name: 'Raphael Monges',
+    role: 'Co-founder & CEO',
+    photo: '/team/raphael-monges.webp',
+    bio: 'Raphael brings experience in the freight and commodity industry from Navios Maritime. He holds a Master in Business Analytics from Columbia Engineering, a Master in Artificial Intelligence from Centrale Paris, and an MIM from ESCP.',
+  },
+  { name: 'Wiam Homir', role: 'CTO' },
+]
+
+export const FOUNDER_FIT =
+  'With experience across maritime logistics, financial markets, AI, business analytics, and chemical engineering, Vulcan Trade is being built from a firsthand understanding of opaque commodity and industrial supply chains.'
+
+export const ASK = {
+  headline: ['Building the infrastructure', 'for better material decisions.'],
+  copy: 'Vulcan Trade is raising $2M to launch initial customer deployments, validate repeatable sales, and build the data foundation for scalable growth across commodity supply chains.',
+}
