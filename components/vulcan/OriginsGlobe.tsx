@@ -12,6 +12,7 @@ import {
   type MaterialId,
   type NetworkNode,
 } from '@/lib/vulcan/content'
+import { sampleRoute } from '@/lib/vulcan/geo'
 
 const SIGNAL = '#FF6A1A'
 
@@ -125,12 +126,77 @@ export default function OriginsGlobe({ activeMaterial, selected, onSelect, reduc
     el.style.animationDelay = `${(MINES.indexOf(node) % 6) * 0.3}s`
     return el
   }, [])
-  const arcs = useMemo(
-    () => ROUTES.map((r, index) => ({ ...r, index, a: NODE_BY_ID[r.from], b: NODE_BY_ID[r.to] })),
+  const routeSamples = useMemo(
+    () => ROUTES.map((r, index) => {
+      const a = NODE_BY_ID[r.from]
+      const b = NODE_BY_ID[r.to]
+      const { points, angle } = sampleRoute([a, ...(r.via || []), b], r.via ? 90 : 40)
+      return { index, material: r.material, points, lift: r.via ? 0.012 : Math.min(0.28, 0.03 + angle * 0.18) }
+    }),
     [],
   )
 
   const isDimmed = (m?: MaterialId) => !!activeMaterial && m !== activeMaterial
+
+  const overlayRef = useRef<HTMLCanvasElement>(null)
+  const activeRef = useRef(activeMaterial)
+  activeRef.current = activeMaterial
+
+  useEffect(() => {
+    const canvas = overlayRef.current
+    if (!canvas || size.width === 0) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    const dpr = Math.min(window.devicePixelRatio || 1, 2)
+    canvas.width = Math.round(size.width * dpr)
+    canvas.height = Math.round(size.height * dpr)
+    let raf = 0
+    let onScreen = true
+    const io = new IntersectionObserver(([e]) => (onScreen = e.isIntersecting))
+    io.observe(canvas)
+
+    const draw = (now: number) => {
+      raf = requestAnimationFrame(draw)
+      const globe = globeRef.current
+      if (!globe || !onScreen) return
+      const cam = globe.camera().position
+      const radius = globe.getGlobeRadius()
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      ctx.clearRect(0, 0, size.width, size.height)
+      ctx.lineCap = 'round'
+      const active = activeRef.current
+      for (const route of routeSamples) {
+        const dim = !!active && route.material !== active
+        const color = MATERIAL_BY_ID[route.material].color
+        ctx.strokeStyle = withAlpha(color, dim ? 0.08 : 0.55)
+        ctx.lineWidth = dim ? 0.8 : 1.2
+        ctx.setLineDash(reducedMotion ? [] : [7, 9])
+        ctx.lineDashOffset = reducedMotion ? 0 : -((now / 1000) * 14 + route.index * 5)
+        ctx.beginPath()
+        let pen = false
+        for (const p of route.points) {
+          const alt = route.lift * Math.sin(Math.PI * p.t)
+          const w = globe.getCoords(p.lat, p.lng, alt)
+          const toCam = { x: cam.x - w.x, y: cam.y - w.y, z: cam.z - w.z }
+          const facing = (w.x * toCam.x + w.y * toCam.y + w.z * toCam.z) / radius
+          if (facing < -radius * 0.02) {
+            pen = false
+            continue
+          }
+          const sc = globe.getScreenCoords(p.lat, p.lng, alt)
+          if (pen) ctx.lineTo(sc.x, sc.y)
+          else ctx.moveTo(sc.x, sc.y)
+          pen = true
+        }
+        ctx.stroke()
+      }
+    }
+    raf = requestAnimationFrame(draw)
+    return () => {
+      cancelAnimationFrame(raf)
+      io.disconnect()
+    }
+  }, [size, routeSamples, reducedMotion])
 
   return (
     <div
@@ -187,25 +253,14 @@ export default function OriginsGlobe({ activeMaterial, selected, onSelect, reduc
           htmlElementVisibilityModifier={(el: HTMLElement, visible: boolean) => {
             el.style.opacity = visible ? '1' : '0'
           }}
-          arcsData={arcs}
-          arcStartLat={(d: object) => (d as (typeof arcs)[number]).a.lat}
-          arcStartLng={(d: object) => (d as (typeof arcs)[number]).a.lng}
-          arcEndLat={(d: object) => (d as (typeof arcs)[number]).b.lat}
-          arcEndLng={(d: object) => (d as (typeof arcs)[number]).b.lng}
-          arcColor={(d: object) => {
-            const r = d as (typeof arcs)[number]
-            const dim = isDimmed(r.material)
-            const color = MATERIAL_BY_ID[r.material].color
-            return [withAlpha(color, dim ? 0.06 : 0.85), withAlpha(SIGNAL, dim ? 0.06 : 0.9)]
-          }}
-          arcStroke={0.5}
-          arcAltitudeAutoScale={0.32}
-          arcDashLength={reducedMotion ? 1 : 0.4}
-          arcDashGap={reducedMotion ? 0 : 1.1}
-          arcDashInitialGap={(d: object) => ((d as (typeof arcs)[number]).index % 5) * 0.3}
-          arcDashAnimateTime={reducedMotion ? 0 : 4200}
         />
       )}
+      <canvas
+        ref={overlayRef}
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{ width: size.width, height: size.height }}
+      />
     </div>
   )
 }

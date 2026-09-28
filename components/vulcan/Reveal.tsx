@@ -1,45 +1,26 @@
 'use client'
 
-import { useEffect, useRef, type ElementType, type ReactNode } from 'react'
-import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { motion, useReducedMotion } from 'framer-motion'
+import type { ReactNode } from 'react'
 
 type Props = {
   children: ReactNode
-  as?: ElementType
   className?: string
   delay?: number
   y?: number
 }
 
-export default function Reveal({ children, as: Tag = 'div', className, delay = 0, y = 28 }: Props) {
-  const ref = useRef<HTMLElement>(null)
-
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    gsap.registerPlugin(ScrollTrigger)
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        el,
-        { autoAlpha: 0, y },
-        {
-          autoAlpha: 1,
-          y: 0,
-          duration: 1.3,
-          delay,
-          ease: 'power3.out',
-          scrollTrigger: { trigger: el, start: 'top 88%', once: true },
-        },
-      )
-    }, el)
-    return () => ctx.revert()
-  }, [delay, y])
-
+export default function Reveal({ children, className, delay = 0, y = 24 }: Props) {
+  const reduced = useReducedMotion()
   return (
-    <Tag ref={ref} className={className}>
+    <motion.div
+      className={className}
+      initial={reduced ? false : { opacity: 0, y }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '0px 0px -12% 0px' }}
+      transition={{ duration: 1.2, delay, ease: [0.22, 1, 0.36, 1] }}
+    >
       {children}
-    </Tag>
+    </motion.div>
   )
 }
