@@ -77,7 +77,7 @@ export default function HeroOverlay({ stage, showOpening, showFinal, flowRef }: 
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 1, ease: EASE, delay: 0.3 }}
-            className="pointer-events-none absolute bottom-36 left-[var(--hero-margin)] hidden md:block"
+            className="pointer-events-none absolute bottom-[7.25rem] left-[var(--hero-margin)] right-[calc(var(--hero-margin)+3.5rem)] hidden md:block"
           >
             <MaterialLegend />
           </motion.div>
