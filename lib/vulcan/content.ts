@@ -91,34 +91,87 @@ export type NetworkRoute = {
   to: string
   material: MaterialId
   kind: RouteKind
+  /** Sea-lane waypoints so ocean legs don't cut across continents. */
+  via?: { lat: number; lng: number }[]
 }
+
+export const MARITIME_ROUTE_INDEX = 1
 
 export const ROUTES: NetworkRoute[] = [
   { from: 'boke', to: 'kamsar', material: 'bauxite', kind: 'export' },
-  { from: 'kamsar', to: 'qingdao', material: 'bauxite', kind: 'ocean' },
+  {
+    from: 'kamsar',
+    to: 'qingdao',
+    material: 'bauxite',
+    kind: 'ocean',
+    via: [
+      { lat: 8, lng: -17 },
+      { lat: -35.5, lng: 19 },
+      { lat: -24, lng: 62 },
+      { lat: -7, lng: 104.5 },
+      { lat: 6, lng: 110 },
+      { lat: 22, lng: 119.5 },
+    ],
+  },
   { from: 'qingdao', to: 'shandong', material: 'bauxite', kind: 'ocean' },
   { from: 'shandong', to: 'shanghai', material: 'bauxite', kind: 'delivery' },
-  { from: 'weipa', to: 'gladstone', material: 'bauxite', kind: 'ocean' },
+  {
+    from: 'weipa',
+    to: 'gladstone',
+    material: 'bauxite',
+    kind: 'ocean',
+    via: [{ lat: -10.3, lng: 142.3 }, { lat: -17, lng: 147 }],
+  },
   { from: 'gladstone', to: 'kitakyushu', material: 'bauxite', kind: 'delivery' },
   { from: 'escondida', to: 'antofagasta', material: 'copper', kind: 'export' },
   { from: 'antofagasta', to: 'shanghai', material: 'copper', kind: 'ocean' },
   { from: 'kamoa', to: 'durban', material: 'copper', kind: 'export' },
-  { from: 'durban', to: 'rotterdam', material: 'copper', kind: 'ocean' },
+  {
+    from: 'durban',
+    to: 'rotterdam',
+    material: 'copper',
+    kind: 'ocean',
+    via: [{ lat: -35.5, lng: 19 }, { lat: -5, lng: 3 }, { lat: 15, lng: -20 }, { lat: 43, lng: -11 }],
+  },
   { from: 'atacama', to: 'antofagasta', material: 'lithium', kind: 'export' },
   { from: 'greenbushes', to: 'kwinana', material: 'lithium', kind: 'export' },
   { from: 'kwinana', to: 'yamanashi', material: 'lithium', kind: 'delivery' },
   { from: 'kolwezi', to: 'daressalaam', material: 'cobalt', kind: 'export' },
-  { from: 'daressalaam', to: 'shanghai', material: 'cobalt', kind: 'ocean' },
+  {
+    from: 'daressalaam',
+    to: 'shanghai',
+    material: 'cobalt',
+    kind: 'ocean',
+    via: [{ lat: 5, lng: 78 }, { lat: 5.5, lng: 95 }, { lat: 2, lng: 102.5 }, { lat: 8, lng: 110 }, { lat: 22, lng: 119.5 }],
+  },
   { from: 'pilbara', to: 'porthedland', material: 'iron', kind: 'export' },
-  { from: 'porthedland', to: 'qingdao', material: 'iron', kind: 'ocean' },
+  {
+    from: 'porthedland',
+    to: 'qingdao',
+    material: 'iron',
+    kind: 'ocean',
+    via: [{ lat: -9, lng: 116 }, { lat: 4, lng: 126 }, { lat: 25, lng: 124 }],
+  },
   { from: 'carajas', to: 'saoluis', material: 'iron', kind: 'export' },
-  { from: 'saoluis', to: 'rotterdam', material: 'iron', kind: 'ocean' },
+  {
+    from: 'saoluis',
+    to: 'rotterdam',
+    material: 'iron',
+    kind: 'ocean',
+    via: [{ lat: 20, lng: -30 }, { lat: 44, lng: -12 }, { lat: 49.5, lng: -4 }],
+  },
   { from: 'rotterdam', to: 'augsburg', material: 'iron', kind: 'delivery' },
   { from: 'morowali', to: 'shanghai', material: 'nickel', kind: 'ocean' },
   { from: 'sudbury', to: 'detroit', material: 'nickel', kind: 'delivery' },
   { from: 'bayanobo', to: 'baotou', material: 'rareEarths', kind: 'export' },
   { from: 'baotou', to: 'yamanashi', material: 'rareEarths', kind: 'delivery' },
-  { from: 'mountweld', to: 'kuantan', material: 'rareEarths', kind: 'ocean' },
+  {
+    from: 'mountweld',
+    to: 'kuantan',
+    material: 'rareEarths',
+    kind: 'ocean',
+    via: [{ lat: -31.9, lng: 115.8 }, { lat: -20, lng: 110 }, { lat: -6.5, lng: 105 }, { lat: 2, lng: 106 }],
+  },
   { from: 'mountainpass', to: 'detroit', material: 'rareEarths', kind: 'delivery' },
 ]
 
@@ -160,6 +213,47 @@ export const HERO_STAGES: HeroStage[] = [
     line: 'Every actuator, battery, and magnet carries a supply chain. Vulcan Trade makes it visible.',
   },
 ]
+
+export type JourneyStage = {
+  id: 'extraction' | 'maritime' | 'transformation'
+  step: string
+  title: string
+  place: string
+  copy: string
+  chips?: string[]
+}
+
+export const JOURNEY_STAGES: JourneyStage[] = [
+  {
+    id: 'extraction',
+    step: '01',
+    title: 'Extraction',
+    place: 'Boké, Guinea · 11.10° N · 13.78° W',
+    copy: 'Bauxite is stripped from laterite plateaus in Guinea’s Boké region, stockpiled, and hauled to the railhead — the first node of the aluminum chain.',
+  },
+  {
+    id: 'maritime',
+    step: '02',
+    title: 'Maritime transit',
+    place: 'Kamsar, Guinea → Qingdao, China',
+    copy: 'Loaded at Kamsar, bauxite moves in dry-bulk carriers south around the Cape and across the Indian Ocean toward refineries in China.',
+  },
+  {
+    id: 'transformation',
+    step: '03',
+    title: 'Transformation → product',
+    place: 'Shandong, China · refinery, smelter, assembly',
+    copy: 'Bauxite is refined to alumina, smelted to aluminum, cast, machined, and assembled into the arm of an industrial robot.',
+    chips: ['Bauxite → Alumina → Aluminum', 'Delivered cost · modeled', 'Supply risk · elevated', 'Alternative routes · 3'],
+  },
+]
+
+/** Diorama sites in the cinematic scene. */
+export const DIORAMAS = {
+  pit: { lat: 11.1, lng: -13.78 },
+  port: { lat: 10.65, lng: -14.61 },
+  factory: { lat: 37.1, lng: 118.4 },
+}
 
 export const CYCLING_MATERIALS = ['Bauxite.', 'Copper.', 'Lithium.', 'Rare earths.']
 
