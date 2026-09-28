@@ -40,52 +40,28 @@ export const CONTACT_HREF = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponen
 export const LINKEDIN_HREF = `https://www.linkedin.com/search/results/all/?keywords=${encodeURIComponent('Vulcan Trade')}`
 
 export const PROBLEM = {
-  lead: ['The commodity market is opaque.', 'We want to change that.'],
   headline: 'The supply chain behind production is still difficult to see.',
   copy: 'Manufacturers make critical sourcing decisions across fragmented commodity, supplier, logistics, and market systems.',
+  broader: ['The commodity market is opaque.', 'We are building the intelligence layer to change that.'],
+  risks: [
+    { title: 'Geopolitical events', text: 'Strikes and instability' },
+    { title: 'Mine & port disruptions', text: 'Unexpected operational delays' },
+    { title: 'Tariffs & export restrictions', text: 'Policy changes that reshape routes and costs' },
+    { title: 'Market volatility', text: 'Prices, demand, and availability shift quickly' },
+  ],
 }
 
-export const INTELLIGENCE = {
-  headline: ['One intelligence layer', 'for the physical supply chain.'],
-  inputs: ['Production', 'Suppliers', 'Routes', 'Markets'],
-  core: 'Vulcan Trade',
-  output: 'Sourcing decisions',
+export const SOLUTION = {
+  headline: 'See what is changing before it affects production.',
+  copy: 'Vulcan Trade connects commodity, supplier, logistics, and market signals to help manufacturers evaluate sourcing options before disruption reaches the factory floor.',
   values: [
-    { title: 'See true cost', text: 'Compare complete delivered costs.' },
-    { title: 'Anticipate risk', text: 'Identify disruption before production is affected.' },
-    { title: 'Model the future', text: 'Evaluate scenarios across 6, 12, and 24 months.' },
+    { title: 'Detect early signals', text: 'Surface geopolitical, operational, and policy risks.' },
+    { title: 'Compare options', text: 'Evaluate origins, suppliers, routes, costs, and exposure.' },
+    { title: 'Make better decisions', text: 'Choose more competitive and resilient supply strategies.' },
   ],
+  positioning:
+    'Vulcan Trade does not predict the future with certainty. It helps sourcing teams see emerging risks earlier, model possible outcomes, and make better-informed decisions.',
 }
-
-export const WORKFLOW = [
-  { number: '01', title: 'Connect', text: 'Bring together production, supplier, logistics, and demand data.' },
-  { number: '02', title: 'Model', text: 'Compare origins, routes, costs, risks, and scenarios.' },
-  { number: '03', title: 'Decide', text: 'Secure more competitive, resilient material supply.' },
-]
-
-export type ScenarioLevel = 1 | 2 | 3
-
-export const SCENARIOS = {
-  headline: ['See how a sourcing decision', 'changes before it becomes a problem.'],
-  metrics: ['Delivered cost', 'Transit time', 'Disruption exposure', 'Supplier concentration', 'Confidence'],
-  routes: [
-    { id: 'current', label: 'Current route', path: ['Guinea', 'Port', 'United States'], values: ['$ index 100', '38 days', 'Elevated', 'High', 'Medium'], levels: [2, 2, 3, 3, 2] as ScenarioLevel[] },
-    { id: 'alt-route', label: 'Alternative route', path: ['Guinea', 'Europe', 'United States'], values: ['$ index 106', '47 days', 'Moderate', 'High', 'Medium'], levels: [3, 3, 2, 3, 2] as ScenarioLevel[] },
-    { id: 'alt-origin', label: 'Alternative origin', path: ['Brazil', 'United States'], values: ['$ index 97', '29 days', 'Low', 'Moderate', 'Low'], levels: [1, 1, 1, 2, 1] as ScenarioLevel[] },
-  ],
-}
-
-export const EXPANSION = {
-  headline: ['Start with one corridor.', 'Expand across the organization.'],
-  path: ['One commodity', 'One region', 'One facility', 'Multiple corridors', 'Enterprise visibility'],
-  timeline: ['Configure', 'Prove value', 'Expand annually'],
-}
-
-export const MARKET = [
-  { value: 37, prefix: '$', suffix: 'B', label: 'TAM', text: 'Supply-chain intelligence across industrial manufacturing' },
-  { value: 6, prefix: '$', suffix: 'B', label: 'SAM', text: 'Critical-material sourcing for robotics and automation' },
-  { value: 150, prefix: '$', suffix: 'M', label: 'SOM', text: 'Initial corridors with early customers' },
-]
 
 export type Founder = { name: string; role: string; bio?: string; photo?: string; linkedin?: string }
 
@@ -100,10 +76,13 @@ export const FOUNDERS: Founder[] = [
   { name: 'Wiam Homir', role: 'CTO' },
 ]
 
-export const FOUNDER_FIT =
-  'With experience across maritime logistics, financial markets, AI, business analytics, and chemical engineering, Vulcan Trade is being built from a firsthand understanding of opaque commodity and industrial supply chains.'
+export const TEAM = {
+  headline: ['The people building', 'the intelligence layer.'],
+  copy: 'With experience across maritime logistics, financial markets, AI, chemical engineering, and business analytics, we are building Vulcan Trade to make commodity supply chains more transparent, predictable, and competitive.',
+}
 
-export const ASK = {
-  headline: ['Building the infrastructure', 'for better material decisions.'],
-  copy: 'Vulcan Trade is raising $2M to launch initial customer deployments, validate repeatable sales, and build the data foundation for scalable growth across commodity supply chains.',
+export const FINAL_CTA = {
+  headline: ['Make the invisible', 'supply chain visible.'],
+  copy: 'Better sourcing decisions begin with a clearer view of what is happening upstream.',
+  cta: 'Talk to Vulcan Trade',
 }

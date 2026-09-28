@@ -2,33 +2,42 @@ import { PROBLEM } from '@/lib/vulcan/content'
 import { Label, Reveal, Section } from './ui'
 
 export default function ProblemSection() {
-  const [opaque, change] = PROBLEM.lead
+  const [opaque, building] = PROBLEM.broader
   return (
-    <Section id="problem" theme="light" className="md:py-48">
-      <Label light>The problem</Label>
-
-      <h2 className="mt-12 max-w-[14ch] font-grotesk text-[clamp(3rem,7vw,7.5rem)] font-medium leading-[0.96] tracking-[-0.035em] text-vulcan-ink [text-wrap:balance] md:mt-16">
-        <Reveal y={22}>
-          <span className="block">{opaque}</span>
-        </Reveal>
-        <Reveal y={22} delay={0.12}>
-          <span className="mt-2 block text-vulcan-ink/40">
-            {change.replace(/\.$/, "")}
-            <span className="text-vulcan-signal">.</span>
-          </span>
-        </Reveal>
-      </h2>
-
-      <div className="mt-24 grid grid-cols-12 gap-x-6 gap-y-10 border-t border-vulcan-ink/15 pt-10 md:mt-32 md:pt-14">
-        <Reveal className="col-span-12 md:col-span-7 lg:col-span-6" delay={0.1}>
-          <p className="max-w-[20ch] font-grotesk text-[clamp(1.9rem,3vw,3.1rem)] font-medium leading-[1.08] tracking-[-0.02em] text-vulcan-ink [text-wrap:balance]">
-            {PROBLEM.headline}
-          </p>
-        </Reveal>
-        <Reveal className="col-span-12 md:col-span-5 lg:col-span-4 lg:col-start-9" delay={0.2}>
-          <p className="max-w-[28rem] text-[clamp(1.1rem,1.35vw,1.3rem)] leading-relaxed text-vulcan-ink/65 md:pt-2">{PROBLEM.copy}</p>
+    <Section id="problem" theme="light">
+      <div className="grid grid-cols-12 gap-x-6 gap-y-8">
+        <div className="col-span-12 lg:col-span-8">
+          <Label light>The problem</Label>
+          <Reveal y={22}>
+            <h2 className="mt-8 max-w-[18ch] font-grotesk text-[clamp(2.6rem,5.4vw,5.75rem)] font-medium leading-[0.98] tracking-[-0.032em] text-vulcan-ink [text-wrap:balance]">
+              {PROBLEM.headline}
+            </h2>
+          </Reveal>
+        </div>
+        <Reveal className="col-span-12 self-end md:col-span-8 lg:col-span-4" delay={0.12}>
+          <p className="max-w-[28rem] text-[clamp(1.1rem,1.35vw,1.3rem)] leading-relaxed text-vulcan-ink/65">{PROBLEM.copy}</p>
         </Reveal>
       </div>
+
+      <Reveal className="mt-16 border-t border-vulcan-ink/15 pt-10 md:mt-20" delay={0.1}>
+        <p className="max-w-[34ch] font-grotesk text-[clamp(1.7rem,2.8vw,2.9rem)] font-medium leading-[1.1] tracking-[-0.02em] text-vulcan-ink [text-wrap:balance]">
+          {opaque} <span className="text-vulcan-ink/45">{building}</span>
+        </p>
+      </Reveal>
+
+      <ul className="mt-10 grid grid-cols-1 gap-px bg-vulcan-ink/10 sm:grid-cols-2 lg:grid-cols-4">
+        {PROBLEM.risks.map((r, i) => (
+          <li key={r.title} className="bg-vulcan-paper">
+            <Reveal delay={0.15 + i * 0.08} className="h-full py-6 pr-6 sm:px-6 lg:first:pl-0">
+              <div className="flex items-center gap-2.5 font-mono text-[11px] uppercase tracking-[0.2em] text-vulcan-ink">
+                <span aria-hidden className="h-1.5 w-1.5 shrink-0 bg-vulcan-signal" />
+                {r.title}
+              </div>
+              <p className="mt-3 text-[15px] leading-snug text-vulcan-ink/60">{r.text}</p>
+            </Reveal>
+          </li>
+        ))}
+      </ul>
     </Section>
   )
 }

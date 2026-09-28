@@ -1,16 +1,16 @@
 import { CONTACT_HREF, LINKEDIN_HREF } from '@/lib/vulcan/content'
 
 const EXPLORE = [
-  { label: 'Product', href: '#product' },
-  { label: 'How it works', href: '#how-it-works' },
-  { label: 'Market opportunity', href: '#market' },
-  { label: 'Company', href: '#team' },
+  { label: 'The problem', href: '#problem' },
+  { label: 'The solution', href: '#solution' },
+  { label: 'Team', href: '#team' },
+  { label: 'Contact', href: '#contact' },
 ]
 
 export default function SiteFooter() {
   return (
-    <footer data-theme="dark" className="border-t border-white/10 bg-vulcan-ink px-[6vw] pb-12 pt-28 text-vulcan-paper lg:px-[7vw]">
-      <div className="mx-auto grid max-w-[1800px] grid-cols-12 gap-x-6 gap-y-16">
+    <footer data-theme="dark" className="border-t border-white/10 bg-vulcan-ink px-[6vw] pb-10 pt-16 text-vulcan-paper lg:px-[7vw]">
+      <div className="mx-auto grid max-w-[1800px] grid-cols-12 gap-x-6 gap-y-12">
         <div className="col-span-12 lg:col-span-6">
           <div className="font-grotesk text-sm font-semibold tracking-[0.3em]">VULCAN TRADE</div>
           <p className="mt-8 max-w-[26rem] font-grotesk text-[clamp(1.6rem,2.4vw,2.4rem)] font-light leading-tight tracking-[-0.015em] text-vulcan-paper/85">
@@ -35,7 +35,7 @@ export default function SiteFooter() {
           </ul>
         </div>
       </div>
-      <div className="mx-auto mt-28 flex max-w-[1800px] items-center justify-between border-t border-white/10 pt-6 font-mono text-[11px] uppercase tracking-[0.22em] text-vulcan-muted">
+      <div className="mx-auto mt-16 flex max-w-[1800px] items-center justify-between border-t border-white/10 pt-6 font-mono text-[11px] uppercase tracking-[0.22em] text-vulcan-muted">
         <span>© Vulcan Trade</span>
         <a href="#top" className="transition-colors hover:text-vulcan-paper">Back to top ↑</a>
       </div>

@@ -1,13 +1,9 @@
 import SiteHeader from '@/components/vulcan/SiteHeader'
 import HeroExperience from '@/components/vulcan/hero/HeroExperience'
 import ProblemSection from '@/components/vulcan/ProblemSection'
-import IntelligenceLayerSection from '@/components/vulcan/IntelligenceLayerSection'
-import WorkflowSection from '@/components/vulcan/WorkflowSection'
-import ScenariosSection from '@/components/vulcan/ScenariosSection'
-import ExpansionSection from '@/components/vulcan/ExpansionSection'
-import MarketSection from '@/components/vulcan/MarketSection'
 import TeamSection from '@/components/vulcan/TeamSection'
-import AskSection from '@/components/vulcan/AskSection'
+import SolutionSection from '@/components/vulcan/SolutionSection'
+import FinalCtaSection from '@/components/vulcan/FinalCtaSection'
 import SiteFooter from '@/components/vulcan/SiteFooter'
 
 export default function Home() {
@@ -17,13 +13,9 @@ export default function Home() {
       <main>
         <HeroExperience />
         <ProblemSection />
-        <IntelligenceLayerSection />
-        <WorkflowSection />
-        <ScenariosSection />
-        <ExpansionSection />
-        <MarketSection />
+        <SolutionSection />
         <TeamSection />
-        <AskSection />
+        <FinalCtaSection />
       </main>
       <SiteFooter />
     </div>

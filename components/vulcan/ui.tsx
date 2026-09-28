@@ -28,7 +28,7 @@ const THEME: Record<Theme, string> = {
 
 export function Section({ id, theme, children, className = '' }: { id: string; theme: Theme; children: ReactNode; className?: string }) {
   return (
-    <section id={id} data-theme={theme === 'light' ? 'light' : 'dark'} className={`relative px-[6vw] py-28 md:py-40 lg:px-[7vw] ${THEME[theme]} ${className}`}>
+    <section id={id} data-theme={theme === 'light' ? 'light' : 'dark'} className={`relative px-[6vw] py-20 md:py-28 lg:px-[7vw] ${THEME[theme]} ${className}`}>
       <div className="mx-auto max-w-[1800px]">{children}</div>
     </section>
   )

@@ -1,8 +1,8 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { FOUNDER_FIT, FOUNDERS } from '@/lib/vulcan/content'
-import { EASE, Headline, Label, Reveal, Section, useReducedMotion } from './ui'
+import { FOUNDERS, TEAM } from '@/lib/vulcan/content'
+import { EASE, Label, Reveal, Section, useReducedMotion } from './ui'
 
 function Portrait({ name, photo, delay }: { name: string; photo?: string; delay: number }) {
   const reduced = useReducedMotion()
@@ -33,10 +33,14 @@ export default function TeamSection() {
     <Section id="team" theme="light" className="border-t border-vulcan-ink/10">
       <div className="grid grid-cols-12 gap-x-6 gap-y-16">
         <div className="col-span-12 lg:col-span-5">
-          <Label light>Founders</Label>
-          <Headline lines={['The people behind', 'Vulcan Trade.']} className="mt-10 text-vulcan-ink" />
+          <Label light>The team</Label>
+          <Reveal y={22}>
+            <h2 className="mt-8 font-grotesk text-[clamp(2.4rem,4.2vw,4.6rem)] font-medium leading-[0.98] tracking-[-0.032em] text-vulcan-ink [text-wrap:balance]">
+              {TEAM.headline.join(' ')}
+            </h2>
+          </Reveal>
           <Reveal delay={0.2}>
-            <p className="mt-10 max-w-[30rem] text-[clamp(1.1rem,1.35vw,1.3rem)] leading-relaxed text-vulcan-ink/70">{FOUNDER_FIT}</p>
+            <p className="mt-8 max-w-[30rem] text-[clamp(1.1rem,1.35vw,1.3rem)] leading-relaxed text-vulcan-ink/70">{TEAM.copy}</p>
           </Reveal>
         </div>
         <div className="col-span-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:col-span-6 lg:col-start-7">
