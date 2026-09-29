@@ -7,11 +7,10 @@ require('dotenv').config({ path: path.join(__dirname, '../.env.local') })
 require('dotenv').config({ path: path.join(__dirname, '../.env') })
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
-// Use service role key for full access - prioritize env var, then fallback to hardcoded
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtpbXJya3FvZG5iZnl6YnplbWhmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2ODYyMzU3NSwiZXhwIjoyMDg0MTk5NTc1fQ.npOqex6vBbF1_DdSlFWfXDrC3VkkQA5w56thj05Zj1M'
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 console.log('🔑 Using Supabase URL:', supabaseUrl)
-console.log('🔑 Using key:', supabaseKey ? supabaseKey.substring(0, 20) + '...' : 'NOT FOUND')
+console.log('🔑 Service role key:', supabaseKey ? 'set' : 'NOT FOUND')
 
 if (!supabaseUrl || !supabaseKey) {
   console.error('❌ Missing Supabase credentials!')
