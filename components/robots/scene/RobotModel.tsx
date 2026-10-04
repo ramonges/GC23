@@ -24,6 +24,7 @@ type RenderPart = {
   baseEmissive: Color
   baseGlow: number
   explode: Vector3
+  bottom: number
 }
 
 function finishMaterial(finish: Finish, palette: Robot['palette']) {
@@ -93,7 +94,7 @@ function useGlbParts(robot: Robot): RenderPart[] {
   }, [scene, robot])
 }
 
-type PartInput = Omit<RenderPart, 'baseColor' | 'baseEmissive' | 'baseGlow'>
+type PartInput = Omit<RenderPart, 'baseColor' | 'baseEmissive' | 'baseGlow' | 'bottom'>
 
 /**
  * Fill in base colours and derive explode directions from each part's offset to the model centre.
@@ -103,7 +104,7 @@ function finalize(parts: PartInput[]): RenderPart[] {
   const box = new Box3()
   const tmp = new Box3()
   const groups = new Map<string, { box: Box3; explode?: Vector3 }>()
-  for (const p of parts) {
+  const bottoms = parts.map((p) => {
     p.geometry.computeBoundingBox()
     tmp.copy(p.geometry.boundingBox!).applyMatrix4(new Matrix4().compose(p.position, p.quaternion, p.scale))
     box.union(tmp)
@@ -111,7 +112,8 @@ function finalize(parts: PartInput[]): RenderPart[] {
     g.box.union(tmp)
     if (!g.explode && p.explode.lengthSq() > 0) g.explode = p.explode.clone()
     groups.set(p.name, g)
-  }
+    return tmp.min.y
+  })
   const center = box.getCenter(new Vector3())
   const size = box.getSize(new Vector3())
   const dirs = new Map<string, Vector3>()
@@ -122,8 +124,9 @@ function finalize(parts: PartInput[]): RenderPart[] {
     if (d.lengthSq() < 1e-6) d.set(0, 0, 1)
     dirs.set(name, d.divideScalar(Math.max(size.y, 1e-3) * 0.5))
   })
-  return parts.map((p) => ({
+  return parts.map((p, i) => ({
     ...p,
+    bottom: bottoms[i],
     explode: dirs.get(p.name)!.clone(),
     baseColor: p.material.color.clone(),
     baseEmissive: p.material.emissive.clone(),
@@ -178,6 +181,8 @@ function PartsRenderer({ robot, interactive, opacity, parts }: Props & { parts: 
 
   const active = pinnedPart ?? hoveredPart
   const spread = robot.height_m * 0.42
+  // Exploded parts that travel downwards would sink into the pedestal, so the whole model rises to compensate.
+  const lift = useMemo(() => Math.max(0, ...parts.map((p) => -(p.bottom + p.explode.y * spread))), [parts, spread])
   const target = new Color()
   const tmp = new Vector3()
 
@@ -193,6 +198,7 @@ function PartsRenderer({ robot, interactive, opacity, parts }: Props & { parts: 
       const mesh = meshRefs.current[i]
       if (!mesh) return
       tmp.copy(p.explode).multiplyScalar(explodeAmt.current * spread)
+      tmp.y += explodeAmt.current * lift
       mesh.position.copy(p.position).add(tmp)
       const mat = p.material
       target.copy(colorBy ? tints[i] : p.baseColor)
