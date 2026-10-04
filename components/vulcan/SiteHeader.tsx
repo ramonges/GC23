@@ -7,7 +7,6 @@ import { usePrefersReducedMotion } from '@/lib/vulcan/hooks'
 type Tone = 'hero' | 'dark' | 'light'
 
 const NAV = [
-  { label: 'Platform', href: '/platform' },
   { label: 'Map', href: '/platform/map' },
 ]
 

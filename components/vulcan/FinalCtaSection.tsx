@@ -18,9 +18,6 @@ export default function FinalCtaSection() {
             <Arrow />
           </a>
           <div className="mt-6 flex gap-8 font-mono text-[12px] uppercase tracking-[0.22em]">
-            <a href="/platform" className="group inline-flex items-center gap-3 border-b border-white/25 pb-1.5 text-vulcan-paper/80 transition-colors hover:border-white/60 hover:text-white">
-              Open the platform <Arrow />
-            </a>
             <a href="/platform/map" className="group inline-flex items-center gap-3 border-b border-white/25 pb-1.5 text-vulcan-paper/80 transition-colors hover:border-white/60 hover:text-white">
               Open the map <Arrow />
             </a>
