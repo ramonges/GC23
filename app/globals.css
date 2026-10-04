@@ -127,7 +127,9 @@ html:has(.vulcan) body {
 }
 
 .hero-capture .hero-ui,
-.hero-capture ~ * {
+.hero-capture .hero-scrim,
+.hero-capture ~ *,
+body:has(.hero-capture) header {
   visibility: hidden;
 }
 

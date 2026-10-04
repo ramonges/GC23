@@ -375,13 +375,13 @@ export default function HeroExperience() {
             alt=""
             aria-hidden
             fetchPriority="high"
-            className={`pointer-events-none absolute inset-0 h-full w-full object-cover transition-opacity duration-[1200ms] ${posterHidden ? 'opacity-0' : 'opacity-100'}`}
+            className={`hero-scrim pointer-events-none absolute inset-0 h-full w-full object-cover transition-opacity duration-[1200ms] ${posterHidden ? 'opacity-0' : 'opacity-100'}`}
           />
         </picture>
       )}
-      <div aria-hidden className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(8,9,9,0.72)_0%,rgba(8,9,9,0.25)_38%,rgba(8,9,9,0)_60%)]" />
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-[38%] bg-[linear-gradient(0deg,rgba(8,9,9,0.85),rgba(8,9,9,0))]" />
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-[linear-gradient(180deg,rgba(8,9,9,0.6),rgba(8,9,9,0))]" />
+      <div aria-hidden className="hero-scrim pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(8,9,9,0.72)_0%,rgba(8,9,9,0.25)_38%,rgba(8,9,9,0)_60%)]" />
+      <div aria-hidden className="hero-scrim pointer-events-none absolute inset-x-0 bottom-0 h-[38%] bg-[linear-gradient(0deg,rgba(8,9,9,0.85),rgba(8,9,9,0))]" />
+      <div aria-hidden className="hero-scrim pointer-events-none absolute inset-x-0 top-0 h-32 bg-[linear-gradient(180deg,rgba(8,9,9,0.6),rgba(8,9,9,0))]" />
 
       <div className="hero-ui absolute inset-0">
         <HeroLabels ref={labelsRef} />
@@ -404,7 +404,7 @@ export default function HeroExperience() {
         </button>
       </div>
 
-      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-px overflow-hidden">
+      <div aria-hidden className="hero-ui pointer-events-none absolute inset-x-0 top-0 h-px overflow-hidden">
         <div
           ref={loaderRef}
           className={`h-px origin-left scale-x-0 bg-vulcan-signal transition-[transform,opacity] duration-700 ${heroState === 'LOADING' ? 'opacity-100' : 'opacity-0'}`}
