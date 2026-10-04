@@ -139,3 +139,21 @@ body:has(.hero-capture) header {
     animation: none;
   }
 }
+
+.vulcan-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23858981' stroke-width='1.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.7rem center;
+  background-size: 14px;
+}
+
+.vulcan-select option {
+  background: #111313;
+  color: #f1f0e8;
+}
+
+@keyframes mapload {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(300%); }
+}

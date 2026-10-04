@@ -62,32 +62,38 @@ export default function PlatformSidebar({ userEmail }: PlatformSidebarProps) {
     }
   }
 
+  const input =
+    'w-full border border-white/10 bg-vulcan-ink px-3 py-2 text-sm text-vulcan-paper placeholder-vulcan-muted focus:border-white/30 focus:outline-none'
+  const label = 'mb-1.5 block font-mono text-[10px] uppercase tracking-[0.18em] text-vulcan-muted'
+  const row =
+    'flex w-full items-center gap-3 px-3 py-2.5 font-mono text-[11px] uppercase tracking-[0.16em] transition-colors'
+
   return (
     <>
-      {/* Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-4 left-4 z-50 p-3 bg-white border-2 border-gray-200 rounded-lg text-black hover:border-black transition-all shadow-lg"
+        aria-label={isOpen ? 'Close menu' : 'Open menu'}
+        className="fixed left-3 top-3 z-50 flex h-10 w-10 items-center justify-center border border-white/10 bg-vulcan-charcoal text-vulcan-paper transition-colors hover:border-white/30 sm:left-4"
       >
-        {isOpen ? <X size={24} /> : <Menu size={24} />}
+        {isOpen ? <X size={18} strokeWidth={1.5} /> : <Menu size={18} strokeWidth={1.5} />}
       </button>
 
-      {/* Sidebar */}
-      <div
-        className={`fixed left-0 top-0 h-full bg-white border-r border-gray-200 transition-all duration-300 z-40 shadow-2xl ${
-          isOpen ? 'w-80' : 'w-0'
-        } overflow-hidden`}
-      >
-        <div className="pt-20 px-6">
-          {/* Logo */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-black">Vulcan Trade</h2>
-            <p className="text-sm text-gray-500 mt-1">Professional Platform</p>
-          </div>
+      {isOpen && <div className="fixed inset-0 z-30 bg-black/50 backdrop-blur-[2px]" onClick={() => setIsOpen(false)} aria-hidden />}
 
-          {/* Navigation Items */}
-          <nav className="space-y-2 mb-8">
-            {menuItems.map((item) => {
+      <aside
+        className={`fixed left-0 top-0 z-40 h-full w-80 max-w-[85vw] border-r border-white/10 bg-vulcan-charcoal text-vulcan-paper transition-transform duration-300 ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <div className="flex h-full flex-col overflow-y-auto px-5 pb-6 pt-20">
+          <Link href="/" onClick={() => setIsOpen(false)} className="mb-10 block px-3" aria-label="Vulcan Trade — home">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/brand/vulcan-trade-logo.png" alt="Vulcan Trade" width={837} height={120} className="h-6 w-auto" />
+          </Link>
+
+          <p className="mb-3 px-3 font-mono text-[10px] uppercase tracking-[0.22em] text-vulcan-muted">Platform</p>
+          <nav className="mb-8 space-y-px">
+            {menuItems.map((item, i) => {
               const Icon = item.icon
               const isActive = pathname === item.href
               return (
@@ -95,100 +101,72 @@ export default function PlatformSidebar({ userEmail }: PlatformSidebarProps) {
                   key={item.href}
                   href={item.href}
                   onClick={() => setIsOpen(false)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                    isActive
-                      ? 'bg-black text-white'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
+                  className={`${row} relative ${isActive ? 'bg-white/[0.06] text-vulcan-paper' : 'text-vulcan-aluminum/70 hover:bg-white/[0.03] hover:text-vulcan-paper'}`}
                 >
-                  <Icon size={20} />
-                  <span className="font-medium">{item.label}</span>
+                  {isActive && <span className="absolute inset-y-0 left-0 w-px bg-vulcan-signal" />}
+                  <span className="w-5 text-vulcan-muted">{String(i + 1).padStart(2, '0')}</span>
+                  <Icon size={15} strokeWidth={1.5} />
+                  <span className="truncate">{item.label}</span>
                 </Link>
               )
             })}
           </nav>
 
-          {/* Profile Section - Only show if user is logged in */}
-          {userEmail && (
-            <div className="border-t border-gray-200 pt-6 space-y-2">
-              <button
-                onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-all"
-              >
-                <User size={20} />
-                <span className="font-medium">My Profile</span>
-              </button>
+          <div className="mt-auto space-y-px border-t border-white/10 pt-5">
+            {userEmail && (
+              <>
+                <button onClick={() => setIsProfileOpen(!isProfileOpen)} className={`${row} text-vulcan-aluminum/70 hover:bg-white/[0.03] hover:text-vulcan-paper`}>
+                  <User size={15} strokeWidth={1.5} />
+                  <span>My profile</span>
+                </button>
 
-              {isProfileOpen && (
-                <div className="bg-gray-50 p-4 rounded-lg space-y-3 ml-4 animate-fade-in">
-                  <div>
-                    <label className="block text-xs text-gray-600 mb-1 font-medium">First Name</label>
-                    <input
-                      type="text"
-                      value={profileData.firstName}
-                      onChange={(e) => setProfileData({ ...profileData, firstName: e.target.value })}
-                      className="w-full px-3 py-2 text-sm rounded-lg bg-white text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
-                    />
+                {isProfileOpen && (
+                  <div className="space-y-3 border border-white/10 bg-vulcan-ink/60 p-4">
+                    <div>
+                      <label className={label}>First name</label>
+                      <input type="text" value={profileData.firstName} onChange={(e) => setProfileData({ ...profileData, firstName: e.target.value })} className={input} />
+                    </div>
+                    <div>
+                      <label className={label}>Last name</label>
+                      <input type="text" value={profileData.lastName} onChange={(e) => setProfileData({ ...profileData, lastName: e.target.value })} className={input} />
+                    </div>
+                    <div>
+                      <label className={label}>Email</label>
+                      <input type="email" value={profileData.email} disabled className={`${input} cursor-not-allowed text-vulcan-muted`} />
+                    </div>
+                    <div>
+                      <label className={label}>New password</label>
+                      <input
+                        type="password"
+                        value={profileData.newPassword}
+                        onChange={(e) => setProfileData({ ...profileData, newPassword: e.target.value })}
+                        className={input}
+                        placeholder="Enter new password"
+                      />
+                    </div>
+                    <button
+                      onClick={handlePasswordChange}
+                      className="w-full bg-vulcan-paper px-3 py-2.5 font-mono text-[11px] uppercase tracking-[0.18em] text-vulcan-ink transition-colors hover:bg-white"
+                    >
+                      Change password
+                    </button>
                   </div>
-                  <div>
-                    <label className="block text-xs text-gray-600 mb-1 font-medium">Last Name</label>
-                    <input
-                      type="text"
-                      value={profileData.lastName}
-                      onChange={(e) => setProfileData({ ...profileData, lastName: e.target.value })}
-                      className="w-full px-3 py-2 text-sm rounded-lg bg-white text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-600 mb-1 font-medium">Email</label>
-                    <input
-                      type="email"
-                      value={profileData.email}
-                      disabled
-                      className="w-full px-3 py-2 text-sm rounded-lg bg-gray-200 text-gray-600 border border-gray-300 cursor-not-allowed"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-gray-600 mb-1 font-medium">New Password</label>
-                    <input
-                      type="password"
-                      value={profileData.newPassword}
-                      onChange={(e) => setProfileData({ ...profileData, newPassword: e.target.value })}
-                      className="w-full px-3 py-2 text-sm rounded-lg bg-white text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-black"
-                      placeholder="Enter new password"
-                    />
-                  </div>
-                  <button
-                    onClick={handlePasswordChange}
-                    className="w-full px-3 py-2 text-sm bg-black text-white rounded-lg hover:bg-accent transition-all"
-                  >
-                    Change Password
-                  </button>
-                </div>
-              )}
+                )}
 
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-all"
-              >
-                <LogOut size={20} />
-                <span className="font-medium">Log Out</span>
-              </button>
-            </div>
-          )}
-
-          {/* Contact section - Always visible */}
-          <div className="border-t border-gray-200 pt-6">
-            <a
-              href="mailto:ram2315@columbia.edu"
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-all"
-            >
-              <Mail size={20} />
-              <span className="font-medium">Contact Us</span>
+                <button onClick={handleLogout} className={`${row} text-vulcan-aluminum/70 hover:bg-white/[0.03] hover:text-vulcan-signal`}>
+                  <LogOut size={15} strokeWidth={1.5} />
+                  <span>Log out</span>
+                </button>
+              </>
+            )}
+            <a href="mailto:ram2315@columbia.edu" className={`${row} text-vulcan-aluminum/70 hover:bg-white/[0.03] hover:text-vulcan-paper`}>
+              <Mail size={15} strokeWidth={1.5} />
+              <span>Contact us</span>
+              <span className="ml-auto text-vulcan-signal">↗</span>
             </a>
           </div>
         </div>
-      </div>
+      </aside>
     </>
   )
 }

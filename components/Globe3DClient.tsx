@@ -3,6 +3,15 @@
 import { useEffect, useRef, memo } from 'react'
 import Globe from 'globe.gl'
 import { CommodityData, RefineryData, ShippingRoute, VesselData } from '@/lib/types'
+import { COMMODITY_COLORS, COMMODITY_FALLBACK, VESSEL_COLORS } from '@/lib/map-theme'
+
+const STYLED_EARTH = '/hero/earth-color.webp'
+const SATELLITE_EARTH = '//unpkg.com/three-globe/example/img/earth-blue-marble.jpg'
+const TOPOLOGY = '//unpkg.com/three-globe/example/img/earth-topology.png'
+const ATMOSPHERE = '#8FA6B2'
+const BORDER = 'rgba(241, 240, 232, 0.16)'
+const pointRadius = (d: { type?: string }) => (d.type === 'refinery' ? 0.22 : 0.13)
+const MONO = "var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace"
 
 interface Globe3DClientProps {
   markers: CommodityData[]
@@ -16,17 +25,6 @@ interface Globe3DClientProps {
   onRouteClick?: (route: ShippingRoute) => void
 }
 
-const VESSEL_COLORS: Record<string, string> = {
-  tanker: '#EF4444',
-  oil_tanker: '#DC2626',
-  chemical_tanker: '#F97316',
-  bulk_carrier: '#3B82F6',
-  container: '#8B5CF6',
-  general_cargo: '#6B7280',
-  lng_carrier: '#06B6D4',
-  lpg_carrier: '#14B8A6',
-  other: '#9CA3AF',
-}
 
 function Globe3DClient({ markers, showCities = true, routes = [], refineries = [], vessels = [], satelliteMode = false, onPointSelect, onVesselClick, onRouteClick }: Globe3DClientProps) {
   const globeEl = useRef<HTMLDivElement>(null)
@@ -58,16 +56,22 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
     const el = globeEl.current
     const rect = el.getBoundingClientRect()
     const globe = new Globe(el)
-      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
-      .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
-      .backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png')
+      .globeImageUrl(STYLED_EARTH)
+      .bumpImageUrl(TOPOLOGY)
+      .backgroundColor('#080909')
       .showAtmosphere(true)
-      .atmosphereColor('#3a228a')
-      .atmosphereAltitude(0.25)
+      .atmosphereColor(ATMOSPHERE)
+      .atmosphereAltitude(0.13)
       .width(rect.width)
       .height(rect.height)
 
     globeRef.current = globe
+
+    // The styled texture keeps oceans near-black; a faint slate emissive gives the sphere volume against the ink background.
+    const material = globe.globeMaterial() as any
+    material.emissive?.set('#1a262c')
+    material.emissiveIntensity = 0.55
+    material.shininess = 6
 
     // Set initial rotation - DISABLED auto-rotate, only manual control
     globe.controls().autoRotate = false
@@ -83,10 +87,10 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
         // Add country polygons with better detail
         globe
           .polygonsData(countries.features)
-          .polygonCapColor(() => 'rgba(255, 255, 255, 0.05)')
-          .polygonSideColor(() => 'rgba(255, 255, 255, 0.02)')
-          .polygonStrokeColor(() => '#555')
-          .polygonAltitude(0.01)
+          .polygonCapColor(() => 'rgba(241, 240, 232, 0.015)')
+          .polygonSideColor(() => 'rgba(0, 0, 0, 0)')
+          .polygonStrokeColor(() => BORDER)
+          .polygonAltitude(0.004)
 
         // Add country labels - sized based on country area
         const countryLabels = countries.features
@@ -129,9 +133,9 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
           .labelText((d: any) => d.name)
           .labelSize((d: any) => d.size)
           .labelAltitude((d: any) => d.altitude)
-          .labelDotRadius((d: any) => d.size * 0.1) // Dot size proportional to label
+          .labelDotRadius((d: any) => d.size * 0.06)
           .labelDotOrientation('bottom')
-          .labelColor(() => 'rgba(255, 255, 255, 0.75)')
+          .labelColor(() => 'rgba(241, 240, 232, 0.6)')
           .labelResolution(3)
       })
 
@@ -190,8 +194,8 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
                 el.style.pointerEvents = 'auto'
                 el.innerHTML = `
                   <div style="position: relative; display: flex; flex-direction: column; align-items: center;">
-                    <svg viewBox="0 0 24 24" width="18" height="18" style="filter: drop-shadow(0 0 3px rgba(0,0,0,0.8)); transform: rotate(${rotation}deg);">
-                      <path d="M12 2 L16 10 L20 18 L12 15 L4 18 L8 10 Z" fill="${color}" stroke="white" stroke-width="1"/>
+                    <svg viewBox="0 0 24 24" width="16" height="16" style="filter: drop-shadow(0 0 4px rgba(8,9,9,0.9)); transform: rotate(${rotation}deg);">
+                      <path d="M12 2 L16 10 L20 18 L12 15 L4 18 L8 10 Z" fill="${color}" stroke="rgba(8,9,9,0.85)" stroke-width="1.2"/>
                     </svg>
                   </div>
                 `
@@ -204,20 +208,20 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
               const el = document.createElement('div')
               el.innerHTML = `
                 <div style="
-                  color: rgba(255, 255, 255, 0.9);
-                  font-size: ${d.isCapital ? '10px' : '8px'};
-                  font-weight: ${d.isCapital ? 'bold' : 'normal'};
-                  text-shadow: 0 0 3px rgba(0,0,0,0.9), 0 0 6px rgba(0,0,0,0.7);
+                  display: flex;
+                  align-items: center;
+                  gap: 4px;
+                  color: ${d.isCapital ? 'rgba(241, 240, 232, 0.92)' : 'rgba(198, 200, 193, 0.75)'};
+                  font-family: ${MONO};
+                  font-size: ${d.isCapital ? '9px' : '8px'};
+                  letter-spacing: 0.12em;
+                  text-transform: uppercase;
+                  text-shadow: 0 0 4px rgba(8, 9, 9, 0.95);
                   pointer-events: none;
                   white-space: nowrap;
-                  background: ${d.isCapital ? 'rgba(0, 102, 255, 0.3)' : 'rgba(0, 0, 0, 0.4)'};
-                  padding: 2px 4px;
-                  border-radius: 3px;
-                  border: ${d.isCapital ? '1px solid rgba(0, 102, 255, 0.6)' : 'none'};
-                  position: relative;
-                  z-index: 0;
                 ">
-                  ${d.isCapital ? '★ ' : ''}${d.name}
+                  <span style="width: 3px; height: 3px; background: ${d.isCapital ? '#F36B21' : 'rgba(198, 200, 193, 0.7)'};"></span>
+                  ${d.name}
                 </div>
               `
               return el
@@ -242,66 +246,38 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
       .pointsData([])
       .pointAltitude('size')
       .pointColor('color')
-      .pointRadius((d: any) => d.type === 'refinery' ? 0.25 : 0.15)
+      .pointRadius(pointRadius)
+      .pointResolution(6)
       .pointsMerge(false)
       .pointsTransitionDuration(400) // Smooth transition when points change
-      .pointLabel((d: any) => `
-        <div style="
-          background: rgba(0, 0, 0, 0.95);
-          border: 2px solid ${d.color};
-          padding: 15px;
-          border-radius: 12px;
-          color: white;
-          min-width: 280px;
-          box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-          position: relative;
-          z-index: 9999;
-        ">
-          <div style="font-size: 18px; font-weight: bold; margin-bottom: 10px; color: ${d.color};">
-            ${d.type === 'refinery' ? d.data.name : d.data.title}
-          </div>
-          ${d.type === 'refinery' ? `
-            <div style="font-size: 14px; margin-bottom: 8px;">
-              <strong>Operator:</strong> ${d.data.operator || 'N/A'}
+      .pointLabel((d: any) => {
+        const row = (k: string, v: string) =>
+          `<div style="display:flex;justify-content:space-between;gap:16px;padding:6px 0;border-top:1px solid rgba(241,240,232,0.08)"><span style="color:#858981">${k}</span><span style="color:#F1F0E8;text-align:right">${v}</span></div>`
+        const title = d.type === 'refinery' ? d.data.name : d.data.title
+        const rows =
+          d.type === 'refinery'
+            ? [
+                row('Operator', d.data.operator || '—'),
+                row('Location', `${d.data.city || ''}${d.data.city && d.data.country ? ', ' : ''}${d.data.country || ''}`),
+                row('Capacity', `${d.capacity.toLocaleString()} bpd`),
+                row('Crude', d.data.crude_types_accepted.map((t: string) => (t === 'extra_heavy' ? 'Extra heavy' : t[0].toUpperCase() + t.slice(1))).join(', ')),
+              ]
+            : [
+                row('Owner', d.data.owner || '—'),
+                row('Commodity', d.data.commodity_name || '—'),
+                d.data.address ? row('Location', d.data.address) : '',
+                d.data.supply_volume > 0 ? row('Supply', `${d.data.supply_volume.toLocaleString()} t`) : '',
+                d.data.long_term_contract ? row('Contract', `Long-term${d.data.contract_with ? ` · ${d.data.contract_with}` : ''}`) : '',
+              ]
+        return `
+          <div style="background:rgba(8,9,9,0.94);border:1px solid rgba(241,240,232,0.14);padding:14px 16px;min-width:260px;max-width:320px;font-family:var(--font-grotesk),system-ui,sans-serif;font-size:12px;color:#F1F0E8;backdrop-filter:blur(8px)">
+            <div style="display:flex;align-items:center;gap:8px;font-family:${MONO};font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#858981">
+              <span style="width:6px;height:6px;background:${d.color}"></span>${d.type === 'refinery' ? 'Refinery' : d.data.commodity_type || 'Site'}
             </div>
-            <div style="font-size: 14px; margin-bottom: 8px;">
-              <strong>Location:</strong> ${d.data.city || ''}${d.data.city && d.data.country ? ', ' : ''}${d.data.country}
-            </div>
-            <div style="font-size: 14px; margin-bottom: 8px;">
-              <strong>Capacity:</strong> ${d.capacity.toLocaleString()} bpd
-            </div>
-            <div style="font-size: 14px; margin-bottom: 8px;">
-              <strong>Crude Types:</strong> ${d.data.crude_types_accepted.map((t: string) => {
-                if (t === 'light') return 'Light';
-                if (t === 'medium') return 'Medium';
-                if (t === 'extra_heavy') return 'Extra Heavy';
-                return t;
-              }).join(', ')}
-            </div>
-          ` : `
-            <div style="font-size: 14px; margin-bottom: 8px;">
-              <strong>Owner:</strong> ${d.data.owner}
-            </div>
-            <div style="font-size: 14px; margin-bottom: 8px;">
-              <strong>Type:</strong> ${d.data.commodity_type} - ${d.data.commodity_name}
-            </div>
-            <div style="font-size: 14px; margin-bottom: 8px;">
-              <strong>Location:</strong> ${d.data.address}
-            </div>
-            ${d.data.supply_volume > 0 ? `
-              <div style="font-size: 14px; margin-bottom: 8px;">
-                <strong>Supply:</strong> ${d.data.supply_volume.toLocaleString()} metric tonnes
-              </div>
-            ` : ''}
-            ${d.data.long_term_contract ? `
-              <div style="font-size: 14px; color: #10B981;">
-                ✓ Long-term Contract
-              ${d.data.contract_with ? ` with ${d.data.contract_with}` : ''}
-              </div>
-            ` : ''}
-          `}
-        </div>
-      `)
+            <div style="margin:8px 0 10px;font-size:16px;line-height:1.25;font-weight:500">${title}</div>
+            ${rows.join('')}
+          </div>`
+      })
       .onPointClick((point: any) => {
         // Show info panel without changing zoom
         if (onPointSelectRef.current) {
@@ -310,11 +286,11 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
 
         // Highlight effect - briefly make the point larger
         globe.pointRadius((d: any) => {
-          if (d === point) return (d.type === 'refinery' ? 0.25 : 0.15) * 2.5
-          return d.type === 'refinery' ? 0.25 : 0.15
+          if (d === point) return pointRadius(d) * 2.5
+          return pointRadius(d)
         })
         setTimeout(() => {
-          globe.pointRadius((d: any) => d.type === 'refinery' ? 0.25 : 0.15)
+          globe.pointRadius(pointRadius)
         }, 1500)
       })
 
@@ -354,13 +330,13 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
 
       // Highlight the point with a pulse effect
       globe.pointRadius((d: any) => {
-        if (d === closestPoint) return (d.type === 'refinery' ? 0.25 : 0.15) * 2.5
-        return d.type === 'refinery' ? 0.25 : 0.15
+        if (d === closestPoint) return pointRadius(d) * 2.5
+        return pointRadius(d)
       })
 
       // Reset after animation
       setTimeout(() => {
-        globe.pointRadius((d: any) => d.type === 'vessel' ? 0.2 : d.type === 'refinery' ? 0.25 : 0.15)
+        globe.pointRadius((d: any) => pointRadius(d))
       }, 1500)
     })
 
@@ -372,9 +348,9 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
       .arcEndLat((d: any) => d.endLat)
       .arcEndLng((d: any) => d.endLng)
       .arcColor((d: any) => d.color)
-      .arcStroke((d: any) => d.stroke ?? 2.5)
-      .arcDashLength(0.5)
-      .arcDashGap(0.08)
+      .arcStroke((d: any) => d.stroke ?? 0.6)
+      .arcDashLength(0.35)
+      .arcDashGap(0.12)
       .arcDashAnimateTime(2500)
       .arcsTransitionDuration(500)
       .onArcClick((arc: any) => {
@@ -413,7 +389,7 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
     const points = validMarkers.map(marker => ({
       lat: marker.latitude,
       lng: marker.longitude,
-      size: 0.05,
+      size: 0.018,
       color: getCommodityColor(marker.commodity_type),
       label: marker.title,
       data: marker,
@@ -421,14 +397,14 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
     }))
 
     const refineryPoints = refineries.map(refinery => {
-      let color = '#6B7280'
-      if (refinery.crude_types_accepted.includes('extra_heavy')) color = '#EF4444'
-      else if (refinery.crude_types_accepted.includes('medium')) color = '#F59E0B'
-      else if (refinery.crude_types_accepted.includes('light')) color = '#10B981'
+      let color = '#858981'
+      if (refinery.crude_types_accepted.includes('extra_heavy')) color = '#E5553B'
+      else if (refinery.crude_types_accepted.includes('medium')) color = '#D9B45A'
+      else if (refinery.crude_types_accepted.includes('light')) color = '#8DB36A'
       return {
         lat: refinery.latitude,
         lng: refinery.longitude,
-        size: 0.08,
+        size: 0.03,
         color,
         label: refinery.name,
         data: refinery,
@@ -446,7 +422,7 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
         name: route.name,
         id: route.id,
         route,
-        stroke: 2.5,
+        stroke: 0.6,
       }
       if (route.waypoints && route.waypoints.length > 0) {
         const pts = [
@@ -498,33 +474,14 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
     const globe = globeRef.current
     if (!globe) return
 
-    if (satelliteMode) {
-      globe.bumpImageUrl('')
-      globe.atmosphereColor('#1a3a5c')
-      globe.atmosphereAltitude(0.12)
-      globe.polygonCapColor(() => 'rgba(100, 200, 255, 0.03)')
-      globe.polygonSideColor(() => 'rgba(100, 200, 255, 0.01)')
-      globe.polygonStrokeColor(() => 'rgba(100, 200, 255, 0.2)')
-    } else {
-      globe.bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
-      globe.atmosphereColor('#3a228a')
-      globe.atmosphereAltitude(0.25)
-      globe.polygonCapColor(() => 'rgba(255, 255, 255, 0.05)')
-      globe.polygonSideColor(() => 'rgba(255, 255, 255, 0.02)')
-      globe.polygonStrokeColor(() => '#555')
-    }
+    globe.globeImageUrl(satelliteMode ? SATELLITE_EARTH : STYLED_EARTH)
+    globe.bumpImageUrl(TOPOLOGY)
+    globe.atmosphereColor(ATMOSPHERE)
+    globe.atmosphereAltitude(satelliteMode ? 0.12 : 0.13)
+    globe.polygonStrokeColor(() => (satelliteMode ? 'rgba(241, 240, 232, 0.28)' : BORDER))
   }, [satelliteMode])
 
-  const getCommodityColor = (type: string) => {
-    const colors: Record<string, string> = {
-      'Energy': '#FF6B35',
-      'Metals': '#FFD700',
-      'Agricultural': '#10B981',
-      'Industrial': '#3B82F6',
-      'Livestock': '#EC4899'
-    }
-    return colors[type] || '#FFFFFF'
-  }
+  const getCommodityColor = (type: string) => COMMODITY_COLORS[type] || COMMODITY_FALLBACK
 
   const getCountryCentroid = (country: any) => {
     // Simple centroid calculation for polygon/multipolygon
@@ -574,7 +531,7 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
   }
 
   return (
-    <div ref={globeEl} style={{ width: '100%', height: '100%' }} className="bg-black" />
+    <div ref={globeEl} style={{ width: '100%', height: '100%' }} className="bg-vulcan-ink" />
   )
 }
 

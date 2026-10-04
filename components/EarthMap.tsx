@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { Search, Filter, ChevronDown } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { CommodityData, RefineryData, ShippingRoute, VesselData } from '@/lib/types'
+import { COMMODITY_COLORS, VESSEL_COLORS, VESSEL_TYPES } from '@/lib/map-theme'
 import dynamic from 'next/dynamic'
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ''
@@ -11,10 +12,12 @@ const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || ''
 const Globe3D = dynamic(() => import('./Globe3DClient'), {
   ssr: false,
   loading: () => (
-    <div className="flex-1 flex items-center justify-center bg-black">
-      <div className="text-center">
-        <div className="w-16 h-16 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-        <p className="text-white text-xl">Loading 3D Earth...</p>
+    <div className="flex h-full flex-1 items-center justify-center bg-vulcan-ink">
+      <div className="w-48 text-center">
+        <div className="h-px w-full overflow-hidden bg-white/10">
+          <div className="h-px w-1/3 animate-[mapload_1.4s_ease-in-out_infinite] bg-vulcan-signal" />
+        </div>
+        <p className="mt-4 font-mono text-[10px] uppercase tracking-[0.22em] text-vulcan-muted">Loading globe</p>
       </div>
     </div>
   ),
@@ -60,23 +63,23 @@ function CompanyDropdown({
         type="button"
         onClick={() => !disabled && setOpen((o) => !o)}
         disabled={disabled}
-        className="h-9 sm:h-10 px-3 sm:px-4 pr-8 text-xs sm:text-sm rounded-xl bg-neutral-900/95 text-white border border-neutral-700 hover:border-neutral-600 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-neutral-500 transition-all w-full text-left flex items-center justify-between gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg min-h-[2.5rem] overflow-hidden"
+        className={`${CONTROL} flex w-full items-center justify-between gap-2 overflow-hidden border-white/10 bg-vulcan-charcoal text-left text-vulcan-paper hover:border-white/25`}
       >
         <span className="truncate min-w-0 flex-1" title={displayLabel}>
           {displayLabel}
         </span>
-        <ChevronDown className={`h-4 w-4 flex-shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown strokeWidth={1.5} className={`h-3.5 w-3.5 flex-shrink-0 text-vulcan-muted transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
-        <div className="absolute top-full left-0 mt-1.5 z-50 rounded-xl bg-neutral-900 border border-neutral-700 shadow-2xl overflow-hidden min-w-[280px] max-w-[min(420px,90vw)]">
+        <div className="absolute top-full left-0 mt-1.5 z-50 bg-vulcan-charcoal border border-white/10 overflow-hidden min-w-[280px] max-w-[min(420px,90vw)]">
           {showSearch && (
-            <div className="p-2 border-b border-neutral-700">
+            <div className="p-2 border-b border-white/10">
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search companies..."
-                className="w-full h-8 px-3 text-sm rounded-lg bg-neutral-800 text-white placeholder-neutral-500 border border-neutral-700 focus:outline-none focus:border-neutral-500"
+                className="w-full h-8 px-3 text-sm bg-vulcan-soft text-vulcan-paper placeholder-vulcan-muted border border-white/10 focus:outline-none focus:border-white/40"
                 autoFocus
               />
             </div>
@@ -89,7 +92,7 @@ function CompanyDropdown({
                 setOpen(false)
                 setSearch('')
               }}
-              className={`w-full px-3 py-2.5 text-left text-sm hover:bg-neutral-700/80 transition-colors border-b border-neutral-700/50 ${!value ? 'bg-neutral-800/80 text-white' : 'text-neutral-300 bg-neutral-900'}`}
+              className={`w-full px-3 py-2.5 text-left text-sm hover:bg-white/[0.08] transition-colors border-b border-white/[0.06] ${!value ? 'bg-white/[0.06] text-vulcan-paper' : 'text-vulcan-aluminum bg-vulcan-charcoal'}`}
             >
               {placeholder}
             </button>
@@ -103,16 +106,16 @@ function CompanyDropdown({
                   setSearch('')
                 }}
                 title={opt}
-                className={`w-full px-3 py-2.5 text-left text-sm transition-colors border-b border-neutral-700/50 last:border-b-0
+                className={`w-full px-3 py-2.5 text-left text-sm transition-colors border-b border-white/[0.06] last:border-b-0
                   whitespace-normal break-words hyphens-auto
-                  ${idx % 2 === 0 ? 'bg-neutral-900 hover:bg-neutral-800' : 'bg-neutral-800 hover:bg-neutral-700'}
-                  ${value === opt ? 'text-white font-medium ring-inset ring-1 ring-neutral-600' : 'text-neutral-300'}`}
+                  ${idx % 2 === 0 ? 'bg-vulcan-charcoal hover:bg-white/[0.06]' : 'bg-vulcan-soft hover:bg-white/[0.08]'}
+                  ${value === opt ? 'text-vulcan-paper font-medium ring-inset ring-1 ring-vulcan-signal/60' : 'text-vulcan-aluminum'}`}
               >
                 {opt}
               </button>
             ))}
             {filtered.length === 0 && (
-              <div className="px-3 py-4 text-sm text-neutral-500 bg-neutral-900">No companies match</div>
+              <div className="px-3 py-4 text-sm text-vulcan-muted bg-vulcan-charcoal">No companies match</div>
             )}
           </div>
         </div>
@@ -120,6 +123,14 @@ function CompanyDropdown({
     </div>
   )
 }
+
+const CONTROL =
+  'h-9 sm:h-10 border px-3 sm:px-4 font-mono text-[11px] uppercase tracking-[0.16em] transition-colors focus:outline-none focus-visible:border-white/50 disabled:cursor-not-allowed disabled:opacity-40'
+const FIELD = `${CONTROL} vulcan-select bg-vulcan-charcoal text-vulcan-paper border-white/10 hover:border-white/25 pr-9 cursor-pointer`
+const toggleClass = (on: boolean) =>
+  `${CONTROL} flex items-center gap-2 ${
+    on ? 'border-vulcan-paper bg-vulcan-paper text-vulcan-ink' : 'border-white/10 bg-vulcan-charcoal text-vulcan-aluminum/80 hover:border-white/25 hover:text-vulcan-paper'
+  }`
 
 const commodityCategories = {
   Energy: ['Crude Oil', 'Natural Gas', 'Uranium', 'Coal'],
@@ -1343,19 +1354,19 @@ export default function EarthMap() {
   const [showRoutesModal, setShowRoutesModal] = useState(false)
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 overflow-hidden bg-black">
+    <div className="flex-1 flex flex-col min-h-0 overflow-hidden bg-vulcan-ink text-vulcan-paper">
       {/* Modern Monochrome Filters Bar - flex-shrink-0 keeps it visible */}
-      <div className="flex-shrink-0 bg-black border-b border-neutral-800 px-3 sm:px-5 py-3 sm:py-4">
-        <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
+      <div className="flex-shrink-0 border-b border-white/10 bg-vulcan-ink px-3 py-3 sm:px-5">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
           {/* Mobile: Filters button opens bottom sheet */}
           <button
             onClick={() => setShowFiltersSheet(true)}
-            className="sm:hidden h-9 px-4 flex items-center gap-2 rounded-xl bg-neutral-900 text-white border border-neutral-700 hover:border-neutral-600 transition-all"
+            className={`sm:hidden ${toggleClass(false)}`}
           >
             <Filter size={16} />
-            <span className="text-sm font-medium">Filters</span>
+            <span>Filters</span>
             {activeFiltersCount > 0 && (
-              <span className="bg-white text-black text-xs font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1">
+              <span className="flex h-[18px] min-w-[18px] items-center justify-center bg-vulcan-signal px-1 text-[10px] text-vulcan-ink">
                 {activeFiltersCount}
               </span>
             )}
@@ -1369,7 +1380,7 @@ export default function EarthMap() {
               setSelectedCommodity('')
               setSelectedCompany('')
             }}
-            className="hidden sm:block h-10 px-4 text-sm rounded-xl bg-neutral-900/95 text-white border border-neutral-700 hover:border-neutral-600 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-neutral-500 transition-all min-w-[150px] appearance-none cursor-pointer shadow-lg"
+            className={`hidden sm:block min-w-[160px] ${FIELD}`}
           >
             <option value="">All Categories</option>
             {Object.keys(commodityCategories).map((category) => (
@@ -1383,7 +1394,7 @@ export default function EarthMap() {
               setSelectedCommodity(e.target.value)
               setSelectedCompany('')
             }}
-            className="hidden sm:block h-10 px-4 text-sm rounded-xl bg-neutral-900/95 text-white border border-neutral-700 hover:border-neutral-600 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-neutral-500 transition-all disabled:opacity-40 disabled:cursor-not-allowed min-w-[160px] appearance-none cursor-pointer shadow-lg"
+            className={`hidden sm:block min-w-[170px] ${FIELD}`}
             disabled={!selectedCategory}
           >
             <option value="">All Commodities</option>
@@ -1405,34 +1416,26 @@ export default function EarthMap() {
             />
           </div>
 
-          <div className="hidden sm:block h-6 w-px bg-neutral-700 mx-1" />
+          <div className="hidden sm:block h-6 w-px bg-white/10 mx-1" />
 
           {/* Routes Button */}
           <button
             onClick={() => setShowRoutesModal(true)}
-            className={`h-9 sm:h-10 px-3 sm:px-5 text-xs sm:text-sm font-medium rounded-lg transition-all flex items-center gap-1.5 sm:gap-2 ${
-              enabledRoutes.size > 0 
-                ? 'bg-white text-black hover:bg-neutral-200' 
-                : 'bg-neutral-900 text-neutral-300 border border-neutral-700 hover:border-neutral-500 hover:text-white'
-            }`}
+            className={toggleClass(enabledRoutes.size > 0)}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
             </svg>
-            <span className="hidden sm:inline">Routes</span> {enabledRoutes.size > 0 && <span className="bg-black/20 px-1.5 py-0.5 rounded text-xs">{enabledRoutes.size}</span>}
+            <span className="hidden sm:inline">Routes</span> {enabledRoutes.size > 0 && <span className="bg-vulcan-ink/10 px-1.5 py-0.5 text-[10px]">{enabledRoutes.size}</span>}
           </button>
 
           {/* Cities Toggle */}
           <button
             onClick={() => setShowCities(!showCities)}
-            className={`h-9 sm:h-10 px-3 sm:px-5 text-xs sm:text-sm font-medium rounded-lg transition-all flex items-center gap-1.5 sm:gap-2 ${
-              showCities 
-                ? 'bg-white text-black hover:bg-neutral-200' 
-                : 'bg-neutral-900 text-neutral-300 border border-neutral-700 hover:border-neutral-500 hover:text-white'
-            }`}
+            className={toggleClass(showCities)}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
             </svg>
             <span className="hidden sm:inline">Cities</span>
           </button>
@@ -1440,14 +1443,10 @@ export default function EarthMap() {
           {/* Satellite Images Toggle */}
           <button
             onClick={() => setSatelliteMode(!satelliteMode)}
-            className={`h-9 sm:h-10 px-3 sm:px-5 text-xs sm:text-sm font-medium rounded-lg transition-all flex items-center gap-1.5 sm:gap-2 ${
-              satelliteMode 
-                ? 'bg-emerald-600 text-white hover:bg-emerald-500' 
-                : 'bg-neutral-900 text-neutral-300 border border-neutral-700 hover:border-neutral-500 hover:text-white'
-            }`}
+            className={toggleClass(satelliteMode)}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <span className="hidden sm:inline">Satellite</span>
           </button>
@@ -1455,24 +1454,20 @@ export default function EarthMap() {
           {/* Vessels Toggle */}
           <button
             onClick={() => setShowVessels(!showVessels)}
-            className={`h-9 sm:h-10 px-3 sm:px-5 text-xs sm:text-sm font-medium rounded-lg transition-all flex items-center gap-1.5 sm:gap-2 ${
-              showVessels
-                ? 'bg-blue-600 text-white hover:bg-blue-500'
-                : 'bg-neutral-900 text-neutral-300 border border-neutral-700 hover:border-neutral-500 hover:text-white'
-            }`}
+            className={toggleClass(showVessels)}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M5 12l4-4m-4 4l4 4M19 12l-4-4m4 4l-4 4" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 12h14M5 12l4-4m-4 4l4 4M19 12l-4-4m4 4l-4 4" />
             </svg>
             <span className="hidden sm:inline">Vessels</span>
-            {showVessels && vesselCount > 0 && <span className="bg-black/30 px-1.5 py-0.5 rounded text-xs">{vesselCount}</span>}
+            {showVessels && vesselCount > 0 && <span className="bg-vulcan-ink/10 px-1.5 py-0.5 text-[10px]">{vesselCount}</span>}
           </button>
 
           {/* Vessel Filter Button */}
           {showVessels && (
             <button
               onClick={() => setShowVesselFilters(true)}
-              className="h-9 sm:h-10 px-3 text-xs sm:text-sm font-medium rounded-lg bg-neutral-900 text-neutral-300 border border-neutral-700 hover:border-neutral-500 hover:text-white transition-all flex items-center gap-1.5"
+              className={toggleClass(false)}
             >
               <Filter size={14} />
               <span className="hidden sm:inline">Type</span>
@@ -1484,9 +1479,9 @@ export default function EarthMap() {
           {/* Search Button */}
           <button
             onClick={handleSearch}
-            className="h-9 sm:h-10 px-4 sm:px-6 bg-white text-black text-xs sm:text-sm font-semibold rounded-lg hover:bg-neutral-200 transition-all flex items-center gap-2"
+            className={`${CONTROL} flex items-center gap-2 border-vulcan-paper bg-vulcan-paper text-vulcan-ink hover:bg-white`}
           >
-            <Search size={16} />
+            <Search size={14} strokeWidth={1.5} />
             <span className="hidden sm:inline">Search</span>
           </button>
         </div>
@@ -1498,19 +1493,19 @@ export default function EarthMap() {
           className="sm:hidden fixed inset-0 z-[9999] flex flex-col justify-end"
           onClick={() => setShowFiltersSheet(false)}
         >
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" aria-hidden="true" />
+          <div className="absolute inset-0 bg-vulcan-ink/70 backdrop-blur-sm" aria-hidden="true" />
           <div
-            className="relative bg-neutral-950 border-t border-neutral-800 rounded-t-2xl shadow-2xl max-h-[85vh] overflow-y-auto animate-slide-up"
+            className="relative bg-vulcan-charcoal border-t border-white/10 max-h-[85vh] overflow-y-auto animate-slide-up"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="sticky top-0 bg-neutral-950 border-b border-neutral-800 px-4 py-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+            <div className="sticky top-0 bg-vulcan-charcoal border-b border-white/10 px-4 py-4 flex items-center justify-between">
+              <h3 className="text-lg font-medium text-vulcan-paper flex items-center gap-2">
                 <Filter size={20} />
                 Filters
               </h3>
               <button
                 onClick={() => setShowFiltersSheet(false)}
-                className="p-2 text-neutral-500 hover:text-white rounded-lg transition-colors"
+                className="p-2 text-vulcan-muted hover:text-vulcan-paper transition-colors"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -1519,7 +1514,7 @@ export default function EarthMap() {
             </div>
             <div className="p-4 space-y-4 pb-8">
               <div>
-                <label className="block text-xs font-medium text-neutral-400 uppercase tracking-wider mb-2">Category</label>
+                <label className="block text-xs font-medium text-vulcan-muted font-mono uppercase tracking-[0.18em] mb-2">Category</label>
                 <select
                   value={selectedCategory}
                   onChange={(e) => {
@@ -1527,7 +1522,7 @@ export default function EarthMap() {
                     setSelectedCommodity('')
                     setSelectedCompany('')
                   }}
-                  className="w-full h-11 px-4 text-base rounded-xl bg-neutral-900 text-white border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-white/30 appearance-none cursor-pointer"
+                  className={`w-full !h-11 ${FIELD}`}
                 >
                   <option value="">All Categories</option>
                   {Object.keys(commodityCategories).map((category) => (
@@ -1536,14 +1531,14 @@ export default function EarthMap() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-neutral-400 uppercase tracking-wider mb-2">Commodity</label>
+                <label className="block text-xs font-medium text-vulcan-muted font-mono uppercase tracking-[0.18em] mb-2">Commodity</label>
                 <select
                   value={selectedCommodity}
                   onChange={(e) => {
                     setSelectedCommodity(e.target.value)
                     setSelectedCompany('')
                   }}
-                  className="w-full h-11 px-4 text-base rounded-xl bg-neutral-900 text-white border border-neutral-700 focus:outline-none focus:ring-2 focus:ring-white/30 disabled:opacity-50 appearance-none cursor-pointer"
+                  className={`w-full !h-11 ${FIELD}`}
                   disabled={!selectedCategory}
                 >
                   <option value="">All Commodities</option>
@@ -1556,7 +1551,7 @@ export default function EarthMap() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-medium text-neutral-400 uppercase tracking-wider mb-2">Company</label>
+                <label className="block text-xs font-medium text-vulcan-muted font-mono uppercase tracking-[0.18em] mb-2">Company</label>
                 <CompanyDropdown
                   value={selectedCompany}
                   options={availableCompanies}
@@ -1567,7 +1562,7 @@ export default function EarthMap() {
               </div>
               <button
                 onClick={() => setShowFiltersSheet(false)}
-                className="w-full py-3.5 bg-white text-black font-semibold rounded-xl hover:bg-neutral-200 transition-all"
+                className="w-full py-3.5 bg-vulcan-paper text-vulcan-ink font-mono text-[11px] uppercase tracking-[0.18em] hover:bg-white transition-all"
               >
                 Apply Filters
               </button>
@@ -1579,23 +1574,23 @@ export default function EarthMap() {
       {/* Shipping Routes Modal */}
       {showRoutesModal && (
         <div 
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] flex items-center justify-center"
+          className="fixed inset-0 bg-vulcan-ink/80 backdrop-blur-sm z-[9999] flex items-center justify-center"
           onClick={() => setShowRoutesModal(false)}
         >
           <div 
-            className="bg-neutral-950 border border-neutral-800 rounded-xl p-4 sm:p-6 max-w-2xl w-full mx-2 sm:mx-4 shadow-2xl max-h-[90vh] overflow-y-auto"
+            className="bg-vulcan-charcoal border border-white/10 p-4 sm:p-6 max-w-2xl w-full mx-2 sm:mx-4 max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+              <h3 className="text-lg font-medium text-vulcan-paper flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-vulcan-paper" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                 </svg>
                 Select Shipping Routes
               </h3>
               <button 
                 onClick={() => setShowRoutesModal(false)}
-                className="text-neutral-500 hover:text-white transition-colors p-1"
+                className="text-vulcan-muted hover:text-vulcan-paper transition-colors p-1"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -1607,14 +1602,14 @@ export default function EarthMap() {
             <div className="flex gap-3 mb-4">
               <button
                 onClick={() => setEnabledRoutes(new Set(shippingRoutes.map(r => r.id)))}
-                className="text-sm text-white hover:text-neutral-300 transition-colors underline underline-offset-2"
+                className="text-sm text-vulcan-paper hover:text-vulcan-aluminum transition-colors underline underline-offset-2"
               >
                 Select All
               </button>
-              <span className="text-neutral-700">|</span>
+              <span className="text-vulcan-paper/20">|</span>
               <button
                 onClick={() => setEnabledRoutes(new Set())}
-                className="text-sm text-neutral-400 hover:text-white transition-colors underline underline-offset-2"
+                className="text-sm text-vulcan-muted hover:text-vulcan-paper transition-colors underline underline-offset-2"
               >
                 Clear All
               </button>
@@ -1625,10 +1620,10 @@ export default function EarthMap() {
               {shippingRoutes.map((route) => (
                 <label
                   key={route.id}
-                  className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all ${
+                  className={`flex items-center gap-3 p-3 cursor-pointer transition-all ${
                     enabledRoutes.has(route.id)
-                      ? 'bg-neutral-900 border border-white/30'
-                      : 'bg-neutral-900/50 border border-transparent hover:bg-neutral-900 hover:border-neutral-700'
+                      ? 'bg-vulcan-charcoal border border-white/25'
+                      : 'bg-white/[0.02] border border-transparent hover:bg-white/[0.04] hover:border-white/15'
                   }`}
                 >
                   <input
@@ -1646,14 +1641,14 @@ export default function EarthMap() {
                     className="sr-only"
                   />
                   <div 
-                    className={`w-5 h-5 rounded flex items-center justify-center border-2 transition-all ${
+                    className={`w-5 h-5 flex items-center justify-center border-2 transition-all ${
                       enabledRoutes.has(route.id)
-                        ? 'border-white bg-white'
-                        : 'border-neutral-600 bg-transparent'
+                        ? 'border-vulcan-paper bg-vulcan-paper'
+                        : 'border-white/25 bg-transparent'
                     }`}
                   >
                     {enabledRoutes.has(route.id) && (
-                      <svg className="w-3 h-3 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="w-3 h-3 text-vulcan-ink" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     )}
@@ -1661,25 +1656,25 @@ export default function EarthMap() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span 
-                        className="w-3 h-3 rounded-full flex-shrink-0" 
+                        className="h-2 w-2 flex-shrink-0" 
                         style={{ backgroundColor: route.color }}
                       />
-                      <span className="text-white font-medium text-sm">{route.id}</span>
+                      <span className="text-vulcan-paper font-medium text-sm">{route.id}</span>
                     </div>
-                    <p className="text-neutral-500 text-xs truncate mt-0.5">{route.name}</p>
+                    <p className="text-vulcan-muted text-xs truncate mt-0.5">{route.name}</p>
                   </div>
                 </label>
               ))}
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between mt-5 pt-4 border-t border-neutral-800">
-              <p className="text-neutral-500 text-sm">
+            <div className="flex items-center justify-between mt-5 pt-4 border-t border-white/10">
+              <p className="text-vulcan-muted text-sm">
                 {enabledRoutes.size} of {shippingRoutes.length} routes selected
               </p>
               <button
                 onClick={() => setShowRoutesModal(false)}
-                className="px-5 py-2 bg-white text-black text-sm font-semibold rounded-lg hover:bg-neutral-200 transition-all"
+                className="px-5 py-2 bg-vulcan-paper text-vulcan-ink font-mono text-[11px] uppercase tracking-[0.18em] hover:bg-white transition-all"
               >
                 Apply Routes
               </button>
@@ -1691,21 +1686,21 @@ export default function EarthMap() {
       {/* Vessel Type Filter Modal */}
       {showVesselFilters && (
         <div
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] flex items-center justify-center"
+          className="fixed inset-0 bg-vulcan-ink/80 backdrop-blur-sm z-[9999] flex items-center justify-center"
           onClick={() => setShowVesselFilters(false)}
         >
           <div
-            className="bg-neutral-950 border border-neutral-800 rounded-xl p-4 sm:p-6 max-w-md w-full mx-2 sm:mx-4 shadow-2xl"
+            className="bg-vulcan-charcoal border border-white/10 p-4 sm:p-6 max-w-md w-full mx-2 sm:mx-4"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+              <h3 className="text-lg font-medium text-vulcan-paper flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                 </svg>
                 Vessel Types
               </h3>
-              <button onClick={() => setShowVesselFilters(false)} className="text-neutral-500 hover:text-white transition-colors p-1">
+              <button onClick={() => setShowVesselFilters(false)} className="text-vulcan-muted hover:text-vulcan-paper transition-colors p-1">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>
@@ -1713,22 +1708,13 @@ export default function EarthMap() {
             </div>
 
             <div className="space-y-2">
-              {[
-                { key: 'tanker', label: 'Tanker', color: '#EF4444' },
-                { key: 'oil_tanker', label: 'Oil Tanker', color: '#DC2626' },
-                { key: 'chemical_tanker', label: 'Chemical Tanker', color: '#F97316' },
-                { key: 'bulk_carrier', label: 'Dry Bulk Carrier', color: '#3B82F6' },
-                { key: 'container', label: 'Container Ship', color: '#8B5CF6' },
-                { key: 'general_cargo', label: 'General Cargo', color: '#6B7280' },
-                { key: 'lng_carrier', label: 'LNG Carrier', color: '#06B6D4' },
-                { key: 'lpg_carrier', label: 'LPG Carrier', color: '#14B8A6' },
-              ].map(({ key, label, color }) => (
+              {VESSEL_TYPES.map(({ key, label, color }) => (
                 <label
                   key={key}
-                  className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all ${
+                  className={`flex items-center gap-3 p-3 cursor-pointer transition-all ${
                     vesselCategoryFilter.has(key)
-                      ? 'bg-neutral-900 border border-white/20'
-                      : 'bg-neutral-900/50 border border-transparent hover:bg-neutral-900'
+                      ? 'bg-vulcan-charcoal border border-white/20'
+                      : 'bg-white/[0.02] border border-transparent hover:bg-white/[0.04]'
                   }`}
                 >
                   <input
@@ -1742,26 +1728,26 @@ export default function EarthMap() {
                     }}
                     className="sr-only"
                   />
-                  <div className={`w-5 h-5 rounded flex items-center justify-center border-2 transition-all ${
-                    vesselCategoryFilter.has(key) ? 'border-white bg-white' : 'border-neutral-600 bg-transparent'
+                  <div className={`w-5 h-5 flex items-center justify-center border-2 transition-all ${
+                    vesselCategoryFilter.has(key) ? 'border-vulcan-paper bg-vulcan-paper' : 'border-white/25 bg-transparent'
                   }`}>
                     {vesselCategoryFilter.has(key) && (
-                      <svg className="w-3 h-3 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg className="w-3 h-3 text-vulcan-ink" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     )}
                   </div>
-                  <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
-                  <span className="text-white text-sm font-medium">{label}</span>
+                  <span className="h-2 w-2 flex-shrink-0" style={{ backgroundColor: color }} />
+                  <span className="text-vulcan-paper text-sm font-medium">{label}</span>
                 </label>
               ))}
             </div>
 
-            <div className="flex items-center justify-between mt-5 pt-4 border-t border-neutral-800">
-              <p className="text-neutral-500 text-sm">{vesselCategoryFilter.size} types selected</p>
+            <div className="flex items-center justify-between mt-5 pt-4 border-t border-white/10">
+              <p className="text-vulcan-muted text-sm">{vesselCategoryFilter.size} types selected</p>
               <button
                 onClick={() => setShowVesselFilters(false)}
-                className="px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-500 transition-all"
+                className="px-5 py-2 bg-vulcan-paper text-vulcan-ink font-mono text-[11px] uppercase tracking-[0.18em] hover:bg-white transition-all"
               >
                 Apply
               </button>
@@ -1789,7 +1775,7 @@ export default function EarthMap() {
         {/* Selected Point Info Panel - Left Side (desktop) / Bottom sheet (mobile) */}
         {selectedPoint.data && (
           <div 
-            className="absolute z-[9999] bg-black bg-opacity-95 border border-gray-500 rounded-xl p-4 sm:p-6 shadow-2xl backdrop-blur-sm overflow-y-auto
+            className="absolute z-[9999] bg-vulcan-ink/95 border border-white/10 p-4 sm:p-6 backdrop-blur-sm overflow-y-auto
               inset-x-2 bottom-2 max-h-[60vh]
               sm:inset-x-auto sm:bottom-auto sm:left-4 sm:top-1/2 sm:-translate-y-1/2 sm:w-80 sm:max-h-[80vh]"
             onClick={(e) => e.stopPropagation()}
@@ -1800,7 +1786,7 @@ export default function EarthMap() {
                 e.preventDefault()
                 setSelectedPoint({ data: null, type: null })
               }}
-              className="absolute top-3 right-3 text-gray-400 hover:text-white transition-colors z-10 bg-gray-800 rounded-full p-1"
+              className="absolute top-3 right-3 text-vulcan-muted hover:text-vulcan-paper hover:border-white/25 transition-colors z-10 border border-white/10 p-1"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -1811,9 +1797,9 @@ export default function EarthMap() {
               {satelliteMode && selectedPoint.data && 'latitude' in selectedPoint.data && selectedPoint.data.latitude && selectedPoint.data.longitude && (
                 <div className="mb-4">
                   <div className="flex items-center justify-between mb-2">
-                    <p className="text-emerald-400 text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5">
+                    <p className="text-vulcan-muted text-[10px] font-mono uppercase tracking-[0.18em] flex items-center gap-1.5">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       Satellite View
                     </p>
@@ -1827,10 +1813,10 @@ export default function EarthMap() {
                         <button
                           key={zoom}
                           onClick={(e) => { e.stopPropagation(); setSatelliteZoom(zoom) }}
-                          className={`px-1.5 py-0.5 text-[9px] rounded font-medium transition-all ${
+                          className={`px-1.5 py-0.5 text-[9px] font-medium transition-all ${
                             satelliteZoom === zoom
-                              ? 'bg-emerald-600 text-white'
-                              : 'bg-neutral-800 text-neutral-500 hover:bg-neutral-700 hover:text-neutral-300'
+                              ? 'bg-vulcan-paper text-vulcan-ink'
+                              : 'bg-vulcan-soft text-vulcan-muted hover:bg-white/[0.08] hover:text-vulcan-aluminum'
                           }`}
                         >
                           {label}
@@ -1839,7 +1825,7 @@ export default function EarthMap() {
                     </div>
                   </div>
                   <div
-                    className="relative rounded-lg overflow-hidden bg-neutral-900 border border-neutral-700/50 cursor-pointer group"
+                    className="relative overflow-hidden bg-vulcan-charcoal border border-white/[0.06] cursor-pointer group"
                     onClick={(e) => { e.stopPropagation(); setFullscreenZoom(satelliteZoom); setSatelliteFullscreen(true) }}
                   >
                     <img
@@ -1848,13 +1834,13 @@ export default function EarthMap() {
                       className="w-full h-[200px] object-cover transition-transform group-hover:scale-105"
                       loading="eager"
                     />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all flex items-center justify-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white opacity-0 group-hover:opacity-90 transition-opacity drop-shadow-lg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
+                    <div className="absolute inset-0 bg-transparent group-hover:bg-vulcan-ink/20 transition-all flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-vulcan-paper opacity-0 group-hover:opacity-90 transition-opacity drop-shadow-lg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" />
                       </svg>
                     </div>
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent px-2 py-1.5">
-                      <p className="text-[10px] text-neutral-300">
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-vulcan-ink/80 to-transparent px-2 py-1.5">
+                      <p className="text-[10px] text-vulcan-aluminum">
                         {selectedPoint.data.latitude.toFixed(4)}, {selectedPoint.data.longitude.toFixed(4)} — click to expand
                       </p>
                     </div>
@@ -1983,8 +1969,8 @@ export default function EarthMap() {
                 }
                 
                 return (
-                  <div className="text-white">
-                    <h3 className="text-xl font-bold text-orange-400 mb-4 pr-8">
+                  <div className="text-vulcan-paper">
+                    <h3 className="text-xl font-medium leading-tight tracking-[-0.01em] text-vulcan-paper mb-5 pr-10">
                       {data.title}
                     </h3>
                     <div className="space-y-2 text-sm">
@@ -2007,8 +1993,8 @@ export default function EarthMap() {
                           }
                           return (
                             <div key={key} className="py-1">
-                              <span className="text-gray-400">{label}:</span>
-                              <ul className="ml-4 mt-1 text-gray-200">
+                              <span className="text-vulcan-muted">{label}:</span>
+                              <ul className="ml-4 mt-1 text-vulcan-paper/90">
                                 {value.map((item, i) => (
                                   <li key={i} className="text-xs">• {fmtItem(item)}</li>
                                 ))}
@@ -2020,7 +2006,7 @@ export default function EarthMap() {
                         // Format booleans
                         if (typeof value === 'boolean') {
                           return (
-                            <p key={key} className={value ? 'text-green-400' : 'text-gray-400'}>
+                            <p key={key} className={value ? 'text-vulcan-paper' : 'text-vulcan-muted'}>
                               {value ? '✓' : '✗'} {label}
                             </p>
                           )
@@ -2030,8 +2016,8 @@ export default function EarthMap() {
                         if (typeof value === 'number') {
                           return (
                             <p key={key}>
-                              <span className="text-gray-400">{label}:</span>{' '}
-                              <span className="text-gray-200">{value.toLocaleString()}</span>
+                              <span className="text-vulcan-muted">{label}:</span>{' '}
+                              <span className="text-vulcan-paper/90">{value.toLocaleString()}</span>
                             </p>
                           )
                         }
@@ -2039,15 +2025,15 @@ export default function EarthMap() {
                         // Format strings
                         return (
                           <p key={key}>
-                            <span className="text-gray-400">{label}:</span>{' '}
-                            <span className="text-gray-200">{String(value)}</span>
+                            <span className="text-vulcan-muted">{label}:</span>{' '}
+                            <span className="text-vulcan-paper/90">{String(value)}</span>
                           </p>
                         )
                       })}
                       {/* Render additional_info JSONB fields */}
                       {data.additional_info && typeof data.additional_info === 'object' && Object.keys(data.additional_info as Record<string, any>).length > 0 && (
-                        <div className="mt-3 pt-3 border-t border-gray-700">
-                          <p className="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-2">Additional Details</p>
+                        <div className="mt-3 pt-3 border-t border-white/10">
+                          <p className="text-vulcan-muted text-[10px] font-mono uppercase tracking-[0.18em] mb-2">Additional Details</p>
                           {Object.entries(data.additional_info as Record<string, any>).map(([key, val]) => {
                             if (val === null || val === undefined || val === '') return null
                             const label = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
@@ -2055,8 +2041,8 @@ export default function EarthMap() {
                               if (val.length === 0) return null
                               return (
                                 <div key={key} className="py-1">
-                                  <span className="text-gray-400">{label}:</span>
-                                  <ul className="ml-4 mt-1 text-gray-200">
+                                  <span className="text-vulcan-muted">{label}:</span>
+                                  <ul className="ml-4 mt-1 text-vulcan-paper/90">
                                     {val.map((item, i) => (
                                       <li key={i} className="text-xs">• {String(item)}</li>
                                     ))}
@@ -2066,14 +2052,14 @@ export default function EarthMap() {
                             }
                             return (
                               <p key={key}>
-                                <span className="text-gray-400">{label}:</span>{' '}
-                                <span className="text-gray-200">{String(val)}</span>
+                                <span className="text-vulcan-muted">{label}:</span>{' '}
+                                <span className="text-vulcan-paper/90">{String(val)}</span>
                               </p>
                             )
                           })}
                         </div>
                       )}
-                      <p className="text-xs text-gray-500 mt-4 pt-2 border-t border-gray-700">
+                      <p className="text-xs text-vulcan-muted mt-4 pt-2 border-t border-white/10">
                         Coordinates: {data.latitude?.toFixed(4)}, {data.longitude?.toFixed(4)}
                       </p>
                     </div>
@@ -2084,21 +2070,21 @@ export default function EarthMap() {
               {selectedPoint.type === 'refinery' && (() => {
                 const data = selectedPoint.data as RefineryData
                 return (
-                  <div className="text-white">
-                    <h3 className="text-xl font-bold text-yellow-400 mb-4 pr-8">
+                  <div className="text-vulcan-paper">
+                    <h3 className="text-xl font-medium leading-tight tracking-[-0.01em] text-vulcan-paper mb-5 pr-10">
                       {data.name}
                     </h3>
                     <div className="space-y-2 text-sm">
-                      {data.operator && <p><span className="text-gray-400">Operator:</span> <span className="text-gray-200">{data.operator}</span></p>}
-                      {data.country && <p><span className="text-gray-400">Country:</span> <span className="text-gray-200">{data.country}</span></p>}
-                      {data.city && <p><span className="text-gray-400">City:</span> <span className="text-gray-200">{data.city}</span></p>}
-                      {data.address && <p><span className="text-gray-400">Address:</span> <span className="text-gray-200">{data.address}</span></p>}
-                      {data.capacity_bpd > 0 && <p><span className="text-gray-400">Capacity:</span> <span className="text-gray-200">{data.capacity_bpd.toLocaleString()} bpd</span></p>}
-                      {data.operational_status && <p><span className="text-gray-400">Status:</span> <span className="text-gray-200">{data.operational_status}</span></p>}
+                      {data.operator && <p><span className="text-vulcan-muted">Operator:</span> <span className="text-vulcan-paper/90">{data.operator}</span></p>}
+                      {data.country && <p><span className="text-vulcan-muted">Country:</span> <span className="text-vulcan-paper/90">{data.country}</span></p>}
+                      {data.city && <p><span className="text-vulcan-muted">City:</span> <span className="text-vulcan-paper/90">{data.city}</span></p>}
+                      {data.address && <p><span className="text-vulcan-muted">Address:</span> <span className="text-vulcan-paper/90">{data.address}</span></p>}
+                      {data.capacity_bpd > 0 && <p><span className="text-vulcan-muted">Capacity:</span> <span className="text-vulcan-paper/90">{data.capacity_bpd.toLocaleString()} bpd</span></p>}
+                      {data.operational_status && <p><span className="text-vulcan-muted">Status:</span> <span className="text-vulcan-paper/90">{data.operational_status}</span></p>}
                       {data.crude_types_accepted && data.crude_types_accepted.length > 0 && (
                         <p>
-                          <span className="text-gray-400">Crude Types:</span>{' '}
-                          <span className="text-gray-200">
+                          <span className="text-vulcan-muted">Crude Types:</span>{' '}
+                          <span className="text-vulcan-paper/90">
                             {data.crude_types_accepted.map(t => {
                               if (t === 'light') return 'Light';
                               if (t === 'medium') return 'Medium';
@@ -2108,7 +2094,7 @@ export default function EarthMap() {
                           </span>
                         </p>
                       )}
-                      <p className="text-xs text-gray-500 mt-4 pt-2 border-t border-gray-700">
+                      <p className="text-xs text-vulcan-muted mt-4 pt-2 border-t border-white/10">
                         Coordinates: {data.latitude?.toFixed(4)}, {data.longitude?.toFixed(4)}
                       </p>
                     </div>
@@ -2121,14 +2107,14 @@ export default function EarthMap() {
         {/* Selected Vessel Info Panel */}
         {selectedVessel && (
           <div
-            className="absolute z-[9999] bg-black bg-opacity-95 border border-blue-500/50 rounded-xl p-4 sm:p-6 shadow-2xl backdrop-blur-sm overflow-y-auto
+            className="absolute z-[9999] bg-vulcan-ink/95 border border-white/10 p-4 sm:p-6 backdrop-blur-sm overflow-y-auto
               inset-x-2 bottom-2 max-h-[60vh]
               sm:inset-x-auto sm:bottom-auto sm:left-4 sm:top-1/2 sm:-translate-y-1/2 sm:w-96 sm:max-h-[80vh]"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={(e) => { e.stopPropagation(); setSelectedVessel(null) }}
-              className="absolute top-3 right-3 text-gray-400 hover:text-white transition-colors z-10 bg-gray-800 rounded-full p-1"
+              className="absolute top-3 right-3 text-vulcan-muted hover:text-vulcan-paper hover:border-white/25 transition-colors z-10 border border-white/10 p-1"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -2137,9 +2123,9 @@ export default function EarthMap() {
 
             {/* Vessel Header */}
             <div className="flex items-start gap-3 mb-5">
-              <div className="w-12 h-12 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center flex-shrink-0">
+              <div className="w-12 h-12 bg-white/[0.04] border border-white/10 flex items-center justify-center flex-shrink-0">
                 <svg viewBox="0 0 24 24" className="w-7 h-7" fill="none" stroke={
-                  ({'tanker': '#EF4444', 'oil_tanker': '#DC2626', 'chemical_tanker': '#F97316', 'bulk_carrier': '#3B82F6', 'container': '#8B5CF6', 'lng_carrier': '#06B6D4', 'lpg_carrier': '#14B8A6'} as Record<string, string>)[selectedVessel.ship_category || ''] || '#9CA3AF'
+                  VESSEL_COLORS[selectedVessel.ship_category || ''] || VESSEL_COLORS.other
                 } strokeWidth="1.5">
                   <path d="M3 17h1l2-7h12l2 7h1" />
                   <path d="M6 10V6a1 1 0 011-1h3v5" />
@@ -2148,11 +2134,11 @@ export default function EarthMap() {
                 </svg>
               </div>
               <div className="flex-1 min-w-0 pr-6">
-                <h3 className="text-lg font-bold text-white truncate">
+                <h3 className="text-lg font-medium text-vulcan-paper truncate">
                   {selectedVessel.vessel_name || 'Unknown Vessel'}
                 </h3>
-                <p className="text-xs font-semibold uppercase tracking-wider mt-0.5" style={{
-                  color: ({'tanker': '#EF4444', 'oil_tanker': '#DC2626', 'chemical_tanker': '#F97316', 'bulk_carrier': '#3B82F6', 'container': '#8B5CF6', 'lng_carrier': '#06B6D4', 'lpg_carrier': '#14B8A6'} as Record<string, string>)[selectedVessel.ship_category || ''] || '#9CA3AF'
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] mt-1" style={{
+                  color: VESSEL_COLORS[selectedVessel.ship_category || ''] || VESSEL_COLORS.other
                 }}>
                   {(selectedVessel.ship_category || 'vessel').replace(/_/g, ' ')}
                 </p>
@@ -2160,42 +2146,42 @@ export default function EarthMap() {
             </div>
 
             {/* Live Position */}
-            <div className="bg-neutral-900/80 rounded-lg p-3 mb-4 border border-neutral-800">
-              <p className="text-[10px] uppercase tracking-wider text-blue-400 font-semibold mb-2 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span>
+            <div className="bg-white/[0.03] p-3 mb-4 border border-white/10">
+              <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-vulcan-muted mb-2 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 bg-vulcan-signal animate-pulse"></span>
                 Live Position
               </p>
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div>
-                  <p className="text-gray-500 text-[10px]">Latitude</p>
-                  <p className="text-white font-mono">{selectedVessel.latitude?.toFixed(5)}</p>
+                  <p className="text-vulcan-muted text-[10px]">Latitude</p>
+                  <p className="text-vulcan-paper font-mono">{selectedVessel.latitude?.toFixed(5)}</p>
                 </div>
                 <div>
-                  <p className="text-gray-500 text-[10px]">Longitude</p>
-                  <p className="text-white font-mono">{selectedVessel.longitude?.toFixed(5)}</p>
+                  <p className="text-vulcan-muted text-[10px]">Longitude</p>
+                  <p className="text-vulcan-paper font-mono">{selectedVessel.longitude?.toFixed(5)}</p>
                 </div>
                 {selectedVessel.speed_knots != null && (
                   <div>
-                    <p className="text-gray-500 text-[10px]">Speed</p>
-                    <p className="text-white font-mono">{selectedVessel.speed_knots} kn</p>
+                    <p className="text-vulcan-muted text-[10px]">Speed</p>
+                    <p className="text-vulcan-paper font-mono">{selectedVessel.speed_knots} kn</p>
                   </div>
                 )}
                 {selectedVessel.course != null && (
                   <div>
-                    <p className="text-gray-500 text-[10px]">Course</p>
-                    <p className="text-white font-mono">{selectedVessel.course}°</p>
+                    <p className="text-vulcan-muted text-[10px]">Course</p>
+                    <p className="text-vulcan-paper font-mono">{selectedVessel.course}°</p>
                   </div>
                 )}
                 {selectedVessel.heading != null && (
                   <div>
-                    <p className="text-gray-500 text-[10px]">Heading</p>
-                    <p className="text-white font-mono">{selectedVessel.heading}°</p>
+                    <p className="text-vulcan-muted text-[10px]">Heading</p>
+                    <p className="text-vulcan-paper font-mono">{selectedVessel.heading}°</p>
                   </div>
                 )}
                 {selectedVessel.navigation_status && (
                   <div>
-                    <p className="text-gray-500 text-[10px]">Nav Status</p>
-                    <p className="text-white text-xs">{selectedVessel.navigation_status}</p>
+                    <p className="text-vulcan-muted text-[10px]">Nav Status</p>
+                    <p className="text-vulcan-paper text-xs">{selectedVessel.navigation_status}</p>
                   </div>
                 )}
               </div>
@@ -2203,29 +2189,29 @@ export default function EarthMap() {
 
             {/* Voyage Info */}
             {(selectedVessel.destination || selectedVessel.flag_country) && (
-              <div className="bg-neutral-900/80 rounded-lg p-3 mb-4 border border-neutral-800">
-                <p className="text-[10px] uppercase tracking-wider text-amber-400 font-semibold mb-2">Voyage Information</p>
+              <div className="bg-white/[0.03] p-3 mb-4 border border-white/10">
+                <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-vulcan-muted mb-2">Voyage Information</p>
                 <div className="space-y-2 text-sm">
                   {selectedVessel.destination && (
                     <div className="flex items-start gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-amber-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-vulcan-muted mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
                       <div>
-                        <p className="text-gray-500 text-[10px]">Destination</p>
-                        <p className="text-white">{selectedVessel.destination}</p>
+                        <p className="text-vulcan-muted text-[10px]">Destination</p>
+                        <p className="text-vulcan-paper">{selectedVessel.destination}</p>
                       </div>
                     </div>
                   )}
                   {selectedVessel.flag_country && (
                     <div className="flex items-start gap-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-amber-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-vulcan-muted mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
                       </svg>
                       <div>
-                        <p className="text-gray-500 text-[10px]">Flag State</p>
-                        <p className="text-white">{selectedVessel.flag_country}</p>
+                        <p className="text-vulcan-muted text-[10px]">Flag State</p>
+                        <p className="text-vulcan-paper">{selectedVessel.flag_country}</p>
                       </div>
                     </div>
                   )}
@@ -2235,19 +2221,19 @@ export default function EarthMap() {
 
             {/* Voyage Details (ETA, cargo) */}
             {(selectedVessel.eta || selectedVessel.cargo_type) && (
-              <div className="bg-neutral-900/80 rounded-lg p-3 mb-4 border border-neutral-800">
-                <p className="text-[10px] uppercase tracking-wider text-cyan-400 font-semibold mb-2">Cargo & Schedule</p>
+              <div className="bg-white/[0.03] p-3 mb-4 border border-white/10">
+                <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-vulcan-muted mb-2">Cargo & Schedule</p>
                 <div className="space-y-1.5 text-sm">
                   {selectedVessel.cargo_type && (
                     <div className="flex justify-between">
-                      <span className="text-gray-500">Cargo</span>
-                      <span className="text-white text-xs">{selectedVessel.cargo_type}</span>
+                      <span className="text-vulcan-muted">Cargo</span>
+                      <span className="text-vulcan-paper text-xs">{selectedVessel.cargo_type}</span>
                     </div>
                   )}
                   {selectedVessel.eta && (
                     <div className="flex justify-between">
-                      <span className="text-gray-500">ETA</span>
-                      <span className="text-white text-xs">{selectedVessel.eta}</span>
+                      <span className="text-vulcan-muted">ETA</span>
+                      <span className="text-vulcan-paper text-xs">{selectedVessel.eta}</span>
                     </div>
                   )}
                 </div>
@@ -2255,65 +2241,65 @@ export default function EarthMap() {
             )}
 
             {/* Vessel Details */}
-            <div className="bg-neutral-900/80 rounded-lg p-3 mb-4 border border-neutral-800">
-              <p className="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold mb-2">Vessel Details</p>
+            <div className="bg-white/[0.03] p-3 mb-4 border border-white/10">
+              <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-vulcan-muted mb-2">Vessel Details</p>
               <div className="space-y-1.5 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-500">MMSI</span>
-                  <span className="text-white font-mono text-xs">{selectedVessel.mmsi}</span>
+                  <span className="text-vulcan-muted">MMSI</span>
+                  <span className="text-vulcan-paper font-mono text-xs">{selectedVessel.mmsi}</span>
                 </div>
                 {selectedVessel.imo_number && (
                   <div className="flex justify-between">
-                    <span className="text-gray-500">IMO</span>
-                    <span className="text-white font-mono text-xs">{selectedVessel.imo_number}</span>
+                    <span className="text-vulcan-muted">IMO</span>
+                    <span className="text-vulcan-paper font-mono text-xs">{selectedVessel.imo_number}</span>
                   </div>
                 )}
                 {selectedVessel.call_sign && (
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Call Sign</span>
-                    <span className="text-white font-mono text-xs">{selectedVessel.call_sign}</span>
+                    <span className="text-vulcan-muted">Call Sign</span>
+                    <span className="text-vulcan-paper font-mono text-xs">{selectedVessel.call_sign}</span>
                   </div>
                 )}
                 {selectedVessel.ship_type != null && (
                   <div className="flex justify-between">
-                    <span className="text-gray-500">AIS Ship Type</span>
-                    <span className="text-white font-mono text-xs">{selectedVessel.ship_type}</span>
+                    <span className="text-vulcan-muted">AIS Ship Type</span>
+                    <span className="text-vulcan-paper font-mono text-xs">{selectedVessel.ship_type}</span>
                   </div>
                 )}
                 {selectedVessel.size_category && (
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Size Class</span>
-                    <span className="text-white text-xs capitalize">{selectedVessel.size_category.replace(/_/g, ' ')}</span>
+                    <span className="text-vulcan-muted">Size Class</span>
+                    <span className="text-vulcan-paper text-xs capitalize">{selectedVessel.size_category.replace(/_/g, ' ')}</span>
                   </div>
                 )}
                 {selectedVessel.length_meters != null && (
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Length</span>
-                    <span className="text-white font-mono text-xs">{selectedVessel.length_meters} m</span>
+                    <span className="text-vulcan-muted">Length</span>
+                    <span className="text-vulcan-paper font-mono text-xs">{selectedVessel.length_meters} m</span>
                   </div>
                 )}
                 {selectedVessel.width_meters != null && (
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Width</span>
-                    <span className="text-white font-mono text-xs">{selectedVessel.width_meters} m</span>
+                    <span className="text-vulcan-muted">Width</span>
+                    <span className="text-vulcan-paper font-mono text-xs">{selectedVessel.width_meters} m</span>
                   </div>
                 )}
                 {selectedVessel.draught != null && (
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Draught</span>
-                    <span className="text-white font-mono text-xs">{selectedVessel.draught} m</span>
+                    <span className="text-vulcan-muted">Draught</span>
+                    <span className="text-vulcan-paper font-mono text-xs">{selectedVessel.draught} m</span>
                   </div>
                 )}
                 {selectedVessel.dwt != null && (
                   <div className="flex justify-between">
-                    <span className="text-gray-500">DWT</span>
-                    <span className="text-white font-mono text-xs">{selectedVessel.dwt.toLocaleString()} t</span>
+                    <span className="text-vulcan-muted">DWT</span>
+                    <span className="text-vulcan-paper font-mono text-xs">{selectedVessel.dwt.toLocaleString()} t</span>
                   </div>
                 )}
                 {selectedVessel.last_position_update && (
                   <div className="flex justify-between">
-                    <span className="text-gray-500">Last Update</span>
-                    <span className="text-white text-xs">{new Date(selectedVessel.last_position_update).toLocaleString()}</span>
+                    <span className="text-vulcan-muted">Last Update</span>
+                    <span className="text-vulcan-paper text-xs">{new Date(selectedVessel.last_position_update).toLocaleString()}</span>
                   </div>
                 )}
               </div>
@@ -2322,8 +2308,8 @@ export default function EarthMap() {
             {/* Satellite view of vessel position */}
             {satelliteMode && selectedVessel.latitude && selectedVessel.longitude && (
               <div className="mb-3">
-                <p className="text-[10px] uppercase tracking-wider text-emerald-400 font-semibold mb-1.5">Satellite View</p>
-                <div className="rounded-lg overflow-hidden border border-neutral-700/50">
+                <p className="text-[10px] font-mono uppercase tracking-[0.18em] text-vulcan-muted mb-1.5">Satellite View</p>
+                <div className="overflow-hidden border border-white/[0.06]">
                   <img
                     src={`https://api.mapbox.com/styles/v1/mapbox/satellite-v9/static/${selectedVessel.longitude},${selectedVessel.latitude},8,0/360x180@2x?access_token=${MAPBOX_TOKEN}`}
                     alt="Vessel position satellite view"
@@ -2336,50 +2322,34 @@ export default function EarthMap() {
           </div>
         )}
 
-        {/* Results Counter */}
-        <div className="absolute bottom-3 right-3 sm:bottom-6 sm:right-6 bg-black bg-opacity-90 border border-gray-600 rounded-lg sm:rounded-xl px-3 py-2 sm:px-6 sm:py-3 z-10 shadow-2xl backdrop-blur-sm max-w-[calc(100%-24px)] sm:max-w-none">
-          <p className="text-white text-xs sm:text-base font-semibold flex items-center gap-2">
-            <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse flex-shrink-0"></span>
-            {markers.length} location{markers.length !== 1 ? 's' : ''} found
+        <div className="pointer-events-none absolute bottom-3 right-3 z-10 flex items-center gap-2.5 border border-white/10 bg-vulcan-ink/85 px-3 py-2 backdrop-blur-md sm:bottom-6 sm:right-6 sm:px-4 sm:py-2.5">
+          <span className="h-1.5 w-1.5 flex-shrink-0 animate-pulse bg-vulcan-signal" />
+          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-vulcan-aluminum sm:text-[11px]">
+            <span className="text-vulcan-paper">{markers.length.toLocaleString()}</span> location{markers.length !== 1 ? 's' : ''}
           </p>
         </div>
 
-        {/* Legend */}
-        <div className="absolute top-3 right-3 sm:top-6 sm:right-6 bg-black bg-opacity-90 border border-gray-600 rounded-lg sm:rounded-xl p-2.5 sm:p-4 z-10 shadow-2xl backdrop-blur-sm">
-          <p className="text-white font-semibold mb-2 sm:mb-3 text-[10px] sm:text-sm">Commodity Types</p>
-          <div className="space-y-1 sm:space-y-2 text-[10px] sm:text-xs">
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-[#FF6B35]"></div>
-              <span className="text-gray-300">Energy</span>
-            </div>
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-[#FFD700]"></div>
-              <span className="text-gray-300">Metals</span>
-            </div>
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-[#10B981]"></div>
-              <span className="text-gray-300">Agricultural</span>
-            </div>
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-[#3B82F6]"></div>
-              <span className="text-gray-300">Industrial</span>
-            </div>
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              <div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-[#EC4899]"></div>
-              <span className="text-gray-300">Livestock</span>
-            </div>
-          </div>
+        <div className="pointer-events-none absolute right-3 top-3 z-10 border border-white/10 bg-vulcan-ink/85 px-3 py-2.5 backdrop-blur-md sm:right-6 sm:top-6 sm:px-4 sm:py-3.5">
+          <p className="mb-2.5 font-mono text-[10px] uppercase tracking-[0.22em] text-vulcan-muted">Commodity types</p>
+          <ul className="space-y-1.5 sm:space-y-2">
+            {Object.entries(COMMODITY_COLORS).map(([type, color]) => (
+              <li key={type} className="flex items-center gap-2.5 font-mono text-[10px] uppercase tracking-[0.16em] text-vulcan-aluminum sm:text-[11px]">
+                <span className="h-1.5 w-1.5 flex-shrink-0" style={{ backgroundColor: color }} />
+                {type}
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
 
       {/* Satellite Fullscreen Modal */}
       {satelliteFullscreen && selectedPoint.data && 'latitude' in selectedPoint.data && selectedPoint.data.latitude && selectedPoint.data.longitude && (
         <div
-          className="fixed inset-0 z-[99999] bg-black/90 backdrop-blur-md flex items-center justify-center"
+          className="fixed inset-0 z-[99999] bg-vulcan-ink/90 backdrop-blur-md flex items-center justify-center"
           onClick={() => setSatelliteFullscreen(false)}
         >
           <div
-            className="relative w-[95vw] h-[85vh] max-w-[1200px] max-h-[800px] rounded-2xl overflow-hidden border border-neutral-700 shadow-2xl"
+            className="relative w-[95vw] h-[85vh] max-w-[1200px] max-h-[800px] overflow-hidden border border-white/10"
             onClick={(e) => e.stopPropagation()}
           >
             <img
@@ -2390,20 +2360,20 @@ export default function EarthMap() {
             />
 
             {/* Top bar with title and close */}
-            <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/80 via-black/40 to-transparent p-4 flex items-start justify-between">
+            <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-vulcan-ink/80 via-vulcan-ink/40 to-transparent p-4 flex items-start justify-between">
               <div>
-                <h3 className="text-white font-bold text-lg drop-shadow-lg">
+                <h3 className="text-vulcan-paper font-medium text-lg drop-shadow-lg">
                   {selectedPoint.type === 'refinery'
                     ? (selectedPoint.data as RefineryData).name
                     : (selectedPoint.data as CommodityData).title}
                 </h3>
-                <p className="text-neutral-300 text-sm drop-shadow">
+                <p className="text-vulcan-aluminum text-sm drop-shadow">
                   {selectedPoint.data.latitude.toFixed(5)}, {selectedPoint.data.longitude.toFixed(5)}
                 </p>
               </div>
               <button
                 onClick={() => setSatelliteFullscreen(false)}
-                className="p-2 rounded-full bg-black/50 hover:bg-black/80 text-white transition-all"
+                className="p-2 border border-white/15 bg-vulcan-ink/50 hover:bg-vulcan-ink/80 text-vulcan-paper transition-all"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -2412,7 +2382,7 @@ export default function EarthMap() {
             </div>
 
             {/* Bottom zoom controls */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4 flex items-end justify-between">
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-vulcan-ink/80 via-vulcan-ink/40 to-transparent p-4 flex items-end justify-between">
               <div className="flex gap-1.5">
                 {[
                   { label: 'Area', zoom: 12 },
@@ -2424,17 +2394,17 @@ export default function EarthMap() {
                   <button
                     key={zoom}
                     onClick={() => setFullscreenZoom(zoom)}
-                    className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-all ${
+                    className={`px-3 py-1.5 text-xs font-medium transition-all ${
                       fullscreenZoom === zoom
-                        ? 'bg-emerald-600 text-white'
-                        : 'bg-black/60 text-neutral-300 hover:bg-black/80 hover:text-white border border-neutral-600'
+                        ? 'bg-vulcan-paper text-vulcan-ink'
+                        : 'bg-vulcan-ink/60 text-vulcan-aluminum hover:bg-vulcan-ink/80 hover:text-vulcan-paper border border-white/25'
                     }`}
                   >
                     {label}
                   </button>
                 ))}
               </div>
-              <p className="text-neutral-400 text-xs">
+              <p className="text-vulcan-muted text-xs">
                 Zoom {fullscreenZoom} — Press Esc or click outside to close
               </p>
             </div>
