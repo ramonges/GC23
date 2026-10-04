@@ -66,7 +66,7 @@ export default function PlatformSidebar({ userEmail }: PlatformSidebarProps) {
     'w-full border border-white/10 bg-vulcan-ink px-3 py-2 text-sm text-vulcan-paper placeholder-vulcan-muted focus:border-white/30 focus:outline-none'
   const label = 'mb-1.5 block font-mono text-[10px] uppercase tracking-[0.18em] text-vulcan-muted'
   const row =
-    'flex w-full items-center gap-3 px-3 py-2.5 font-mono text-[11px] uppercase tracking-[0.16em] transition-colors'
+    'flex w-full items-center gap-3 px-3 py-2.5 font-mono text-[11px] uppercase tracking-[0.1em] transition-colors'
 
   return (
     <>
@@ -106,7 +106,7 @@ export default function PlatformSidebar({ userEmail }: PlatformSidebarProps) {
                   {isActive && <span className="absolute inset-y-0 left-0 w-px bg-vulcan-signal" />}
                   <span className="w-5 text-vulcan-muted">{String(i + 1).padStart(2, '0')}</span>
                   <Icon size={15} strokeWidth={1.5} />
-                  <span className="truncate">{item.label}</span>
+                  <span className="leading-snug">{item.label}</span>
                 </Link>
               )
             })}
