@@ -23,7 +23,7 @@ const SECTIONS = [
   },
   {
     title: '3D models',
-    body: 'Robots are shown as stylised placeholders built from primitives, with one named mesh per part. Licensed GLB models can replace them without changing the data.',
+    body: 'Microduck is open hardware, so it is shown from its published CAD, assembled with the official MuJoCo model and its part masses taken from that model. Tesla Optimus is a procedural reconstruction from public renders. The other robots are stylised placeholders built from primitives. Every model uses one named mesh per part, so licensed GLB models can replace them without changing the data.',
   },
 ]
 

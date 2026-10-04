@@ -9518,1209 +9518,1118 @@
       ]
     },
     {
-      "id": "bdx",
-      "name": "BDX-style droid",
-      "maker": "Disney Research × NVIDIA (style)",
+      "id": "microduck",
+      "name": "Microduck",
+      "maker": "Hugging Face × Pollen Robotics",
       "archetype": "droid",
-      "height_m": 0.66,
-      "mass_kg": 15,
-      "battery_kwh": 0.4,
-      "dof": "≈ 14",
-      "blurb": "Expressive bipedal entertainment droid trained in simulation. Generic placeholder, not Disney’s design.",
+      "height_m": 0.27,
+      "mass_kg": 0.74,
+      "battery_kwh": 0.016,
+      "dof": "14 joints · 15 XL330 servos",
+      "blurb": "Tiny open-source bipedal duck, 3D-printed and driven by Dynamixel XL330 servos running RL policies trained in MuJoCo.",
       "palette": {
-        "shell": "#ECE8DF",
-        "dark": "#24272A",
-        "accent": "#F36B21",
-        "frame": "#9AA0A6"
+        "shell": "#D9D9D6",
+        "dark": "#212721",
+        "accent": "#FF671F",
+        "frame": "#ACA39A"
       },
-      "model": null,
+      "model": "/models/robots/microduck.glb",
       "parts": [
         {
-          "meshName": "skull_shell",
-          "label": "Head shell",
+          "meshName": "head_shell",
+          "label": "Head shell, face & jaw",
           "group": "head",
           "materials": [
             {
-              "component": "Outer shell",
+              "component": "Printed structure",
               "commodity": "plastics",
-              "grade": "PA12 (SLS-printed) shell, painted",
-              "mass_pct": 12.413,
-              "confidence": "medium"
+              "grade": "PLA, FDM-printed",
+              "mass_pct": 11.568,
+              "confidence": "high"
             },
             {
-              "component": "Inner frame",
-              "commodity": "aluminum",
-              "grade": "6061-T6 aluminum inner frame",
-              "mass_pct": 2.27,
-              "confidence": "medium"
-            },
-            {
-              "component": "Fasteners & inserts",
+              "component": "Bearings",
               "commodity": "iron",
-              "grade": "A2 stainless fasteners, brass-free inserts",
-              "mass_pct": 0.454,
+              "grade": "Thin-section deep-groove ball bearings (chrome steel)",
+              "mass_pct": 0.52,
+              "confidence": "high"
+            },
+            {
+              "component": "Fasteners",
+              "commodity": "iron",
+              "grade": "M2 / M2.5 steel machine screws",
+              "mass_pct": 0.65,
+              "confidence": "medium"
+            },
+            {
+              "component": "Inserts",
+              "commodity": "copper",
+              "grade": "Brass heat-set inserts (Cu-Zn)",
+              "mass_pct": 0.26,
+              "confidence": "low"
+            }
+          ]
+        },
+        {
+          "meshName": "beak_soft",
+          "label": "Soft beak",
+          "group": "head",
+          "materials": [
+            {
+              "component": "Beak",
+              "commodity": "elastomers",
+              "grade": "TPU 95A, printed",
+              "mass_pct": 1.842,
+              "confidence": "medium"
+            },
+            {
+              "component": "Fasteners",
+              "commodity": "iron",
+              "grade": "M2 steel screws",
+              "mass_pct": 0.057,
               "confidence": "medium"
             }
           ]
         },
         {
           "meshName": "head_sensors",
-          "label": "Eye lights & stereo cameras",
+          "label": "Camera, lens & eyes",
           "group": "head",
           "materials": [
             {
-              "component": "Image sensors",
-              "commodity": "silicon",
-              "grade": "CMOS image sensors (back-side illuminated)",
-              "mass_pct": 0.584,
+              "component": "Eye & lens holder prints",
+              "commodity": "plastics",
+              "grade": "PLA eye surrounds, M12 lens holder",
+              "mass_pct": 1.045,
               "confidence": "medium"
             },
             {
               "component": "Optics",
-              "commodity": "plastics",
-              "grade": "Polycarbonate / optical glass lenses",
-              "mass_pct": 0.714,
+              "commodity": "silicon",
+              "grade": "Optical glass (silica) lens elements",
+              "mass_pct": 0.228,
               "confidence": "low"
             },
             {
-              "component": "Sensor bracket",
+              "component": "Lens barrel",
               "commodity": "aluminum",
-              "grade": "6061-T6 bracket",
-              "mass_pct": 0.973,
-              "confidence": "medium"
-            },
-            {
-              "component": "Flex PCBs",
-              "commodity": "copper",
-              "grade": "Polyimide flex circuits",
-              "mass_pct": 0.486,
-              "confidence": "medium"
-            },
-            {
-              "component": "Flex PCBs",
-              "commodity": "plastics",
-              "grade": "Polyimide substrate",
-              "mass_pct": 0.324,
+              "grade": "Anodised aluminium M12 barrel",
+              "mass_pct": 0.228,
               "confidence": "low"
+            },
+            {
+              "component": "Camera & ToF boards",
+              "commodity": "copper",
+              "grade": "Flex cable and PCB copper",
+              "mass_pct": 0.19,
+              "confidence": "low"
+            },
+            {
+              "component": "Camera & ToF boards",
+              "commodity": "silicon",
+              "grade": "CMOS image sensor, ToF sensor die",
+              "mass_pct": 0.152,
+              "confidence": "low"
+            },
+            {
+              "component": "Camera & ToF boards",
+              "commodity": "tin",
+              "grade": "SAC305 solder",
+              "mass_pct": 0.057,
+              "confidence": "low"
+            }
+          ]
+        },
+        {
+          "meshName": "compute_head",
+          "label": "Raspberry Pi Zero 2 W & servo HAT",
+          "group": "head",
+          "materials": [
+            {
+              "component": "Boards",
+              "commodity": "plastics",
+              "grade": "FR-4 glass-epoxy laminate, connector housings",
+              "mass_pct": 1.594,
+              "confidence": "medium"
+            },
+            {
+              "component": "Boards",
+              "commodity": "copper",
+              "grade": "PCB copper layers",
+              "mass_pct": 0.678,
+              "confidence": "medium"
+            },
+            {
+              "component": "Headers & shields",
+              "commodity": "iron",
+              "grade": "Tin-plated steel shields, header pins",
+              "mass_pct": 0.407,
+              "confidence": "low"
+            },
+            {
+              "component": "Chips",
+              "commodity": "silicon",
+              "grade": "RP3A0 SiP, IMU, regulators",
+              "mass_pct": 0.271,
+              "confidence": "medium"
             },
             {
               "component": "Solder",
               "commodity": "tin",
               "grade": "SAC305 lead-free solder",
-              "mass_pct": 0.032,
+              "mass_pct": 0.136,
+              "confidence": "medium"
+            },
+            {
+              "component": "Connectors",
+              "commodity": "nickel",
+              "grade": "Nickel underplating on contacts",
+              "mass_pct": 0.034,
+              "confidence": "low"
+            }
+          ]
+        },
+        {
+          "meshName": "speaker",
+          "label": "Speaker",
+          "group": "head",
+          "materials": [
+            {
+              "component": "Frame & pole piece",
+              "commodity": "iron",
+              "grade": "Low-carbon steel frame and pole piece",
+              "mass_pct": 0.345,
+              "confidence": "medium"
+            },
+            {
+              "component": "Cone & surround",
+              "commodity": "plastics",
+              "grade": "Paper/PET cone, rubber surround",
+              "mass_pct": 0.279,
+              "confidence": "medium"
+            },
+            {
+              "component": "Voice coil & leads",
+              "commodity": "copper",
+              "grade": "Copper voice coil",
+              "mass_pct": 0.098,
+              "confidence": "medium"
+            },
+            {
+              "component": "Magnet",
+              "commodity": "neodymium",
+              "grade": "NdFeB magnet",
+              "mass_pct": 0.09,
               "confidence": "low"
             },
             {
-              "component": "Fasteners",
-              "commodity": "iron",
-              "grade": "A2 stainless fasteners",
-              "mass_pct": 0.13,
+              "component": "Magnet",
+              "commodity": "boron",
+              "grade": "B in Nd₂Fe₁₄B",
+              "mass_pct": 0.002,
+              "confidence": "low"
+            }
+          ]
+        },
+        {
+          "meshName": "actuator_head",
+          "label": "Head roll & beak servos ×2",
+          "group": "head",
+          "materials": [
+            {
+              "component": "Housing & gear train",
+              "commodity": "plastics",
+              "grade": "PC housing, engineering-plastic (POM/PA) gear train",
+              "mass_pct": 2.888,
               "confidence": "medium"
+            },
+            {
+              "component": "Motor & shaft",
+              "commodity": "iron",
+              "grade": "Electrical steel can and laminations, steel output shaft",
+              "mass_pct": 1.095,
+              "confidence": "medium"
+            },
+            {
+              "component": "Windings & PCB",
+              "commodity": "copper",
+              "grade": "Enamelled copper windings, PCB copper",
+              "mass_pct": 0.697,
+              "confidence": "medium"
+            },
+            {
+              "component": "Motor magnets",
+              "commodity": "neodymium",
+              "grade": "Sintered NdFeB magnet (motor type not disclosed)",
+              "mass_pct": 0.1,
+              "confidence": "low"
+            },
+            {
+              "component": "Motor magnets",
+              "commodity": "dysprosium",
+              "grade": "Dy grain-boundary additive in NdFeB",
+              "mass_pct": 0.005,
+              "confidence": "low"
+            },
+            {
+              "component": "Motor magnets",
+              "commodity": "boron",
+              "grade": "B in Nd₂Fe₁₄B",
+              "mass_pct": 0.005,
+              "confidence": "low"
+            },
+            {
+              "component": "Controller",
+              "commodity": "silicon",
+              "grade": "MCU, motor driver and magnetic encoder ICs",
+              "mass_pct": 0.075,
+              "confidence": "low"
+            },
+            {
+              "component": "Controller",
+              "commodity": "tin",
+              "grade": "SAC305 lead-free solder",
+              "mass_pct": 0.02,
+              "confidence": "low"
             }
           ]
         },
         {
           "meshName": "actuator_neck",
-          "label": "Neck actuator stack",
+          "label": "Neck & head-yaw servos ×3",
           "group": "head",
           "materials": [
             {
-              "component": "Planetary gearbox & bearings",
-              "commodity": "iron",
-              "grade": "20CrMnTi carburized steel",
-              "mass_pct": 1.562,
-              "confidence": "high"
-            },
-            {
-              "component": "Housing",
-              "commodity": "aluminum",
-              "grade": "6061-T6 machined aluminum",
-              "mass_pct": 1.441,
-              "confidence": "high"
-            },
-            {
-              "component": "Stator laminations",
-              "commodity": "iron",
-              "grade": "M19 non-oriented electrical steel (3% Si)",
-              "mass_pct": 0.661,
+              "component": "Housing & gear train",
+              "commodity": "plastics",
+              "grade": "PC housing, engineering-plastic (POM/PA) gear train",
+              "mass_pct": 4.331,
               "confidence": "medium"
             },
             {
-              "component": "Stator windings",
-              "commodity": "copper",
-              "grade": "99.99% C10100 OFHC enamelled magnet wire",
-              "mass_pct": 0.781,
-              "confidence": "high"
+              "component": "Motor & shaft",
+              "commodity": "iron",
+              "grade": "Electrical steel can and laminations, steel output shaft",
+              "mass_pct": 1.643,
+              "confidence": "medium"
             },
             {
-              "component": "NdFeB magnets",
+              "component": "Windings & PCB",
+              "commodity": "copper",
+              "grade": "Enamelled copper windings, PCB copper",
+              "mass_pct": 1.046,
+              "confidence": "medium"
+            },
+            {
+              "component": "Motor magnets",
               "commodity": "neodymium",
-              "grade": "Sintered NdFeB N52SH (Nd+Pr ≈ 30 wt%)",
-              "mass_pct": 0.135,
-              "confidence": "medium"
+              "grade": "Sintered NdFeB magnet (motor type not disclosed)",
+              "mass_pct": 0.149,
+              "confidence": "low"
             },
             {
-              "component": "NdFeB magnets",
+              "component": "Motor magnets",
               "commodity": "dysprosium",
-              "grade": "Grain-boundary diffused Dy (≈ 2–4 wt%)",
-              "mass_pct": 0.013,
+              "grade": "Dy grain-boundary additive in NdFeB",
+              "mass_pct": 0.007,
               "confidence": "low"
             },
             {
-              "component": "NdFeB magnets",
-              "commodity": "iron",
-              "grade": "Fe matrix of NdFeB (≈ 66 wt%)",
-              "mass_pct": 0.297,
-              "confidence": "medium"
-            },
-            {
-              "component": "NdFeB magnets",
+              "component": "Motor magnets",
               "commodity": "boron",
-              "grade": "Ferroboron in NdFeB (≈ 1 wt%)",
-              "mass_pct": 0.005,
-              "confidence": "medium"
+              "grade": "B in Nd₂Fe₁₄B",
+              "mass_pct": 0.007,
+              "confidence": "low"
             },
             {
-              "component": "Motor driver",
+              "component": "Controller",
               "commodity": "silicon",
-              "grade": "SiC/GaN MOSFETs, gate-driver & encoder ICs",
-              "mass_pct": 0.072,
+              "grade": "MCU, motor driver and magnetic encoder ICs",
+              "mass_pct": 0.112,
               "confidence": "low"
             },
             {
-              "component": "Motor driver",
-              "commodity": "copper",
-              "grade": "Heavy-copper PCB & busbars",
-              "mass_pct": 0.18,
-              "confidence": "medium"
-            },
-            {
-              "component": "Solder",
+              "component": "Controller",
               "commodity": "tin",
-              "grade": "SAC305 lead-free solder (96.5% Sn)",
-              "mass_pct": 0.018,
+              "grade": "SAC305 lead-free solder",
+              "mass_pct": 0.03,
               "confidence": "low"
-            },
-            {
-              "component": "Seals, cable jackets",
-              "commodity": "plastics",
-              "grade": "FKM seals, PTFE cable jacket",
-              "mass_pct": 0.24,
-              "confidence": "medium"
             }
           ]
         },
         {
-          "meshName": "torso_shell",
-          "label": "Body shell",
-          "group": "torso",
+          "meshName": "neck_frame",
+          "label": "Neck linkage & bearings",
+          "group": "head",
           "materials": [
             {
-              "component": "Outer shell",
+              "component": "Printed structure",
               "commodity": "plastics",
-              "grade": "PA12 (SLS-printed) shell",
-              "mass_pct": 8.465,
-              "confidence": "medium"
+              "grade": "PLA, FDM-printed",
+              "mass_pct": 3.171,
+              "confidence": "high"
             },
             {
-              "component": "Inner frame",
-              "commodity": "aluminum",
-              "grade": "6061-T6 aluminum inner frame",
-              "mass_pct": 0.973,
-              "confidence": "medium"
-            },
-            {
-              "component": "Fasteners & inserts",
+              "component": "Bearings",
               "commodity": "iron",
-              "grade": "A2 stainless fasteners, brass-free inserts",
-              "mass_pct": 0.292,
+              "grade": "Thin-section deep-groove ball bearings (chrome steel)",
+              "mass_pct": 1.611,
+              "confidence": "high"
+            },
+            {
+              "component": "Fasteners",
+              "commodity": "iron",
+              "grade": "M2 / M2.5 steel machine screws",
+              "mass_pct": 0.252,
               "confidence": "medium"
             }
           ]
         },
         {
-          "meshName": "battery_torso",
-          "label": "Battery pack (NMC, ≈ 0.4 kWh est.)",
+          "meshName": "body_shell",
+          "label": "Body shells (left & right)",
           "group": "torso",
           "materials": [
             {
-              "component": "Cathode",
-              "commodity": "nickel",
-              "grade": "Class-1 nickel sulfate → NMC811 cathode",
-              "mass_pct": 1.297,
+              "component": "Printed structure",
+              "commodity": "plastics",
+              "grade": "PLA, FDM-printed",
+              "mass_pct": 4.689,
+              "confidence": "high"
+            },
+            {
+              "component": "Fasteners",
+              "commodity": "iron",
+              "grade": "M2 / M2.5 steel machine screws",
+              "mass_pct": 0.195,
+              "confidence": "medium"
+            }
+          ]
+        },
+        {
+          "meshName": "trunk_frame",
+          "label": "Trunk base, bearings & cabling",
+          "group": "torso",
+          "materials": [
+            {
+              "component": "Printed structure",
+              "commodity": "plastics",
+              "grade": "PLA, FDM-printed",
+              "mass_pct": 1.845,
+              "confidence": "high"
+            },
+            {
+              "component": "Bearings",
+              "commodity": "iron",
+              "grade": "Thin-section deep-groove ball bearings (chrome steel)",
+              "mass_pct": 1.07,
+              "confidence": "high"
+            },
+            {
+              "component": "Fasteners",
+              "commodity": "iron",
+              "grade": "M2 / M2.5 steel machine screws",
+              "mass_pct": 0.221,
               "confidence": "medium"
             },
             {
-              "component": "Cathode",
-              "commodity": "cobalt",
-              "grade": "Cobalt sulfate → NMC811 cathode",
-              "mass_pct": 0.162,
+              "component": "Servo cabling",
+              "commodity": "copper",
+              "grade": "Tinned copper TTL daisy-chain leads",
+              "mass_pct": 0.369,
               "confidence": "medium"
             },
             {
-              "component": "Cathode",
-              "commodity": "manganese",
-              "grade": "High-purity manganese sulfate (HPMSM)",
-              "mass_pct": 0.151,
+              "component": "Servo cabling",
+              "commodity": "plastics",
+              "grade": "PVC jackets, JST housings",
+              "mass_pct": 0.185,
               "confidence": "medium"
-            },
+            }
+          ]
+        },
+        {
+          "meshName": "battery_pack",
+          "label": "Battery pack & holder",
+          "group": "torso",
+          "materials": [
             {
-              "component": "Cathode",
-              "commodity": "lithium",
-              "grade": "Battery-grade LiOH·H₂O (Li ≈ 7% of cathode)",
-              "mass_pct": 0.216,
+              "component": "Pack housing & holder",
+              "commodity": "plastics",
+              "grade": "PC/ABS NP-F housing, printed PLA holder",
+              "mass_pct": 3.312,
               "confidence": "medium"
             },
             {
               "component": "Anode",
               "commodity": "graphite",
-              "grade": "Spherical natural / synthetic graphite blend",
-              "mass_pct": 1.622,
+              "grade": "Synthetic / spherical natural graphite",
+              "mass_pct": 2.07,
               "confidence": "medium"
+            },
+            {
+              "component": "Cell cans",
+              "commodity": "iron",
+              "grade": "Nickel-plated steel 18650 cans",
+              "mass_pct": 1.932,
+              "confidence": "medium"
+            },
+            {
+              "component": "Cathode",
+              "commodity": "nickel",
+              "grade": "NMC cathode active material (chemistry assumed)",
+              "mass_pct": 1.38,
+              "confidence": "low"
             },
             {
               "component": "Current collectors",
               "commodity": "copper",
-              "grade": "6–8 µm electrodeposited copper foil",
-              "mass_pct": 1.189,
+              "grade": "8 µm copper foil, tabs",
+              "mass_pct": 1.38,
               "confidence": "medium"
             },
             {
-              "component": "Current collectors & cans",
+              "component": "Current collectors",
               "commodity": "aluminum",
-              "grade": "1235 Al foil + 3003 cell cans",
-              "mass_pct": 1.297,
+              "grade": "12 µm aluminium foil, tabs",
+              "mass_pct": 1.104,
               "confidence": "medium"
-            },
-            {
-              "component": "Pack enclosure",
-              "commodity": "aluminum",
-              "grade": "6061-T6 / die-cast A380 pack housing",
-              "mass_pct": 1.405,
-              "confidence": "high"
             },
             {
               "component": "Electrolyte & separator",
               "commodity": "plastics",
               "grade": "PE/PP separator, carbonate solvents, LiPF₆",
-              "mass_pct": 2.162,
+              "mass_pct": 1.518,
               "confidence": "low"
             },
             {
-              "component": "Busbars & BMS",
-              "commodity": "copper",
-              "grade": "C11000 ETP busbars",
-              "mass_pct": 0.432,
-              "confidence": "medium"
+              "component": "Cathode",
+              "commodity": "cobalt",
+              "grade": "NMC cathode active material",
+              "mass_pct": 0.276,
+              "confidence": "low"
+            },
+            {
+              "component": "Cathode",
+              "commodity": "manganese",
+              "grade": "NMC cathode active material",
+              "mass_pct": 0.276,
+              "confidence": "low"
+            },
+            {
+              "component": "Cathode",
+              "commodity": "lithium",
+              "grade": "Li in cathode and electrolyte",
+              "mass_pct": 0.248,
+              "confidence": "low"
             },
             {
               "component": "BMS",
               "commodity": "silicon",
-              "grade": "Cell-monitoring AFEs & MOSFETs",
-              "mass_pct": 0.065,
-              "confidence": "low"
-            },
-            {
-              "component": "Fasteners & brackets",
-              "commodity": "iron",
-              "grade": "AISI 304 stainless",
-              "mass_pct": 0.486,
-              "confidence": "medium"
-            },
-            {
-              "component": "Thermal pads & potting",
-              "commodity": "plastics",
-              "grade": "Silicone thermal pads, PU potting",
-              "mass_pct": 0.324,
-              "confidence": "low"
-            }
-          ]
-        },
-        {
-          "meshName": "compute_torso",
-          "label": "Onboard computer (Jetson-class, est.)",
-          "group": "torso",
-          "materials": [
-            {
-              "component": "Processor & memory",
-              "commodity": "silicon",
-              "grade": "NVIDIA Jetson-class module (8 nm SoC, LPDDR5)",
-              "mass_pct": 0.541,
-              "confidence": "medium"
-            },
-            {
-              "component": "PCB",
-              "commodity": "copper",
-              "grade": "Multilayer PCB copper planes",
-              "mass_pct": 0.973,
-              "confidence": "medium"
-            },
-            {
-              "component": "PCB laminate",
-              "commodity": "plastics",
-              "grade": "FR-4 glass-epoxy laminate",
-              "mass_pct": 1.081,
-              "confidence": "medium"
-            },
-            {
-              "component": "Heatsink & heat pipes",
-              "commodity": "aluminum",
-              "grade": "6063-T5 extruded heatsink",
-              "mass_pct": 1.838,
-              "confidence": "high"
-            },
-            {
-              "component": "Heat pipes",
-              "commodity": "copper",
-              "grade": "C10200 copper heat pipes",
-              "mass_pct": 0.541,
-              "confidence": "medium"
-            },
-            {
-              "component": "Solder",
-              "commodity": "tin",
-              "grade": "SAC305 lead-free solder (96.5% Sn)",
-              "mass_pct": 0.108,
-              "confidence": "low"
-            },
-            {
-              "component": "Connectors",
-              "commodity": "copper",
-              "grade": "Phosphor-bronze contacts (gold flash)",
-              "mass_pct": 0.162,
-              "confidence": "low"
-            },
-            {
-              "component": "Fan & shroud",
-              "commodity": "plastics",
-              "grade": "PBT shroud",
-              "mass_pct": 0.162,
-              "confidence": "low"
-            }
-          ]
-        },
-        {
-          "meshName": "wiring_harness",
-          "label": "Wiring harness",
-          "group": "torso",
-          "materials": [
-            {
-              "component": "Conductors",
-              "commodity": "copper",
-              "grade": "99.9% C11000 ETP stranded copper",
-              "mass_pct": 1.676,
-              "confidence": "high"
-            },
-            {
-              "component": "Insulation & sleeving",
-              "commodity": "plastics",
-              "grade": "PTFE / silicone insulation, PET braid",
-              "mass_pct": 0.919,
-              "confidence": "medium"
-            },
-            {
-              "component": "Connector shells",
-              "commodity": "aluminum",
-              "grade": "Anodized aluminum connector shells",
-              "mass_pct": 0.108,
-              "confidence": "low"
-            }
-          ]
-        },
-        {
-          "meshName": "pelvis_frame",
-          "label": "Hip frame",
-          "group": "legs",
-          "materials": [
-            {
-              "component": "Structural frame",
-              "commodity": "aluminum",
-              "grade": "7075-T6 machined aluminum",
-              "mass_pct": 3.373,
-              "confidence": "high"
-            },
-            {
-              "component": "Fasteners & brackets",
-              "commodity": "iron",
-              "grade": "12.9 alloy-steel bolts, 17-4PH brackets",
-              "mass_pct": 0.865,
-              "confidence": "medium"
-            },
-            {
-              "component": "Wiring clips",
-              "commodity": "plastics",
-              "grade": "PA66 clips",
-              "mass_pct": 0.086,
+              "grade": "Protection IC and MOSFETs",
+              "mass_pct": 0.069,
               "confidence": "low"
             }
           ]
         },
         {
           "meshName": "actuator_hip_L",
-          "label": "Hip actuators (left)",
+          "label": "Hip servos ×3 (left)",
           "group": "legs",
           "materials": [
             {
-              "component": "Planetary gearbox & bearings",
-              "commodity": "iron",
-              "grade": "20CrMnTi carburized steel",
-              "mass_pct": 1.405,
-              "confidence": "high"
-            },
-            {
-              "component": "Housing",
-              "commodity": "aluminum",
-              "grade": "6061-T6 machined aluminum",
-              "mass_pct": 1.297,
-              "confidence": "high"
-            },
-            {
-              "component": "Stator laminations",
-              "commodity": "iron",
-              "grade": "M19 non-oriented electrical steel (3% Si)",
-              "mass_pct": 0.595,
-              "confidence": "medium"
-            },
-            {
-              "component": "Stator windings",
-              "commodity": "copper",
-              "grade": "99.99% C10100 OFHC enamelled magnet wire",
-              "mass_pct": 0.703,
-              "confidence": "high"
-            },
-            {
-              "component": "NdFeB magnets",
-              "commodity": "neodymium",
-              "grade": "Sintered NdFeB N52SH (Nd+Pr ≈ 30 wt%)",
-              "mass_pct": 0.122,
-              "confidence": "medium"
-            },
-            {
-              "component": "NdFeB magnets",
-              "commodity": "dysprosium",
-              "grade": "Grain-boundary diffused Dy (≈ 2–4 wt%)",
-              "mass_pct": 0.012,
-              "confidence": "low"
-            },
-            {
-              "component": "NdFeB magnets",
-              "commodity": "iron",
-              "grade": "Fe matrix of NdFeB (≈ 66 wt%)",
-              "mass_pct": 0.268,
-              "confidence": "medium"
-            },
-            {
-              "component": "NdFeB magnets",
-              "commodity": "boron",
-              "grade": "Ferroboron in NdFeB (≈ 1 wt%)",
-              "mass_pct": 0.004,
-              "confidence": "medium"
-            },
-            {
-              "component": "Motor driver",
-              "commodity": "silicon",
-              "grade": "SiC/GaN MOSFETs, gate-driver & encoder ICs",
-              "mass_pct": 0.065,
-              "confidence": "low"
-            },
-            {
-              "component": "Motor driver",
-              "commodity": "copper",
-              "grade": "Heavy-copper PCB & busbars",
-              "mass_pct": 0.162,
-              "confidence": "medium"
-            },
-            {
-              "component": "Solder",
-              "commodity": "tin",
-              "grade": "SAC305 lead-free solder (96.5% Sn)",
-              "mass_pct": 0.016,
-              "confidence": "low"
-            },
-            {
-              "component": "Seals, cable jackets",
+              "component": "Housing & gear train",
               "commodity": "plastics",
-              "grade": "FKM seals, PTFE cable jacket",
-              "mass_pct": 0.216,
+              "grade": "PC housing, engineering-plastic (POM/PA) gear train",
+              "mass_pct": 4.331,
+              "confidence": "medium"
+            },
+            {
+              "component": "Motor & shaft",
+              "commodity": "iron",
+              "grade": "Electrical steel can and laminations, steel output shaft",
+              "mass_pct": 1.643,
+              "confidence": "medium"
+            },
+            {
+              "component": "Windings & PCB",
+              "commodity": "copper",
+              "grade": "Enamelled copper windings, PCB copper",
+              "mass_pct": 1.046,
+              "confidence": "medium"
+            },
+            {
+              "component": "Motor magnets",
+              "commodity": "neodymium",
+              "grade": "Sintered NdFeB magnet (motor type not disclosed)",
+              "mass_pct": 0.149,
+              "confidence": "low"
+            },
+            {
+              "component": "Motor magnets",
+              "commodity": "dysprosium",
+              "grade": "Dy grain-boundary additive in NdFeB",
+              "mass_pct": 0.007,
+              "confidence": "low"
+            },
+            {
+              "component": "Motor magnets",
+              "commodity": "boron",
+              "grade": "B in Nd₂Fe₁₄B",
+              "mass_pct": 0.007,
+              "confidence": "low"
+            },
+            {
+              "component": "Controller",
+              "commodity": "silicon",
+              "grade": "MCU, motor driver and magnetic encoder ICs",
+              "mass_pct": 0.112,
+              "confidence": "low"
+            },
+            {
+              "component": "Controller",
+              "commodity": "tin",
+              "grade": "SAC305 lead-free solder",
+              "mass_pct": 0.03,
+              "confidence": "low"
+            }
+          ]
+        },
+        {
+          "meshName": "hip_frame_L",
+          "label": "Hip yaw & roll brackets (left)",
+          "group": "legs",
+          "materials": [
+            {
+              "component": "Printed structure",
+              "commodity": "plastics",
+              "grade": "PLA, FDM-printed",
+              "mass_pct": 0.425,
+              "confidence": "high"
+            },
+            {
+              "component": "Bearings",
+              "commodity": "iron",
+              "grade": "Thin-section deep-groove ball bearings (chrome steel)",
+              "mass_pct": 1.003,
+              "confidence": "high"
+            },
+            {
+              "component": "Fasteners",
+              "commodity": "iron",
+              "grade": "M2 / M2.5 steel machine screws",
+              "mass_pct": 0.091,
               "confidence": "medium"
             }
           ]
         },
         {
           "meshName": "thigh_L",
-          "label": "Thigh (left)",
+          "label": "Upper leg & rigidity plate (left)",
           "group": "legs",
           "materials": [
             {
-              "component": "Structural link",
-              "commodity": "aluminum",
-              "grade": "6061-T6 aluminum",
-              "mass_pct": 1.703,
+              "component": "Printed structure",
+              "commodity": "plastics",
+              "grade": "PLA, FDM-printed",
+              "mass_pct": 1.026,
               "confidence": "high"
             },
             {
-              "component": "Cover",
-              "commodity": "plastics",
-              "grade": "PA12 (SLS) cover",
-              "mass_pct": 1.589,
-              "confidence": "medium"
-            },
-            {
-              "component": "Bearings & fasteners",
+              "component": "Bearings",
               "commodity": "iron",
-              "grade": "AISI 52100 bearings, 12.9 alloy-steel bolts",
-              "mass_pct": 0.265,
-              "confidence": "medium"
+              "grade": "Thin-section deep-groove ball bearings (chrome steel)",
+              "mass_pct": 0.546,
+              "confidence": "high"
             },
             {
-              "component": "Wiring",
-              "commodity": "copper",
-              "grade": "Tinned C11000 stranded copper",
-              "mass_pct": 0.227,
+              "component": "Fasteners",
+              "commodity": "iron",
+              "grade": "M2 / M2.5 steel machine screws",
+              "mass_pct": 0.083,
               "confidence": "medium"
             }
           ]
         },
         {
           "meshName": "actuator_knee_L",
-          "label": "Knee actuator (left)",
+          "label": "Knee servo (left)",
           "group": "legs",
           "materials": [
             {
-              "component": "Planetary gearbox & bearings",
-              "commodity": "iron",
-              "grade": "20CrMnTi carburized steel",
-              "mass_pct": 1.249,
-              "confidence": "high"
-            },
-            {
-              "component": "Housing",
-              "commodity": "aluminum",
-              "grade": "6061-T6 machined aluminum",
-              "mass_pct": 1.153,
-              "confidence": "high"
-            },
-            {
-              "component": "Stator laminations",
-              "commodity": "iron",
-              "grade": "M19 non-oriented electrical steel (3% Si)",
-              "mass_pct": 0.529,
-              "confidence": "medium"
-            },
-            {
-              "component": "Stator windings",
-              "commodity": "copper",
-              "grade": "99.99% C10100 OFHC enamelled magnet wire",
-              "mass_pct": 0.625,
-              "confidence": "high"
-            },
-            {
-              "component": "NdFeB magnets",
-              "commodity": "neodymium",
-              "grade": "Sintered NdFeB N52SH (Nd+Pr ≈ 30 wt%)",
-              "mass_pct": 0.108,
-              "confidence": "medium"
-            },
-            {
-              "component": "NdFeB magnets",
-              "commodity": "dysprosium",
-              "grade": "Grain-boundary diffused Dy (≈ 2–4 wt%)",
-              "mass_pct": 0.011,
-              "confidence": "low"
-            },
-            {
-              "component": "NdFeB magnets",
-              "commodity": "iron",
-              "grade": "Fe matrix of NdFeB (≈ 66 wt%)",
-              "mass_pct": 0.238,
-              "confidence": "medium"
-            },
-            {
-              "component": "NdFeB magnets",
-              "commodity": "boron",
-              "grade": "Ferroboron in NdFeB (≈ 1 wt%)",
-              "mass_pct": 0.004,
-              "confidence": "medium"
-            },
-            {
-              "component": "Motor driver",
-              "commodity": "silicon",
-              "grade": "SiC/GaN MOSFETs, gate-driver & encoder ICs",
-              "mass_pct": 0.058,
-              "confidence": "low"
-            },
-            {
-              "component": "Motor driver",
-              "commodity": "copper",
-              "grade": "Heavy-copper PCB & busbars",
-              "mass_pct": 0.144,
-              "confidence": "medium"
-            },
-            {
-              "component": "Solder",
-              "commodity": "tin",
-              "grade": "SAC305 lead-free solder (96.5% Sn)",
-              "mass_pct": 0.014,
-              "confidence": "low"
-            },
-            {
-              "component": "Seals, cable jackets",
+              "component": "Housing & gear train",
               "commodity": "plastics",
-              "grade": "FKM seals, PTFE cable jacket",
-              "mass_pct": 0.192,
+              "grade": "PC housing, engineering-plastic (POM/PA) gear train",
+              "mass_pct": 1.444,
               "confidence": "medium"
+            },
+            {
+              "component": "Motor & shaft",
+              "commodity": "iron",
+              "grade": "Electrical steel can and laminations, steel output shaft",
+              "mass_pct": 0.548,
+              "confidence": "medium"
+            },
+            {
+              "component": "Windings & PCB",
+              "commodity": "copper",
+              "grade": "Enamelled copper windings, PCB copper",
+              "mass_pct": 0.349,
+              "confidence": "medium"
+            },
+            {
+              "component": "Motor magnets",
+              "commodity": "neodymium",
+              "grade": "Sintered NdFeB magnet (motor type not disclosed)",
+              "mass_pct": 0.05,
+              "confidence": "low"
+            },
+            {
+              "component": "Motor magnets",
+              "commodity": "dysprosium",
+              "grade": "Dy grain-boundary additive in NdFeB",
+              "mass_pct": 0.002,
+              "confidence": "low"
+            },
+            {
+              "component": "Motor magnets",
+              "commodity": "boron",
+              "grade": "B in Nd₂Fe₁₄B",
+              "mass_pct": 0.002,
+              "confidence": "low"
+            },
+            {
+              "component": "Controller",
+              "commodity": "silicon",
+              "grade": "MCU, motor driver and magnetic encoder ICs",
+              "mass_pct": 0.037,
+              "confidence": "low"
+            },
+            {
+              "component": "Controller",
+              "commodity": "tin",
+              "grade": "SAC305 lead-free solder",
+              "mass_pct": 0.01,
+              "confidence": "low"
             }
           ]
         },
         {
           "meshName": "shin_L",
-          "label": "Shin (left)",
+          "label": "Lower leg (left)",
           "group": "legs",
           "materials": [
             {
-              "component": "Structural link",
-              "commodity": "aluminum",
-              "grade": "6061-T6 aluminum",
-              "mass_pct": 1.459,
+              "component": "Printed structure",
+              "commodity": "plastics",
+              "grade": "PLA, FDM-printed",
+              "mass_pct": 0.44,
               "confidence": "high"
             },
             {
-              "component": "Cover",
-              "commodity": "plastics",
-              "grade": "PA12 (SLS) cover",
-              "mass_pct": 1.362,
-              "confidence": "medium"
-            },
-            {
-              "component": "Bearings & fasteners",
+              "component": "Fasteners",
               "commodity": "iron",
-              "grade": "AISI 52100 bearings, 12.9 alloy-steel bolts",
-              "mass_pct": 0.227,
-              "confidence": "medium"
-            },
-            {
-              "component": "Wiring",
-              "commodity": "copper",
-              "grade": "Tinned C11000 stranded copper",
-              "mass_pct": 0.195,
+              "grade": "M2 / M2.5 steel machine screws",
+              "mass_pct": 0.049,
               "confidence": "medium"
             }
           ]
         },
         {
           "meshName": "actuator_ankle_L",
-          "label": "Ankle actuator (left)",
+          "label": "Ankle servo (left)",
           "group": "legs",
           "materials": [
             {
-              "component": "Planetary gearbox & bearings",
-              "commodity": "iron",
-              "grade": "20CrMnTi carburized steel",
-              "mass_pct": 0.781,
-              "confidence": "high"
-            },
-            {
-              "component": "Housing",
-              "commodity": "aluminum",
-              "grade": "6061-T6 machined aluminum",
-              "mass_pct": 0.721,
-              "confidence": "high"
-            },
-            {
-              "component": "Stator laminations",
-              "commodity": "iron",
-              "grade": "M19 non-oriented electrical steel (3% Si)",
-              "mass_pct": 0.33,
-              "confidence": "medium"
-            },
-            {
-              "component": "Stator windings",
-              "commodity": "copper",
-              "grade": "99.99% C10100 OFHC enamelled magnet wire",
-              "mass_pct": 0.39,
-              "confidence": "high"
-            },
-            {
-              "component": "NdFeB magnets",
-              "commodity": "neodymium",
-              "grade": "Sintered NdFeB N52SH (Nd+Pr ≈ 30 wt%)",
-              "mass_pct": 0.068,
-              "confidence": "medium"
-            },
-            {
-              "component": "NdFeB magnets",
-              "commodity": "dysprosium",
-              "grade": "Grain-boundary diffused Dy (≈ 2–4 wt%)",
-              "mass_pct": 0.007,
-              "confidence": "low"
-            },
-            {
-              "component": "NdFeB magnets",
-              "commodity": "iron",
-              "grade": "Fe matrix of NdFeB (≈ 66 wt%)",
-              "mass_pct": 0.149,
-              "confidence": "medium"
-            },
-            {
-              "component": "NdFeB magnets",
-              "commodity": "boron",
-              "grade": "Ferroboron in NdFeB (≈ 1 wt%)",
-              "mass_pct": 0.002,
-              "confidence": "medium"
-            },
-            {
-              "component": "Motor driver",
-              "commodity": "silicon",
-              "grade": "SiC/GaN MOSFETs, gate-driver & encoder ICs",
-              "mass_pct": 0.036,
-              "confidence": "low"
-            },
-            {
-              "component": "Motor driver",
-              "commodity": "copper",
-              "grade": "Heavy-copper PCB & busbars",
-              "mass_pct": 0.09,
-              "confidence": "medium"
-            },
-            {
-              "component": "Solder",
-              "commodity": "tin",
-              "grade": "SAC305 lead-free solder (96.5% Sn)",
-              "mass_pct": 0.009,
-              "confidence": "low"
-            },
-            {
-              "component": "Seals, cable jackets",
+              "component": "Housing & gear train",
               "commodity": "plastics",
-              "grade": "FKM seals, PTFE cable jacket",
-              "mass_pct": 0.12,
+              "grade": "PC housing, engineering-plastic (POM/PA) gear train",
+              "mass_pct": 1.444,
               "confidence": "medium"
+            },
+            {
+              "component": "Motor & shaft",
+              "commodity": "iron",
+              "grade": "Electrical steel can and laminations, steel output shaft",
+              "mass_pct": 0.548,
+              "confidence": "medium"
+            },
+            {
+              "component": "Windings & PCB",
+              "commodity": "copper",
+              "grade": "Enamelled copper windings, PCB copper",
+              "mass_pct": 0.349,
+              "confidence": "medium"
+            },
+            {
+              "component": "Motor magnets",
+              "commodity": "neodymium",
+              "grade": "Sintered NdFeB magnet (motor type not disclosed)",
+              "mass_pct": 0.05,
+              "confidence": "low"
+            },
+            {
+              "component": "Motor magnets",
+              "commodity": "dysprosium",
+              "grade": "Dy grain-boundary additive in NdFeB",
+              "mass_pct": 0.002,
+              "confidence": "low"
+            },
+            {
+              "component": "Motor magnets",
+              "commodity": "boron",
+              "grade": "B in Nd₂Fe₁₄B",
+              "mass_pct": 0.002,
+              "confidence": "low"
+            },
+            {
+              "component": "Controller",
+              "commodity": "silicon",
+              "grade": "MCU, motor driver and magnetic encoder ICs",
+              "mass_pct": 0.037,
+              "confidence": "low"
+            },
+            {
+              "component": "Controller",
+              "commodity": "tin",
+              "grade": "SAC305 lead-free solder",
+              "mass_pct": 0.01,
+              "confidence": "low"
             }
           ]
         },
         {
           "meshName": "foot_L",
-          "label": "Foot (left)",
+          "label": "Ankle & foot (left)",
           "group": "legs",
           "materials": [
             {
-              "component": "Foot plate",
-              "commodity": "aluminum",
-              "grade": "7075-T6 plate",
-              "mass_pct": 1.351,
+              "component": "Printed structure",
+              "commodity": "plastics",
+              "grade": "PLA, FDM-printed",
+              "mass_pct": 3.053,
+              "confidence": "high"
+            },
+            {
+              "component": "Bearings",
+              "commodity": "iron",
+              "grade": "Thin-section deep-groove ball bearings (chrome steel)",
+              "mass_pct": 0.244,
+              "confidence": "high"
+            },
+            {
+              "component": "Fasteners",
+              "commodity": "iron",
+              "grade": "M2 / M2.5 steel machine screws",
+              "mass_pct": 0.163,
               "confidence": "medium"
             },
             {
               "component": "Sole",
               "commodity": "elastomers",
-              "grade": "Shore 70A TPU sole",
-              "mass_pct": 0.595,
-              "confidence": "low"
-            },
-            {
-              "component": "Force/torque sensor",
-              "commodity": "iron",
-              "grade": "17-4PH stainless flexure",
-              "mass_pct": 0.324,
-              "confidence": "medium"
-            },
-            {
-              "component": "Force/torque sensor",
-              "commodity": "silicon",
-              "grade": "Strain-gauge amplifier ICs",
-              "mass_pct": 0.027,
-              "confidence": "low"
-            },
-            {
-              "component": "Cover",
-              "commodity": "plastics",
-              "grade": "PA12 cover",
-              "mass_pct": 0.405,
+              "grade": "TPU 95A, printed sole",
+              "mass_pct": 0.611,
               "confidence": "medium"
             }
           ]
         },
         {
           "meshName": "actuator_hip_R",
-          "label": "Hip actuators (right)",
+          "label": "Hip servos ×3 (right)",
           "group": "legs",
           "materials": [
             {
-              "component": "Planetary gearbox & bearings",
-              "commodity": "iron",
-              "grade": "20CrMnTi carburized steel",
-              "mass_pct": 1.405,
-              "confidence": "high"
-            },
-            {
-              "component": "Housing",
-              "commodity": "aluminum",
-              "grade": "6061-T6 machined aluminum",
-              "mass_pct": 1.297,
-              "confidence": "high"
-            },
-            {
-              "component": "Stator laminations",
-              "commodity": "iron",
-              "grade": "M19 non-oriented electrical steel (3% Si)",
-              "mass_pct": 0.595,
-              "confidence": "medium"
-            },
-            {
-              "component": "Stator windings",
-              "commodity": "copper",
-              "grade": "99.99% C10100 OFHC enamelled magnet wire",
-              "mass_pct": 0.703,
-              "confidence": "high"
-            },
-            {
-              "component": "NdFeB magnets",
-              "commodity": "neodymium",
-              "grade": "Sintered NdFeB N52SH (Nd+Pr ≈ 30 wt%)",
-              "mass_pct": 0.122,
-              "confidence": "medium"
-            },
-            {
-              "component": "NdFeB magnets",
-              "commodity": "dysprosium",
-              "grade": "Grain-boundary diffused Dy (≈ 2–4 wt%)",
-              "mass_pct": 0.012,
-              "confidence": "low"
-            },
-            {
-              "component": "NdFeB magnets",
-              "commodity": "iron",
-              "grade": "Fe matrix of NdFeB (≈ 66 wt%)",
-              "mass_pct": 0.268,
-              "confidence": "medium"
-            },
-            {
-              "component": "NdFeB magnets",
-              "commodity": "boron",
-              "grade": "Ferroboron in NdFeB (≈ 1 wt%)",
-              "mass_pct": 0.004,
-              "confidence": "medium"
-            },
-            {
-              "component": "Motor driver",
-              "commodity": "silicon",
-              "grade": "SiC/GaN MOSFETs, gate-driver & encoder ICs",
-              "mass_pct": 0.065,
-              "confidence": "low"
-            },
-            {
-              "component": "Motor driver",
-              "commodity": "copper",
-              "grade": "Heavy-copper PCB & busbars",
-              "mass_pct": 0.162,
-              "confidence": "medium"
-            },
-            {
-              "component": "Solder",
-              "commodity": "tin",
-              "grade": "SAC305 lead-free solder (96.5% Sn)",
-              "mass_pct": 0.016,
-              "confidence": "low"
-            },
-            {
-              "component": "Seals, cable jackets",
+              "component": "Housing & gear train",
               "commodity": "plastics",
-              "grade": "FKM seals, PTFE cable jacket",
-              "mass_pct": 0.216,
+              "grade": "PC housing, engineering-plastic (POM/PA) gear train",
+              "mass_pct": 4.331,
+              "confidence": "medium"
+            },
+            {
+              "component": "Motor & shaft",
+              "commodity": "iron",
+              "grade": "Electrical steel can and laminations, steel output shaft",
+              "mass_pct": 1.643,
+              "confidence": "medium"
+            },
+            {
+              "component": "Windings & PCB",
+              "commodity": "copper",
+              "grade": "Enamelled copper windings, PCB copper",
+              "mass_pct": 1.046,
+              "confidence": "medium"
+            },
+            {
+              "component": "Motor magnets",
+              "commodity": "neodymium",
+              "grade": "Sintered NdFeB magnet (motor type not disclosed)",
+              "mass_pct": 0.149,
+              "confidence": "low"
+            },
+            {
+              "component": "Motor magnets",
+              "commodity": "dysprosium",
+              "grade": "Dy grain-boundary additive in NdFeB",
+              "mass_pct": 0.007,
+              "confidence": "low"
+            },
+            {
+              "component": "Motor magnets",
+              "commodity": "boron",
+              "grade": "B in Nd₂Fe₁₄B",
+              "mass_pct": 0.007,
+              "confidence": "low"
+            },
+            {
+              "component": "Controller",
+              "commodity": "silicon",
+              "grade": "MCU, motor driver and magnetic encoder ICs",
+              "mass_pct": 0.112,
+              "confidence": "low"
+            },
+            {
+              "component": "Controller",
+              "commodity": "tin",
+              "grade": "SAC305 lead-free solder",
+              "mass_pct": 0.03,
+              "confidence": "low"
+            }
+          ]
+        },
+        {
+          "meshName": "hip_frame_R",
+          "label": "Hip yaw & roll brackets (right)",
+          "group": "legs",
+          "materials": [
+            {
+              "component": "Printed structure",
+              "commodity": "plastics",
+              "grade": "PLA, FDM-printed",
+              "mass_pct": 0.425,
+              "confidence": "high"
+            },
+            {
+              "component": "Bearings",
+              "commodity": "iron",
+              "grade": "Thin-section deep-groove ball bearings (chrome steel)",
+              "mass_pct": 1.003,
+              "confidence": "high"
+            },
+            {
+              "component": "Fasteners",
+              "commodity": "iron",
+              "grade": "M2 / M2.5 steel machine screws",
+              "mass_pct": 0.091,
               "confidence": "medium"
             }
           ]
         },
         {
           "meshName": "thigh_R",
-          "label": "Thigh (right)",
+          "label": "Upper leg & rigidity plate (right)",
           "group": "legs",
           "materials": [
             {
-              "component": "Structural link",
-              "commodity": "aluminum",
-              "grade": "6061-T6 aluminum",
-              "mass_pct": 1.703,
+              "component": "Printed structure",
+              "commodity": "plastics",
+              "grade": "PLA, FDM-printed",
+              "mass_pct": 1.026,
               "confidence": "high"
             },
             {
-              "component": "Cover",
-              "commodity": "plastics",
-              "grade": "PA12 (SLS) cover",
-              "mass_pct": 1.589,
-              "confidence": "medium"
-            },
-            {
-              "component": "Bearings & fasteners",
+              "component": "Bearings",
               "commodity": "iron",
-              "grade": "AISI 52100 bearings, 12.9 alloy-steel bolts",
-              "mass_pct": 0.265,
-              "confidence": "medium"
+              "grade": "Thin-section deep-groove ball bearings (chrome steel)",
+              "mass_pct": 0.546,
+              "confidence": "high"
             },
             {
-              "component": "Wiring",
-              "commodity": "copper",
-              "grade": "Tinned C11000 stranded copper",
-              "mass_pct": 0.227,
+              "component": "Fasteners",
+              "commodity": "iron",
+              "grade": "M2 / M2.5 steel machine screws",
+              "mass_pct": 0.083,
               "confidence": "medium"
             }
           ]
         },
         {
           "meshName": "actuator_knee_R",
-          "label": "Knee actuator (right)",
+          "label": "Knee servo (right)",
           "group": "legs",
           "materials": [
             {
-              "component": "Planetary gearbox & bearings",
-              "commodity": "iron",
-              "grade": "20CrMnTi carburized steel",
-              "mass_pct": 1.249,
-              "confidence": "high"
-            },
-            {
-              "component": "Housing",
-              "commodity": "aluminum",
-              "grade": "6061-T6 machined aluminum",
-              "mass_pct": 1.153,
-              "confidence": "high"
-            },
-            {
-              "component": "Stator laminations",
-              "commodity": "iron",
-              "grade": "M19 non-oriented electrical steel (3% Si)",
-              "mass_pct": 0.529,
-              "confidence": "medium"
-            },
-            {
-              "component": "Stator windings",
-              "commodity": "copper",
-              "grade": "99.99% C10100 OFHC enamelled magnet wire",
-              "mass_pct": 0.625,
-              "confidence": "high"
-            },
-            {
-              "component": "NdFeB magnets",
-              "commodity": "neodymium",
-              "grade": "Sintered NdFeB N52SH (Nd+Pr ≈ 30 wt%)",
-              "mass_pct": 0.108,
-              "confidence": "medium"
-            },
-            {
-              "component": "NdFeB magnets",
-              "commodity": "dysprosium",
-              "grade": "Grain-boundary diffused Dy (≈ 2–4 wt%)",
-              "mass_pct": 0.011,
-              "confidence": "low"
-            },
-            {
-              "component": "NdFeB magnets",
-              "commodity": "iron",
-              "grade": "Fe matrix of NdFeB (≈ 66 wt%)",
-              "mass_pct": 0.238,
-              "confidence": "medium"
-            },
-            {
-              "component": "NdFeB magnets",
-              "commodity": "boron",
-              "grade": "Ferroboron in NdFeB (≈ 1 wt%)",
-              "mass_pct": 0.004,
-              "confidence": "medium"
-            },
-            {
-              "component": "Motor driver",
-              "commodity": "silicon",
-              "grade": "SiC/GaN MOSFETs, gate-driver & encoder ICs",
-              "mass_pct": 0.058,
-              "confidence": "low"
-            },
-            {
-              "component": "Motor driver",
-              "commodity": "copper",
-              "grade": "Heavy-copper PCB & busbars",
-              "mass_pct": 0.144,
-              "confidence": "medium"
-            },
-            {
-              "component": "Solder",
-              "commodity": "tin",
-              "grade": "SAC305 lead-free solder (96.5% Sn)",
-              "mass_pct": 0.014,
-              "confidence": "low"
-            },
-            {
-              "component": "Seals, cable jackets",
+              "component": "Housing & gear train",
               "commodity": "plastics",
-              "grade": "FKM seals, PTFE cable jacket",
-              "mass_pct": 0.192,
+              "grade": "PC housing, engineering-plastic (POM/PA) gear train",
+              "mass_pct": 1.444,
               "confidence": "medium"
+            },
+            {
+              "component": "Motor & shaft",
+              "commodity": "iron",
+              "grade": "Electrical steel can and laminations, steel output shaft",
+              "mass_pct": 0.548,
+              "confidence": "medium"
+            },
+            {
+              "component": "Windings & PCB",
+              "commodity": "copper",
+              "grade": "Enamelled copper windings, PCB copper",
+              "mass_pct": 0.349,
+              "confidence": "medium"
+            },
+            {
+              "component": "Motor magnets",
+              "commodity": "neodymium",
+              "grade": "Sintered NdFeB magnet (motor type not disclosed)",
+              "mass_pct": 0.05,
+              "confidence": "low"
+            },
+            {
+              "component": "Motor magnets",
+              "commodity": "dysprosium",
+              "grade": "Dy grain-boundary additive in NdFeB",
+              "mass_pct": 0.002,
+              "confidence": "low"
+            },
+            {
+              "component": "Motor magnets",
+              "commodity": "boron",
+              "grade": "B in Nd₂Fe₁₄B",
+              "mass_pct": 0.002,
+              "confidence": "low"
+            },
+            {
+              "component": "Controller",
+              "commodity": "silicon",
+              "grade": "MCU, motor driver and magnetic encoder ICs",
+              "mass_pct": 0.037,
+              "confidence": "low"
+            },
+            {
+              "component": "Controller",
+              "commodity": "tin",
+              "grade": "SAC305 lead-free solder",
+              "mass_pct": 0.01,
+              "confidence": "low"
             }
           ]
         },
         {
           "meshName": "shin_R",
-          "label": "Shin (right)",
+          "label": "Lower leg (right)",
           "group": "legs",
           "materials": [
             {
-              "component": "Structural link",
-              "commodity": "aluminum",
-              "grade": "6061-T6 aluminum",
-              "mass_pct": 1.459,
+              "component": "Printed structure",
+              "commodity": "plastics",
+              "grade": "PLA, FDM-printed",
+              "mass_pct": 0.44,
               "confidence": "high"
             },
             {
-              "component": "Cover",
-              "commodity": "plastics",
-              "grade": "PA12 (SLS) cover",
-              "mass_pct": 1.362,
-              "confidence": "medium"
-            },
-            {
-              "component": "Bearings & fasteners",
+              "component": "Fasteners",
               "commodity": "iron",
-              "grade": "AISI 52100 bearings, 12.9 alloy-steel bolts",
-              "mass_pct": 0.227,
-              "confidence": "medium"
-            },
-            {
-              "component": "Wiring",
-              "commodity": "copper",
-              "grade": "Tinned C11000 stranded copper",
-              "mass_pct": 0.195,
+              "grade": "M2 / M2.5 steel machine screws",
+              "mass_pct": 0.049,
               "confidence": "medium"
             }
           ]
         },
         {
           "meshName": "actuator_ankle_R",
-          "label": "Ankle actuator (right)",
+          "label": "Ankle servo (right)",
           "group": "legs",
           "materials": [
             {
-              "component": "Planetary gearbox & bearings",
-              "commodity": "iron",
-              "grade": "20CrMnTi carburized steel",
-              "mass_pct": 0.781,
-              "confidence": "high"
-            },
-            {
-              "component": "Housing",
-              "commodity": "aluminum",
-              "grade": "6061-T6 machined aluminum",
-              "mass_pct": 0.721,
-              "confidence": "high"
-            },
-            {
-              "component": "Stator laminations",
-              "commodity": "iron",
-              "grade": "M19 non-oriented electrical steel (3% Si)",
-              "mass_pct": 0.33,
-              "confidence": "medium"
-            },
-            {
-              "component": "Stator windings",
-              "commodity": "copper",
-              "grade": "99.99% C10100 OFHC enamelled magnet wire",
-              "mass_pct": 0.39,
-              "confidence": "high"
-            },
-            {
-              "component": "NdFeB magnets",
-              "commodity": "neodymium",
-              "grade": "Sintered NdFeB N52SH (Nd+Pr ≈ 30 wt%)",
-              "mass_pct": 0.068,
-              "confidence": "medium"
-            },
-            {
-              "component": "NdFeB magnets",
-              "commodity": "dysprosium",
-              "grade": "Grain-boundary diffused Dy (≈ 2–4 wt%)",
-              "mass_pct": 0.007,
-              "confidence": "low"
-            },
-            {
-              "component": "NdFeB magnets",
-              "commodity": "iron",
-              "grade": "Fe matrix of NdFeB (≈ 66 wt%)",
-              "mass_pct": 0.149,
-              "confidence": "medium"
-            },
-            {
-              "component": "NdFeB magnets",
-              "commodity": "boron",
-              "grade": "Ferroboron in NdFeB (≈ 1 wt%)",
-              "mass_pct": 0.002,
-              "confidence": "medium"
-            },
-            {
-              "component": "Motor driver",
-              "commodity": "silicon",
-              "grade": "SiC/GaN MOSFETs, gate-driver & encoder ICs",
-              "mass_pct": 0.036,
-              "confidence": "low"
-            },
-            {
-              "component": "Motor driver",
-              "commodity": "copper",
-              "grade": "Heavy-copper PCB & busbars",
-              "mass_pct": 0.09,
-              "confidence": "medium"
-            },
-            {
-              "component": "Solder",
-              "commodity": "tin",
-              "grade": "SAC305 lead-free solder (96.5% Sn)",
-              "mass_pct": 0.009,
-              "confidence": "low"
-            },
-            {
-              "component": "Seals, cable jackets",
+              "component": "Housing & gear train",
               "commodity": "plastics",
-              "grade": "FKM seals, PTFE cable jacket",
-              "mass_pct": 0.12,
+              "grade": "PC housing, engineering-plastic (POM/PA) gear train",
+              "mass_pct": 1.444,
               "confidence": "medium"
+            },
+            {
+              "component": "Motor & shaft",
+              "commodity": "iron",
+              "grade": "Electrical steel can and laminations, steel output shaft",
+              "mass_pct": 0.548,
+              "confidence": "medium"
+            },
+            {
+              "component": "Windings & PCB",
+              "commodity": "copper",
+              "grade": "Enamelled copper windings, PCB copper",
+              "mass_pct": 0.349,
+              "confidence": "medium"
+            },
+            {
+              "component": "Motor magnets",
+              "commodity": "neodymium",
+              "grade": "Sintered NdFeB magnet (motor type not disclosed)",
+              "mass_pct": 0.05,
+              "confidence": "low"
+            },
+            {
+              "component": "Motor magnets",
+              "commodity": "dysprosium",
+              "grade": "Dy grain-boundary additive in NdFeB",
+              "mass_pct": 0.002,
+              "confidence": "low"
+            },
+            {
+              "component": "Motor magnets",
+              "commodity": "boron",
+              "grade": "B in Nd₂Fe₁₄B",
+              "mass_pct": 0.002,
+              "confidence": "low"
+            },
+            {
+              "component": "Controller",
+              "commodity": "silicon",
+              "grade": "MCU, motor driver and magnetic encoder ICs",
+              "mass_pct": 0.037,
+              "confidence": "low"
+            },
+            {
+              "component": "Controller",
+              "commodity": "tin",
+              "grade": "SAC305 lead-free solder",
+              "mass_pct": 0.01,
+              "confidence": "low"
             }
           ]
         },
         {
           "meshName": "foot_R",
-          "label": "Foot (right)",
+          "label": "Ankle & foot (right)",
           "group": "legs",
           "materials": [
             {
-              "component": "Foot plate",
-              "commodity": "aluminum",
-              "grade": "7075-T6 plate",
-              "mass_pct": 1.351,
+              "component": "Printed structure",
+              "commodity": "plastics",
+              "grade": "PLA, FDM-printed",
+              "mass_pct": 3.053,
+              "confidence": "high"
+            },
+            {
+              "component": "Bearings",
+              "commodity": "iron",
+              "grade": "Thin-section deep-groove ball bearings (chrome steel)",
+              "mass_pct": 0.244,
+              "confidence": "high"
+            },
+            {
+              "component": "Fasteners",
+              "commodity": "iron",
+              "grade": "M2 / M2.5 steel machine screws",
+              "mass_pct": 0.163,
               "confidence": "medium"
             },
             {
               "component": "Sole",
               "commodity": "elastomers",
-              "grade": "Shore 70A TPU sole",
-              "mass_pct": 0.595,
-              "confidence": "low"
-            },
-            {
-              "component": "Force/torque sensor",
-              "commodity": "iron",
-              "grade": "17-4PH stainless flexure",
-              "mass_pct": 0.324,
-              "confidence": "medium"
-            },
-            {
-              "component": "Force/torque sensor",
-              "commodity": "silicon",
-              "grade": "Strain-gauge amplifier ICs",
-              "mass_pct": 0.027,
-              "confidence": "low"
-            },
-            {
-              "component": "Cover",
-              "commodity": "plastics",
-              "grade": "PA12 cover",
-              "mass_pct": 0.405,
+              "grade": "TPU 95A, printed sole",
+              "mass_pct": 0.611,
               "confidence": "medium"
             }
           ]
