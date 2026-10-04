@@ -35,7 +35,10 @@ export function EstimatedBadge({ onClick }: { onClick: () => void }) {
       className="group inline-flex items-center gap-2 border border-vulcan-signal/40 bg-vulcan-signal/[0.08] px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-vulcan-paper transition-colors hover:border-vulcan-signal"
     >
       <span className="h-1.5 w-1.5 bg-vulcan-signal" aria-hidden />
-      <span>Estimated, not manufacturer-disclosed</span>
+      <span className="sm:hidden" aria-hidden>
+        Estimated
+      </span>
+      <span className="sr-only sm:not-sr-only">Estimated, not manufacturer-disclosed</span>
       <span className="hidden text-vulcan-muted transition-colors group-hover:text-vulcan-paper sm:inline">· Methodology</span>
     </button>
   )
