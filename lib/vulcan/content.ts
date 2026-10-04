@@ -40,7 +40,7 @@ export const CONTACT_HREF = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponen
 export const LINKEDIN_HREF = `https://www.linkedin.com/search/results/all/?keywords=${encodeURIComponent('Vulcan Trade')}`
 
 export const PROBLEM = {
-  headline: 'The supply chain behind production is still difficult to see.',
+  headline: 'The commodities market is over-the-counter and very opaque. We want to change that.',
   copy: 'Manufacturers make critical sourcing decisions across fragmented commodity, supplier, logistics, and market systems.',
   broader: ['The commodity market is opaque.', 'We are building the intelligence layer to change that.'],
   risks: [
