@@ -23,7 +23,7 @@ const SECTIONS = [
   },
   {
     title: '3D models',
-    body: 'Microduck is open hardware, so it is shown from its published CAD, assembled with the official MuJoCo model and its part masses taken from that model. Tesla Optimus is a procedural reconstruction from public renders. The other robots are stylised placeholders built from primitives. Every model uses one named mesh per part, so licensed GLB models can replace them without changing the data.',
+    body: 'Microduck and Reachy 2 are open hardware, so they are shown from their published CAD. Microduck is assembled with the official MuJoCo model, and its part masses come from that model. Reachy 2 is reduced from Pollen Robotics\' official Blender file, and its masses follow Pollen\'s datasheet. Tesla Optimus is a procedural reconstruction from public renders. The other robots are stylised placeholders built from primitives. Every model uses one named mesh per part, so licensed GLB models can replace them without changing the data.',
   },
 ]
 

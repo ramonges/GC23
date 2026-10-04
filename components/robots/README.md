@@ -15,7 +15,7 @@ Each robot is rendered from one of three sources. Every source produces meshes n
 
 | Source | When it's used | Example |
 | --- | --- | --- |
-| GLB (`robot.model`) | `model` is a path under `/public` | Microduck |
+| GLB (`robot.model`) | `model` is a path under `/public` | Microduck, Reachy 2 |
 | Procedural reconstruction | A builder exists for the robot id in `scene/placeholder.ts` | Tesla Optimus (`scene/optimus.ts`) |
 | Placeholder | Fallback per `archetype` | Every other robot |
 
@@ -67,8 +67,27 @@ node scripts/robots/assemble-microduck.mjs microduck.glb path/to/robot_groundcon
 
 If you change how parts are grouped (`partFor` in the script), update the matching `parts` in `robots.json`.
 
+## Reachy 2
+
+`public/models/robots/reachy2.glb` comes from Pollen's official Blender file, [pollen-robotics/reachy2-blender](https://github.com/pollen-robotics/reachy2-blender) (`reachy2.blend`, about 12,000 CAD objects). That repository is Apache 2.0.
+
+`scripts/robots/export-reachy2.py` runs inside Blender. It does the following:
+
+1. It resets the armature to its rest pose, an arms-down stance.
+2. It skips the `*_little_pieces` collections, which are excluded in the source file and sit at the origin. It also drops screws, nuts and other parts smaller than about 1 cm.
+3. It merges the CAD objects under each named empty into one explorer part. `GROUPS` and `PREFIX` define the mapping; for example, `L.Hand.Orbita3D*` becomes `actuator_wrist_L`.
+4. It maps the 40+ CAD materials onto a small palette and keeps the marinière shirt texture.
+5. It decimates each part to a triangle budget (`BUDGET`), drops the model onto `y = 0` and writes a Draco GLB of about 1.8 MB.
+
+```bash
+git clone https://github.com/pollen-robotics/reachy2-blender && cd reachy2-blender
+blender -b reachy2.blend --python /path/to/scripts/robots/export-reachy2.py -- assets/mariniere.jpg reachy2.glb rest --preview
+```
+
+Part masses follow Pollen's datasheet: 50 kg in total, including the 25 kg mobile base and its 6.5 kg LiFePO₄ battery. The split inside each part is estimated.
+
 ## Performance notes
 
 - The canvas renders on demand (`frameloop="demand"`). Anything animating must call `state.invalidate()`.
 - Pixel ratio is capped at 2, and shadows are reduced on mobile.
-- Keep GLBs under about 1 MB after Draco. Microduck is about 465 KB.
+- Keep GLBs under about 2 MB after Draco. Microduck is about 465 KB and Reachy 2 about 1.8 MB.
