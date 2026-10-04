@@ -1,22 +1,26 @@
-import {
-  BoxGeometry,
-  BufferGeometry,
-  CapsuleGeometry,
-  CatmullRomCurve3,
-  CylinderGeometry,
-  Euler,
-  Matrix4,
-  Quaternion,
-  SphereGeometry,
-  TubeGeometry,
-  Vector3,
-} from 'three'
-import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js'
-import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
+import { BoxGeometry, BufferGeometry, CatmullRomCurve3, CylinderGeometry, SphereGeometry, TubeGeometry, Vector3 } from 'three'
 import type { Archetype } from '@/lib/robots/types'
+import { capsule, drum, ellipsoid, merge, piece, rbox, type V3 } from './geometry'
+import { optimus } from './optimus'
 
-export type Finish = 'shell' | 'frame' | 'dark' | 'actuator' | 'rubber' | 'glass' | 'accent' | 'battery' | 'board' | 'cable'
+export type Finish =
+  | 'shell'
+  | 'frame'
+  | 'dark'
+  | 'actuator'
+  | 'rubber'
+  | 'glass'
+  | 'accent'
+  | 'battery'
+  | 'board'
+  | 'cable'
+  | 'gloss'
+  | 'satin'
+  | 'housing'
+  | 'chrome'
+  | 'glow'
 
+/** Several specs may share a name: they render as separate meshes but hover, pin and explode as one part. */
 export type PartSpec = {
   name: string
   geometry: BufferGeometry
@@ -25,33 +29,6 @@ export type PartSpec = {
   finish: Finish
   /** Direction the part travels in exploded view; derived from its offset to the robot centre when omitted. */
   explode?: [number, number, number]
-}
-
-type V3 = [number, number, number]
-
-function piece(g: BufferGeometry, pos: V3 = [0, 0, 0], rot: V3 = [0, 0, 0]) {
-  const m = new Matrix4().compose(new Vector3(...pos), new Quaternion().setFromEuler(new Euler(...rot)), new Vector3(1, 1, 1))
-  const out = g.clone()
-  out.applyMatrix4(m)
-  return out
-}
-
-function merge(...geoms: BufferGeometry[]) {
-  const nonIndexed = geoms.map((g) => (g.index ? g.toNonIndexed() : g))
-  for (const g of nonIndexed) {
-    if (!g.getAttribute('uv')) g.setAttribute('uv', g.getAttribute('position').clone())
-  }
-  return mergeGeometries(nonIndexed, false)!
-}
-
-const rbox = (w: number, h: number, d: number, r = 0.012) => new RoundedBoxGeometry(w, h, d, 3, Math.min(r, w / 2, h / 2, d / 2))
-const capsule = (r: number, len: number) => new CapsuleGeometry(r, len, 6, 16)
-/** Joint drum lying along X. */
-const drum = (r: number, len: number) => piece(new CylinderGeometry(r, r, len, 28), [0, 0, 0], [0, 0, Math.PI / 2])
-const ellipsoid = (rx: number, ry: number, rz: number) => {
-  const g = new SphereGeometry(1, 40, 28)
-  g.scale(rx, ry, rz)
-  return g
 }
 
 function scaleSpecs(specs: PartSpec[], s: number) {
@@ -269,6 +246,7 @@ function desktop(): PartSpec[] {
 export function buildPlaceholder(archetype: Archetype, robotId: string, height: number): PartSpec[] {
   switch (archetype) {
     case 'humanoid':
+      if (robotId === 'optimus') return scaleSpecs(optimus(), height / 1.73)
       return scaleSpecs(humanoid(robotId), height / 1.75)
     case 'digitigrade':
       return scaleSpecs(digitigrade(), height / 1.75)

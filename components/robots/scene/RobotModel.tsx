@@ -21,6 +21,8 @@ type RenderPart = {
   scale: Vector3
   material: MeshStandardMaterial
   baseColor: Color
+  baseEmissive: Color
+  baseGlow: number
   explode: Vector3
 }
 
@@ -36,6 +38,11 @@ function finishMaterial(finish: Finish, palette: Robot['palette']) {
     battery: { color: '#30363A', roughness: 0.5, metalness: 0.25 },
     board: { color: '#1E3A33', roughness: 0.45, metalness: 0.3 },
     cable: { color: '#8E5A3A', roughness: 0.55, metalness: 0.2 },
+    gloss: { color: '#0B0C0D', roughness: 0.16, metalness: 0.3, envMapIntensity: 1.4 },
+    satin: { color: '#16181A', roughness: 0.42, metalness: 0.18 },
+    housing: { color: '#4A4E52', roughness: 0.4, metalness: 0.62 },
+    chrome: { color: '#C9CDD0', roughness: 0.16, metalness: 1 },
+    glow: { color: '#2BC4D6', emissive: '#22D3E6', emissiveIntensity: 0.9, roughness: 0.3, metalness: 0, toneMapped: false },
   }
   return new MeshStandardMaterial(p[finish])
 }
@@ -69,7 +76,7 @@ function useGlbParts(robot: Robot): RenderPart[] {
   return useMemo(() => {
     const names = new Set(robot.parts.map((p) => p.meshName))
     scene.updateMatrixWorld(true)
-    const out: Omit<RenderPart, 'baseColor'>[] = []
+    const out: PartInput[] = []
     scene.traverse((o) => {
       const mesh = o as Mesh
       if (!mesh.isMesh) return
@@ -86,29 +93,42 @@ function useGlbParts(robot: Robot): RenderPart[] {
   }, [scene, robot])
 }
 
-/** Fill in base colours and derive explode directions from each part's offset to the model centre. */
-function finalize(parts: Omit<RenderPart, 'baseColor'>[]): RenderPart[] {
+type PartInput = Omit<RenderPart, 'baseColor' | 'baseEmissive' | 'baseGlow'>
+
+/**
+ * Fill in base colours and derive explode directions from each part's offset to the model centre.
+ * Meshes sharing a name are one part, so they get one direction from their combined bounds.
+ */
+function finalize(parts: PartInput[]): RenderPart[] {
   const box = new Box3()
   const tmp = new Box3()
-  const centers = parts.map((p) => {
+  const groups = new Map<string, { box: Box3; explode?: Vector3 }>()
+  for (const p of parts) {
     p.geometry.computeBoundingBox()
     tmp.copy(p.geometry.boundingBox!).applyMatrix4(new Matrix4().compose(p.position, p.quaternion, p.scale))
     box.union(tmp)
-    return tmp.getCenter(new Vector3())
-  })
+    const g = groups.get(p.name) ?? { box: new Box3() }
+    g.box.union(tmp)
+    if (!g.explode && p.explode.lengthSq() > 0) g.explode = p.explode.clone()
+    groups.set(p.name, g)
+  }
   const center = box.getCenter(new Vector3())
   const size = box.getSize(new Vector3())
-  return parts.map((p, i) => {
-    if (p.explode.lengthSq() === 0) {
-      const d = centers[i].clone().sub(center)
-      d.y *= 0.6
-      if (d.lengthSq() < 1e-6) d.set(0, 0, 1)
-      p.explode.copy(d.divideScalar(Math.max(size.y, 1e-3) * 0.5))
-    } else {
-      p.explode.normalize().multiplyScalar(0.55)
-    }
-    return { ...p, baseColor: p.material.color.clone() }
+  const dirs = new Map<string, Vector3>()
+  groups.forEach((g, name) => {
+    if (g.explode) return dirs.set(name, g.explode.normalize().multiplyScalar(0.55))
+    const d = g.box.getCenter(new Vector3()).sub(center)
+    d.y *= 0.6
+    if (d.lengthSq() < 1e-6) d.set(0, 0, 1)
+    dirs.set(name, d.divideScalar(Math.max(size.y, 1e-3) * 0.5))
   })
+  return parts.map((p) => ({
+    ...p,
+    explode: dirs.get(p.name)!.clone(),
+    baseColor: p.material.color.clone(),
+    baseEmissive: p.material.emissive.clone(),
+    baseGlow: p.material.emissiveIntensity,
+  }))
 }
 
 type Props = {
@@ -182,14 +202,14 @@ function PartsRenderer({ robot, interactive, opacity, parts }: Props & { parts: 
         mat.color.lerp(target, k)
         moving = true
       } else mat.color.copy(target)
-      const glow = isActive ? 0.45 : 0
+      const glow = isActive ? 0.45 : p.baseGlow
       if (Math.abs(mat.emissiveIntensity - glow) > 0.01) {
-        mat.emissive.copy(isActive ? SIGNAL : BLACK)
+        mat.emissive.copy(isActive ? SIGNAL : p.baseGlow > 0 ? p.baseEmissive : BLACK)
         mat.emissiveIntensity += (glow - mat.emissiveIntensity) * k
         moving = true
       } else {
         mat.emissiveIntensity = glow
-        if (!isActive) mat.emissive.copy(BLACK)
+        if (!isActive) mat.emissive.copy(p.baseEmissive)
       }
       const transparent = op < 0.999
       if (mat.transparent !== transparent) {
