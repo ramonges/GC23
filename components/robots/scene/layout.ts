@@ -3,8 +3,8 @@ import type { Robot } from '@/lib/robots/types'
 
 /** Robots stand on a concave arc facing the camera. */
 const ARC_CENTER = new Vector3(0, 0, 4.5)
-const ARC_RADIUS = 7
-const ARC_SPREAD = (84 * Math.PI) / 180
+const ARC_RADIUS = 7.5
+const ARC_SPREAD = (70 * Math.PI) / 180
 
 /** Where the selected robot ends up: alone, centred, closer to the camera. */
 export const FRONT = new Vector3(0, 0, 2.4)
@@ -32,5 +32,5 @@ export function detailDistance(robot: Robot) {
   return Math.max(0.75, robot.height_m * 1.9 + 0.5)
 }
 
-export const SHOWROOM_CAMERA = { position: new Vector3(0, 1.75, 7.6), target: new Vector3(0, 0.85, -0.6) }
+export const SHOWROOM_CAMERA = { position: new Vector3(0, 2.15, 8.9), target: new Vector3(0, 1.3, -0.9) }
 export const ARC = { center: ARC_CENTER, radius: ARC_RADIUS }

@@ -208,7 +208,7 @@ function PartsRenderer({ robot, interactive, opacity, parts }: Props & { parts: 
       ? {
           onPointerOver: (e: ThreeEvent<PointerEvent>) => {
             e.stopPropagation()
-            if (e.pointerType === 'mouse') hoverPart(name)
+            if (e.nativeEvent.pointerType !== 'touch') hoverPart(name)
           },
           onPointerOut: (e: ThreeEvent<PointerEvent>) => {
             e.stopPropagation()

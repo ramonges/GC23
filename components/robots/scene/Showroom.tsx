@@ -287,12 +287,13 @@ function CameraRig({ layout }: { layout: SceneLayout }) {
       } else {
         c.minAzimuthAngle = -0.35
         c.maxAzimuthAngle = 0.35
-        const p = SHOWROOM_CAMERA.position
         const t = SHOWROOM_CAMERA.target
+        const fit = MathUtils.clamp(1.75 / (size.width / size.height), 1, 1.45)
+        const p = SHOWROOM_CAMERA.position.clone().sub(t).multiplyScalar(fit).add(t)
         c.setLookAt(p.x, p.y, p.z, t.x, t.y, t.z, true)
       }
     }
-  }, [selected, portrait, mobileFocus])
+  }, [selected, portrait, mobileFocus, size.width, size.height])
 
   useEffect(() => {
     const c = ref.current

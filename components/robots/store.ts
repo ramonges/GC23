@@ -50,3 +50,7 @@ export const useExplorer = create<ExplorerState>((set) => ({
   setMethodology: (open) => set({ methodologyOpen: open }),
   setPointer: (x, y) => set({ pointer: { x, y } }),
 }))
+
+if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
+  ;(window as unknown as { __explorer: typeof useExplorer }).__explorer = useExplorer
+}
