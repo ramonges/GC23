@@ -1,0 +1,1055 @@
+{
+  "version": 1,
+  "estimated": true,
+  "source": "Country shares rounded from USGS Mineral Commodity Summaries 2024 (2023 production) and IEA Global Critical Minerals Outlook 2024; polymer shares are industry estimates.",
+  "countries": {
+    "AU": {
+      "name": "Australia",
+      "lat": -25.3,
+      "lng": 134.5
+    },
+    "GN": {
+      "name": "Guinea",
+      "lat": 10.4,
+      "lng": -10.9
+    },
+    "CN": {
+      "name": "China",
+      "lat": 35.0,
+      "lng": 104.0
+    },
+    "BR": {
+      "name": "Brazil",
+      "lat": -10.0,
+      "lng": -52.0
+    },
+    "IN": {
+      "name": "India",
+      "lat": 22.0,
+      "lng": 79.0
+    },
+    "RU": {
+      "name": "Russia",
+      "lat": 60.0,
+      "lng": 90.0
+    },
+    "CA": {
+      "name": "Canada",
+      "lat": 57.0,
+      "lng": -100.0
+    },
+    "AE": {
+      "name": "United Arab Emirates",
+      "lat": 24.0,
+      "lng": 54.0
+    },
+    "CL": {
+      "name": "Chile",
+      "lat": -30.0,
+      "lng": -71.0
+    },
+    "PE": {
+      "name": "Peru",
+      "lat": -10.0,
+      "lng": -76.0
+    },
+    "CD": {
+      "name": "DR Congo",
+      "lat": -3.0,
+      "lng": 23.0
+    },
+    "US": {
+      "name": "United States",
+      "lat": 39.0,
+      "lng": -98.0
+    },
+    "JP": {
+      "name": "Japan",
+      "lat": 36.0,
+      "lng": 138.0
+    },
+    "MM": {
+      "name": "Myanmar",
+      "lat": 21.0,
+      "lng": 96.0
+    },
+    "MY": {
+      "name": "Malaysia",
+      "lat": 4.0,
+      "lng": 102.0
+    },
+    "EE": {
+      "name": "Estonia",
+      "lat": 58.6,
+      "lng": 25.0
+    },
+    "VN": {
+      "name": "Vietnam",
+      "lat": 16.0,
+      "lng": 107.0
+    },
+    "TR": {
+      "name": "Türkiye",
+      "lat": 39.0,
+      "lng": 35.0
+    },
+    "AR": {
+      "name": "Argentina",
+      "lat": -34.0,
+      "lng": -64.0
+    },
+    "ID": {
+      "name": "Indonesia",
+      "lat": -2.0,
+      "lng": 118.0
+    },
+    "PH": {
+      "name": "Philippines",
+      "lat": 12.0,
+      "lng": 122.0
+    },
+    "NC": {
+      "name": "New Caledonia",
+      "lat": -21.3,
+      "lng": 165.5
+    },
+    "FI": {
+      "name": "Finland",
+      "lat": 64.0,
+      "lng": 26.0
+    },
+    "ZA": {
+      "name": "South Africa",
+      "lat": -29.0,
+      "lng": 24.0
+    },
+    "GA": {
+      "name": "Gabon",
+      "lat": -0.8,
+      "lng": 11.6
+    },
+    "MG": {
+      "name": "Madagascar",
+      "lat": -19.0,
+      "lng": 47.0
+    },
+    "MZ": {
+      "name": "Mozambique",
+      "lat": -18.0,
+      "lng": 35.0
+    },
+    "KR": {
+      "name": "South Korea",
+      "lat": 36.0,
+      "lng": 128.0
+    },
+    "NO": {
+      "name": "Norway",
+      "lat": 61.0,
+      "lng": 9.0
+    },
+    "DE": {
+      "name": "Germany",
+      "lat": 51.0,
+      "lng": 10.0
+    },
+    "SA": {
+      "name": "Saudi Arabia",
+      "lat": 24.0,
+      "lng": 45.0
+    },
+    "TH": {
+      "name": "Thailand",
+      "lat": 15.0,
+      "lng": 101.0
+    },
+    "TW": {
+      "name": "Taiwan",
+      "lat": 23.7,
+      "lng": 121.0
+    },
+    "SE": {
+      "name": "Sweden",
+      "lat": 62.0,
+      "lng": 15.0
+    },
+    "BO": {
+      "name": "Bolivia",
+      "lat": -17.0,
+      "lng": -65.0
+    },
+    "KZ": {
+      "name": "Kazakhstan",
+      "lat": 48.0,
+      "lng": 67.0
+    },
+    "BH": {
+      "name": "Bahrain",
+      "lat": 26.0,
+      "lng": 50.5
+    },
+    "GH": {
+      "name": "Ghana",
+      "lat": 7.9,
+      "lng": -1.0
+    }
+  },
+  "commodities": {
+    "aluminum": {
+      "label": "Aluminum",
+      "color": "#B9C0C4",
+      "group": "Base metals",
+      "basis": "USGS MCS — bauxite (mining) and primary aluminum (smelting)",
+      "note": "Structural 6061/7075 billet is extruded or machined from primary metal; China dominates smelting.",
+      "sourcing": [
+        {
+          "country": "AU",
+          "role": "mining",
+          "share_pct": 26,
+          "confidence": "high",
+          "reasoning": "Largest bauxite producer (Weipa, Darling Range); mostly exported as alumina."
+        },
+        {
+          "country": "GN",
+          "role": "mining",
+          "share_pct": 23,
+          "confidence": "high",
+          "reasoning": "Fastest-growing bauxite exporter; feeds Chinese alumina refineries."
+        },
+        {
+          "country": "CN",
+          "role": "mining",
+          "share_pct": 22,
+          "confidence": "high",
+          "reasoning": "Large domestic bauxite output, supplemented by imports."
+        },
+        {
+          "country": "BR",
+          "role": "mining",
+          "share_pct": 8,
+          "confidence": "medium",
+          "reasoning": "Pará bauxite feeds Alunorte, one of the largest alumina refineries."
+        },
+        {
+          "country": "CN",
+          "role": "refining",
+          "share_pct": 59,
+          "confidence": "high",
+          "reasoning": "Smelts ~59% of the world’s primary aluminum; default origin for alloy billet."
+        },
+        {
+          "country": "IN",
+          "role": "refining",
+          "share_pct": 6,
+          "confidence": "medium",
+          "reasoning": "Coal-powered smelters (Hindalco, Vedanta) export ingot and billet."
+        },
+        {
+          "country": "RU",
+          "role": "refining",
+          "share_pct": 5,
+          "confidence": "medium",
+          "reasoning": "Hydro-powered Siberian smelters (Rusal)."
+        },
+        {
+          "country": "CA",
+          "role": "refining",
+          "share_pct": 4,
+          "confidence": "medium",
+          "reasoning": "Low-carbon Québec hydro smelters, typical for North American aerospace grades."
+        },
+        {
+          "country": "AE",
+          "role": "refining",
+          "share_pct": 4,
+          "confidence": "medium",
+          "reasoning": "EGA smelters supply 6xxx billet to Asian and European extruders."
+        }
+      ]
+    },
+    "iron": {
+      "label": "Iron & steel",
+      "color": "#6F7B84",
+      "group": "Base metals",
+      "basis": "USGS MCS — iron ore (mining) and crude steel (refining)",
+      "note": "Gear and bearing steels (52100, 20CrMnTi) are specialty grades, often from Japan, Sweden, Germany or China.",
+      "sourcing": [
+        {
+          "country": "AU",
+          "role": "mining",
+          "share_pct": 37,
+          "confidence": "high",
+          "reasoning": "Pilbara hematite is the world’s largest seaborne iron-ore supply."
+        },
+        {
+          "country": "BR",
+          "role": "mining",
+          "share_pct": 17,
+          "confidence": "high",
+          "reasoning": "Carajás high-grade ore (Vale)."
+        },
+        {
+          "country": "CN",
+          "role": "mining",
+          "share_pct": 14,
+          "confidence": "medium",
+          "reasoning": "Large but low-grade domestic ore (usable-ore basis)."
+        },
+        {
+          "country": "IN",
+          "role": "mining",
+          "share_pct": 11,
+          "confidence": "medium",
+          "reasoning": "Odisha and Karnataka ore, mostly consumed domestically."
+        },
+        {
+          "country": "CN",
+          "role": "refining",
+          "share_pct": 54,
+          "confidence": "high",
+          "reasoning": "Produces over half the world’s crude steel, including bearing and gear steels."
+        },
+        {
+          "country": "IN",
+          "role": "refining",
+          "share_pct": 7,
+          "confidence": "high",
+          "reasoning": "Second-largest steelmaker."
+        },
+        {
+          "country": "JP",
+          "role": "refining",
+          "share_pct": 5,
+          "confidence": "high",
+          "reasoning": "High-cleanliness bearing steel (e.g. Sanyo Special Steel)."
+        },
+        {
+          "country": "SE",
+          "role": "refining",
+          "share_pct": 1,
+          "confidence": "low",
+          "reasoning": "Ovako and SKF supply premium bearing steel despite a small share."
+        }
+      ]
+    },
+    "copper": {
+      "label": "Copper",
+      "color": "#C07A45",
+      "group": "Base metals",
+      "basis": "USGS MCS — mine production and refined copper",
+      "note": "99.99% C10100 magnet wire and electrodeposited foil start from cathode-grade refined copper.",
+      "sourcing": [
+        {
+          "country": "CL",
+          "role": "mining",
+          "share_pct": 24,
+          "confidence": "high",
+          "reasoning": "Escondida, Collahuasi and El Teniente lead world mine output."
+        },
+        {
+          "country": "PE",
+          "role": "mining",
+          "share_pct": 12,
+          "confidence": "high",
+          "reasoning": "Large porphyry mines (Antamina, Las Bambas, Cerro Verde)."
+        },
+        {
+          "country": "CD",
+          "role": "mining",
+          "share_pct": 11,
+          "confidence": "high",
+          "reasoning": "High-grade Copperbelt ores, rapidly growing."
+        },
+        {
+          "country": "CN",
+          "role": "mining",
+          "share_pct": 8,
+          "confidence": "medium",
+          "reasoning": "Domestic mines cover a fraction of smelter demand."
+        },
+        {
+          "country": "CN",
+          "role": "refining",
+          "share_pct": 45,
+          "confidence": "high",
+          "reasoning": "Refines ~45% of world copper; main source of magnet wire and battery foil."
+        },
+        {
+          "country": "CL",
+          "role": "refining",
+          "share_pct": 8,
+          "confidence": "medium",
+          "reasoning": "SX-EW cathode and smelter output."
+        },
+        {
+          "country": "CD",
+          "role": "refining",
+          "share_pct": 7,
+          "confidence": "medium",
+          "reasoning": "SX-EW cathode produced at the mine."
+        },
+        {
+          "country": "JP",
+          "role": "refining",
+          "share_pct": 6,
+          "confidence": "medium",
+          "reasoning": "Custom smelters producing high-purity cathode for wire."
+        }
+      ]
+    },
+    "neodymium": {
+      "label": "Neodymium / praseodymium",
+      "color": "#9B7FE0",
+      "group": "Rare earths",
+      "basis": "USGS MCS — rare-earth mine production; separation and magnet-alloy capacity (IEA)",
+      "note": "About 90% of NdFeB magnet production and rare-earth separation happens in China.",
+      "sourcing": [
+        {
+          "country": "CN",
+          "role": "mining",
+          "share_pct": 69,
+          "confidence": "high",
+          "reasoning": "Bayan Obo and Sichuan bastnäsite deposits, plus quota-controlled production."
+        },
+        {
+          "country": "US",
+          "role": "mining",
+          "share_pct": 12,
+          "confidence": "high",
+          "reasoning": "Mountain Pass; concentrate historically shipped to China for separation."
+        },
+        {
+          "country": "MM",
+          "role": "mining",
+          "share_pct": 8,
+          "confidence": "medium",
+          "reasoning": "Ionic-clay concentrate, mostly sent to China."
+        },
+        {
+          "country": "AU",
+          "role": "mining",
+          "share_pct": 5,
+          "confidence": "high",
+          "reasoning": "Mt Weld (Lynas)."
+        },
+        {
+          "country": "CN",
+          "role": "refining",
+          "share_pct": 90,
+          "confidence": "high",
+          "reasoning": "Dominates separation, metal and NdFeB magnet-alloy production."
+        },
+        {
+          "country": "MY",
+          "role": "refining",
+          "share_pct": 5,
+          "confidence": "medium",
+          "reasoning": "Lynas separation plant in Kuantan."
+        },
+        {
+          "country": "JP",
+          "role": "refining",
+          "share_pct": 2,
+          "confidence": "low",
+          "reasoning": "Magnet makers (Shin-Etsu, Proterial) with small upstream capacity."
+        },
+        {
+          "country": "EE",
+          "role": "refining",
+          "share_pct": 1,
+          "confidence": "low",
+          "reasoning": "Neo Performance Materials separation in Sillamäe."
+        }
+      ]
+    },
+    "dysprosium": {
+      "label": "Dysprosium",
+      "color": "#6E55C8",
+      "group": "Rare earths",
+      "basis": "USGS MCS and IEA critical-minerals data; heavy rare earths from ionic clays",
+      "note": "Heavy rare earths for high-coercivity magnets come almost entirely from southern China and Myanmar ionic clays.",
+      "sourcing": [
+        {
+          "country": "MM",
+          "role": "mining",
+          "share_pct": 45,
+          "confidence": "medium",
+          "reasoning": "Kachin-state ionic clays are now the largest heavy-rare-earth source."
+        },
+        {
+          "country": "CN",
+          "role": "mining",
+          "share_pct": 45,
+          "confidence": "medium",
+          "reasoning": "Southern-China ionic clays (Jiangxi, Guangdong)."
+        },
+        {
+          "country": "AU",
+          "role": "mining",
+          "share_pct": 4,
+          "confidence": "low",
+          "reasoning": "Minor heavy-rare-earth content in Lynas feed."
+        },
+        {
+          "country": "CN",
+          "role": "refining",
+          "share_pct": 99,
+          "confidence": "high",
+          "reasoning": "Near-total control of heavy-rare-earth separation and grain-boundary diffusion."
+        }
+      ]
+    },
+    "boron": {
+      "label": "Boron",
+      "color": "#CDB8F0",
+      "group": "Rare earths",
+      "basis": "USGS MCS — boron minerals",
+      "note": "The ferroboron in NdFeB is about 1 wt% of the magnet.",
+      "sourcing": [
+        {
+          "country": "TR",
+          "role": "mining",
+          "share_pct": 60,
+          "confidence": "high",
+          "reasoning": "Eti Maden controls the world’s largest borate reserves."
+        },
+        {
+          "country": "US",
+          "role": "mining",
+          "share_pct": 13,
+          "confidence": "medium",
+          "reasoning": "Boron, California (Rio Tinto)."
+        },
+        {
+          "country": "CL",
+          "role": "mining",
+          "share_pct": 8,
+          "confidence": "low",
+          "reasoning": "Borates from Atacama salars."
+        },
+        {
+          "country": "AR",
+          "role": "mining",
+          "share_pct": 7,
+          "confidence": "low",
+          "reasoning": "Puna borates."
+        },
+        {
+          "country": "TR",
+          "role": "refining",
+          "share_pct": 45,
+          "confidence": "medium",
+          "reasoning": "Refined borates and boric acid."
+        },
+        {
+          "country": "CN",
+          "role": "refining",
+          "share_pct": 25,
+          "confidence": "low",
+          "reasoning": "Converts imported borates to ferroboron for magnet alloys."
+        },
+        {
+          "country": "US",
+          "role": "refining",
+          "share_pct": 15,
+          "confidence": "low",
+          "reasoning": "Refined borate products."
+        }
+      ]
+    },
+    "lithium": {
+      "label": "Lithium",
+      "color": "#E2D65C",
+      "group": "Battery materials",
+      "basis": "USGS MCS — mine production; refining capacity (IEA)",
+      "note": "Battery-grade LiOH·H₂O and Li₂CO₃ (≥ 99.5%) are mostly refined in China, including from Australian spodumene.",
+      "sourcing": [
+        {
+          "country": "AU",
+          "role": "mining",
+          "share_pct": 47,
+          "confidence": "high",
+          "reasoning": "Hard-rock spodumene (Greenbushes, Pilgangoora), shipped to China."
+        },
+        {
+          "country": "CL",
+          "role": "mining",
+          "share_pct": 24,
+          "confidence": "high",
+          "reasoning": "Atacama brine (SQM, Albemarle)."
+        },
+        {
+          "country": "CN",
+          "role": "mining",
+          "share_pct": 18,
+          "confidence": "medium",
+          "reasoning": "Lepidolite and Qinghai brines."
+        },
+        {
+          "country": "AR",
+          "role": "mining",
+          "share_pct": 5,
+          "confidence": "medium",
+          "reasoning": "Expanding lithium-triangle brines."
+        },
+        {
+          "country": "CN",
+          "role": "refining",
+          "share_pct": 65,
+          "confidence": "high",
+          "reasoning": "Converts most of the world’s spodumene to battery-grade hydroxide and carbonate."
+        },
+        {
+          "country": "CL",
+          "role": "refining",
+          "share_pct": 25,
+          "confidence": "high",
+          "reasoning": "Brine-to-carbonate refining at the Salar de Atacama."
+        },
+        {
+          "country": "AR",
+          "role": "refining",
+          "share_pct": 4,
+          "confidence": "medium",
+          "reasoning": "Carbonate from brine projects."
+        }
+      ]
+    },
+    "nickel": {
+      "label": "Nickel",
+      "color": "#78B08A",
+      "group": "Battery materials",
+      "basis": "USGS MCS — mine production; class-1 refining (IEA)",
+      "note": "NMC811 needs class-1 nickel sulfate, increasingly made from Indonesian MHP by Chinese-owned plants.",
+      "sourcing": [
+        {
+          "country": "ID",
+          "role": "mining",
+          "share_pct": 50,
+          "confidence": "high",
+          "reasoning": "Laterite ores (Sulawesi, Halmahera) after the 2020 ore-export ban."
+        },
+        {
+          "country": "PH",
+          "role": "mining",
+          "share_pct": 11,
+          "confidence": "high",
+          "reasoning": "Laterite ore, mostly shipped to China."
+        },
+        {
+          "country": "RU",
+          "role": "mining",
+          "share_pct": 6,
+          "confidence": "high",
+          "reasoning": "Norilsk sulfide ores."
+        },
+        {
+          "country": "NC",
+          "role": "mining",
+          "share_pct": 6,
+          "confidence": "medium",
+          "reasoning": "Laterite mines."
+        },
+        {
+          "country": "CN",
+          "role": "refining",
+          "share_pct": 33,
+          "confidence": "medium",
+          "reasoning": "Main producer of battery-grade nickel sulfate and precursors."
+        },
+        {
+          "country": "ID",
+          "role": "refining",
+          "share_pct": 32,
+          "confidence": "medium",
+          "reasoning": "HPAL/MHP and matte plants feed battery chains."
+        },
+        {
+          "country": "JP",
+          "role": "refining",
+          "share_pct": 5,
+          "confidence": "medium",
+          "reasoning": "Sumitomo Metal Mining class-1 nickel."
+        },
+        {
+          "country": "FI",
+          "role": "refining",
+          "share_pct": 3,
+          "confidence": "low",
+          "reasoning": "Harjavalta / Terrafame battery-chemical nickel."
+        }
+      ]
+    },
+    "cobalt": {
+      "label": "Cobalt",
+      "color": "#3F74E0",
+      "group": "Battery materials",
+      "basis": "USGS MCS — mine production; refined cobalt",
+      "note": "Battery-grade cobalt sulfate is refined mainly in China from Congolese hydroxide.",
+      "sourcing": [
+        {
+          "country": "CD",
+          "role": "mining",
+          "share_pct": 74,
+          "confidence": "high",
+          "reasoning": "Copperbelt by-product; artisanal mining is a known traceability risk."
+        },
+        {
+          "country": "ID",
+          "role": "mining",
+          "share_pct": 7,
+          "confidence": "medium",
+          "reasoning": "By-product of nickel HPAL."
+        },
+        {
+          "country": "RU",
+          "role": "mining",
+          "share_pct": 4,
+          "confidence": "medium",
+          "reasoning": "Norilsk by-product."
+        },
+        {
+          "country": "CN",
+          "role": "refining",
+          "share_pct": 76,
+          "confidence": "high",
+          "reasoning": "Refines most cobalt hydroxide into sulfate and oxide."
+        },
+        {
+          "country": "FI",
+          "role": "refining",
+          "share_pct": 9,
+          "confidence": "medium",
+          "reasoning": "Kokkola refinery (Umicore)."
+        },
+        {
+          "country": "CA",
+          "role": "refining",
+          "share_pct": 3,
+          "confidence": "low",
+          "reasoning": "Fort Saskatchewan refinery."
+        }
+      ]
+    },
+    "manganese": {
+      "label": "Manganese",
+      "color": "#D0839A",
+      "group": "Battery materials",
+      "basis": "USGS MCS — mine production; HPMSM capacity",
+      "note": "Battery-grade HPMSM is made almost entirely in China.",
+      "sourcing": [
+        {
+          "country": "ZA",
+          "role": "mining",
+          "share_pct": 36,
+          "confidence": "high",
+          "reasoning": "Kalahari manganese field."
+        },
+        {
+          "country": "GA",
+          "role": "mining",
+          "share_pct": 23,
+          "confidence": "high",
+          "reasoning": "Moanda (Comilog)."
+        },
+        {
+          "country": "AU",
+          "role": "mining",
+          "share_pct": 14,
+          "confidence": "high",
+          "reasoning": "Groote Eylandt (South32)."
+        },
+        {
+          "country": "CN",
+          "role": "refining",
+          "share_pct": 95,
+          "confidence": "medium",
+          "reasoning": "Converts imported ore to high-purity sulfate for cathodes."
+        },
+        {
+          "country": "JP",
+          "role": "refining",
+          "share_pct": 2,
+          "confidence": "low",
+          "reasoning": "Small specialty production."
+        }
+      ]
+    },
+    "graphite": {
+      "label": "Graphite",
+      "color": "#5A5E61",
+      "group": "Battery materials",
+      "basis": "USGS MCS — natural graphite; anode-material capacity (IEA)",
+      "note": "Spherical and synthetic anode graphite is over 90% processed in China.",
+      "sourcing": [
+        {
+          "country": "CN",
+          "role": "mining",
+          "share_pct": 77,
+          "confidence": "high",
+          "reasoning": "Heilongjiang and Inner Mongolia flake graphite."
+        },
+        {
+          "country": "MG",
+          "role": "mining",
+          "share_pct": 6,
+          "confidence": "medium",
+          "reasoning": "Flake graphite exports."
+        },
+        {
+          "country": "MZ",
+          "role": "mining",
+          "share_pct": 5,
+          "confidence": "medium",
+          "reasoning": "Balama flake graphite (Syrah)."
+        },
+        {
+          "country": "BR",
+          "role": "mining",
+          "share_pct": 4,
+          "confidence": "medium",
+          "reasoning": "Minas Gerais flake."
+        },
+        {
+          "country": "CN",
+          "role": "refining",
+          "share_pct": 95,
+          "confidence": "high",
+          "reasoning": "Spheronization, purification and synthetic-graphite production."
+        },
+        {
+          "country": "JP",
+          "role": "refining",
+          "share_pct": 2,
+          "confidence": "low",
+          "reasoning": "Specialty synthetic graphite."
+        }
+      ]
+    },
+    "silicon": {
+      "label": "Silicon (semiconductors)",
+      "color": "#4FB8C9",
+      "group": "Electronics",
+      "basis": "USGS MCS — silicon metal; polysilicon capacity (industry)",
+      "note": "Shares cover polysilicon. Leading-edge chips are then fabricated mainly in Taiwan and South Korea.",
+      "sourcing": [
+        {
+          "country": "CN",
+          "role": "mining",
+          "share_pct": 68,
+          "confidence": "medium",
+          "reasoning": "Quartz to metallurgical silicon (Xinjiang, Yunnan)."
+        },
+        {
+          "country": "BR",
+          "role": "mining",
+          "share_pct": 5,
+          "confidence": "low",
+          "reasoning": "Metallurgical silicon from quartzite."
+        },
+        {
+          "country": "NO",
+          "role": "mining",
+          "share_pct": 5,
+          "confidence": "low",
+          "reasoning": "Elkem metallurgical silicon."
+        },
+        {
+          "country": "US",
+          "role": "mining",
+          "share_pct": 4,
+          "confidence": "low",
+          "reasoning": "Spruce Pine high-purity quartz for crucibles and wafers."
+        },
+        {
+          "country": "CN",
+          "role": "refining",
+          "share_pct": 79,
+          "confidence": "high",
+          "reasoning": "Most polysilicon capacity."
+        },
+        {
+          "country": "DE",
+          "role": "refining",
+          "share_pct": 7,
+          "confidence": "medium",
+          "reasoning": "Wacker electronic-grade (9N–11N) polysilicon."
+        },
+        {
+          "country": "US",
+          "role": "refining",
+          "share_pct": 5,
+          "confidence": "medium",
+          "reasoning": "Hemlock electronic-grade polysilicon."
+        },
+        {
+          "country": "MY",
+          "role": "refining",
+          "share_pct": 4,
+          "confidence": "low",
+          "reasoning": "OCI polysilicon."
+        }
+      ]
+    },
+    "tin": {
+      "label": "Tin",
+      "color": "#A7ADB1",
+      "group": "Electronics",
+      "basis": "USGS MCS — mine and refined tin",
+      "note": "SAC305 solder is 96.5% tin.",
+      "sourcing": [
+        {
+          "country": "CN",
+          "role": "mining",
+          "share_pct": 23,
+          "confidence": "high",
+          "reasoning": "Yunnan tin mines."
+        },
+        {
+          "country": "ID",
+          "role": "mining",
+          "share_pct": 22,
+          "confidence": "high",
+          "reasoning": "Bangka-Belitung alluvial tin."
+        },
+        {
+          "country": "MM",
+          "role": "mining",
+          "share_pct": 11,
+          "confidence": "medium",
+          "reasoning": "Wa-state Man Maw mine."
+        },
+        {
+          "country": "PE",
+          "role": "mining",
+          "share_pct": 9,
+          "confidence": "high",
+          "reasoning": "San Rafael mine (Minsur)."
+        },
+        {
+          "country": "CN",
+          "role": "refining",
+          "share_pct": 49,
+          "confidence": "high",
+          "reasoning": "Yunnan Tin and other smelters."
+        },
+        {
+          "country": "ID",
+          "role": "refining",
+          "share_pct": 20,
+          "confidence": "medium",
+          "reasoning": "PT Timah."
+        },
+        {
+          "country": "MY",
+          "role": "refining",
+          "share_pct": 7,
+          "confidence": "medium",
+          "reasoning": "Malaysia Smelting Corp."
+        }
+      ]
+    },
+    "plastics": {
+      "label": "Engineering plastics",
+      "color": "#E6DFCB",
+      "group": "Polymers",
+      "basis": "Industry estimates (PlasticsEurope, EIA crude data); not USGS",
+      "note": "PA12, PC/ABS, PTFE and PE/PP separators come from oil and gas feedstocks.",
+      "sourcing": [
+        {
+          "country": "US",
+          "role": "mining",
+          "share_pct": 15,
+          "confidence": "medium",
+          "reasoning": "Largest crude-oil and NGL producer (ethane and propane feedstocks)."
+        },
+        {
+          "country": "SA",
+          "role": "mining",
+          "share_pct": 12,
+          "confidence": "medium",
+          "reasoning": "Crude and associated-gas feedstocks."
+        },
+        {
+          "country": "RU",
+          "role": "mining",
+          "share_pct": 11,
+          "confidence": "medium",
+          "reasoning": "Crude and gas feedstocks."
+        },
+        {
+          "country": "CN",
+          "role": "refining",
+          "share_pct": 32,
+          "confidence": "medium",
+          "reasoning": "Largest polymer producer, including PC, ABS and PA6/66."
+        },
+        {
+          "country": "US",
+          "role": "refining",
+          "share_pct": 17,
+          "confidence": "medium",
+          "reasoning": "Gulf Coast polymer plants."
+        },
+        {
+          "country": "DE",
+          "role": "refining",
+          "share_pct": 6,
+          "confidence": "low",
+          "reasoning": "Specialty polyamides (PA12: Evonik) and PC (Covestro)."
+        },
+        {
+          "country": "KR",
+          "role": "refining",
+          "share_pct": 6,
+          "confidence": "low",
+          "reasoning": "ABS and PC producers (LG Chem, Lotte)."
+        }
+      ]
+    },
+    "elastomers": {
+      "label": "Elastomers (TPU, silicone)",
+      "color": "#8E6E58",
+      "group": "Polymers",
+      "basis": "Industry estimates; TPU and silicone are synthetic",
+      "note": "Robot soles and skins are synthetic TPU or silicone, not natural rubber.",
+      "sourcing": [
+        {
+          "country": "US",
+          "role": "mining",
+          "share_pct": 15,
+          "confidence": "low",
+          "reasoning": "Hydrocarbon feedstocks for TPU."
+        },
+        {
+          "country": "CN",
+          "role": "mining",
+          "share_pct": 68,
+          "confidence": "low",
+          "reasoning": "Silicon metal for silicone elastomers."
+        },
+        {
+          "country": "CN",
+          "role": "refining",
+          "share_pct": 45,
+          "confidence": "low",
+          "reasoning": "Largest TPU and silicone-elastomer capacity."
+        },
+        {
+          "country": "DE",
+          "role": "refining",
+          "share_pct": 12,
+          "confidence": "low",
+          "reasoning": "BASF and Covestro TPU, Wacker silicones."
+        },
+        {
+          "country": "US",
+          "role": "refining",
+          "share_pct": 10,
+          "confidence": "low",
+          "reasoning": "Lubrizol TPU, Dow silicones."
+        }
+      ]
+    }
+  }
+}

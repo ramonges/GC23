@@ -5,6 +5,7 @@ const EXPLORE = [
   { label: 'The solution', href: '#solution' },
   { label: 'Team', href: '#team' },
   { label: 'Contact', href: '#contact' },
+  { label: 'Robots', href: '/robots' },
   { label: 'Map', href: '/platform/map' },
 ]
 
