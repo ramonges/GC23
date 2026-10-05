@@ -15,7 +15,7 @@ Each robot is rendered from one of three sources. Every source produces meshes n
 
 | Source | When it's used | Example |
 | --- | --- | --- |
-| GLB (`robot.model`) | `model` is a path under `/public` | Microduck, Reachy 2, Unitree G1, Spot |
+| GLB (`robot.model`) | `model` is a path under `/public` | Microduck, Reachy 2, Reachy Mini, Unitree G1, Spot |
 | Procedural reconstruction | A builder exists for the robot id in `scene/placeholder.ts` | Tesla Optimus (`scene/optimus.ts`) |
 | Placeholder | Fallback per `archetype` | Every other robot |
 
@@ -86,6 +86,28 @@ blender -b reachy2.blend --python /path/to/scripts/robots/export-reachy2.py -- a
 
 Part masses follow Pollen's datasheet: 50 kg in total, including the 25 kg mobile base and its 6.5 kg LiFePO₄ battery. The split inside each part is estimated.
 
+## Reachy Mini
+
+`public/models/robots/reachy_mini.glb` comes from Pollen's official MuJoCo model, `reachy_mini.xml`, and its STL meshes in [pollen-robotics/reachy_mini](https://github.com/pollen-robotics/reachy_mini/tree/main/src/reachy_mini/descriptions/reachy_mini/mjcf) (Apache-2.0). The repository's `src/reachy_mini/assets` folder holds sounds, firmware and kinematics networks, not geometry. The STLs are stored with Git LFS, so download them from `media.githubusercontent.com` rather than `raw.githubusercontent.com`.
+
+`scripts/robots/assemble-reachy-mini.mjs` shares its STL and normals helpers with the G1 script (`mesh-utils.mjs`):
+
+1. It places every visual mesh in the zero pose. That is the CAD assembly pose, so the Stewart platform's six rods meet the head.
+2. It maps meshes to parts by body. Each servo is a cluster of case, LED cap, horn and connector meshes, and the script assigns each cluster to the nearest horn: six Stewart servos and the body yaw servo in the base, and the two antenna servos in the head. Each Stewart part also holds its arm, ball joint and rod.
+3. It drops the screws, caps each mesh's triangle count (`BUDGET`), and reduces 710k to 328k triangles.
+4. It uses the MJCF's material colours, with matte 3D-print, satin servo, metal rod and dark glass finishes. The antennas are lifted from pure black to graphite so they show against the dark room.
+5. It writes a Draco GLB of about 1.3 MB, 0.39 m tall to the antenna tips.
+
+```bash
+B=https://raw.githubusercontent.com/pollen-robotics/reachy_mini/main/src/reachy_mini/descriptions/reachy_mini/mjcf
+L=https://media.githubusercontent.com/media/pollen-robotics/reachy_mini/main/src/reachy_mini/descriptions/reachy_mini/mjcf/assets
+curl -sfO $B/reachy_mini.xml
+for f in $(grep -oE 'file="[^"]+"' reachy_mini.xml | cut -d'"' -f2 | sort -u); do curl -sfL --create-dirs "$L/$f" -o "assets/$f"; done
+node scripts/robots/assemble-reachy-mini.mjs reachy_mini.xml public/models/robots/reachy_mini.glb
+```
+
+The MJCF's inertials total 1.18 kg without a battery. The explorer budgets the 1.5 kg of the battery-powered version, and the battery, computer and wiring sit inside the base part because they have no separate meshes.
+
 ## Unitree G1
 
 `public/models/robots/g1.glb` comes from Unitree's `g1_23dof.xml` and its STL meshes in [unitreerobotics/unitree_ros](https://github.com/unitreerobotics/unitree_ros/tree/master/robots/g1_description) (BSD-3-Clause).
@@ -129,4 +151,4 @@ Spot is a `quadruped`, which has no placeholder. Its `length_m` sizes the pedest
 
 - The canvas renders on demand (`frameloop="demand"`). Anything animating must call `state.invalidate()`.
 - Pixel ratio is capped at 2, and shadows are reduced on mobile.
-- Keep GLBs under about 2 MB after Draco. Microduck is about 465 KB and Reachy 2 about 1.8 MB.
+- Keep GLBs under about 2 MB after Draco. Microduck is about 465 KB, Reachy Mini about 1.3 MB and Reachy 2 about 1.8 MB.

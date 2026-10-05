@@ -10942,22 +10942,22 @@
       "name": "Reachy Mini",
       "maker": "Hugging Face × Pollen Robotics",
       "archetype": "desktop",
-      "height_m": 0.28,
+      "height_m": 0.39,
       "mass_kg": 1.5,
       "battery_kwh": 0.03,
-      "dof": "6 head + body + 2 antennas",
-      "blurb": "Open-source desktop robot with a Stewart-platform head and expressive antennas.",
+      "dof": "9 joints · 6-DoF Stewart head, body yaw, 2 antennas",
+      "blurb": "Open-source desktop robot with a six-servo Stewart-platform head, a rotating body and expressive antennas.",
       "palette": {
         "shell": "#F2F0EA",
         "dark": "#2B2E31",
         "accent": "#7FA7B8",
         "frame": "#B8BEC3"
       },
-      "model": null,
+      "model": "/models/robots/reachy_mini.glb",
       "parts": [
         {
           "meshName": "base_shell",
-          "label": "Base shell",
+          "label": "Base: shell, battery & computer",
           "group": "base",
           "materials": [
             {
@@ -10973,138 +10973,145 @@
               "grade": "A2 stainless fasteners, brass-free inserts",
               "mass_pct": 0.562,
               "confidence": "medium"
-            }
-          ]
-        },
-        {
-          "meshName": "battery_base",
-          "label": "Battery (Li-ion, LCO)",
-          "group": "base",
-          "materials": [
+            },
             {
-              "component": "Cathode",
+              "component": "Battery · Cathode",
               "commodity": "cobalt",
               "grade": "LiCoO₂ cathode (≈ 60 wt% Co in active material)",
               "mass_pct": 1.594,
               "confidence": "medium"
             },
             {
-              "component": "Cathode",
+              "component": "Battery · Cathode",
               "commodity": "lithium",
               "grade": "Li in LiCoO₂ (battery-grade Li₂CO₃ precursor)",
               "mass_pct": 0.188,
               "confidence": "medium"
             },
             {
-              "component": "Anode",
+              "component": "Battery · Anode",
               "commodity": "graphite",
               "grade": "Spherical natural graphite, 99.95% C",
               "mass_pct": 1.5,
               "confidence": "medium"
             },
             {
-              "component": "Current collectors",
+              "component": "Battery · Current collectors",
               "commodity": "copper",
               "grade": "8 µm electrodeposited copper foil",
               "mass_pct": 1.031,
               "confidence": "medium"
             },
             {
-              "component": "Current collectors & can",
+              "component": "Battery · Current collectors & can",
               "commodity": "aluminum",
               "grade": "12 µm 1235 aluminum foil, pouch laminate",
               "mass_pct": 1.125,
               "confidence": "medium"
             },
             {
-              "component": "Electrolyte & separator",
+              "component": "Battery · Electrolyte & separator",
               "commodity": "plastics",
               "grade": "PE/PP separator, carbonate solvents, LiPF₆",
               "mass_pct": 2.25,
               "confidence": "low"
             },
             {
-              "component": "BMS & enclosure",
+              "component": "Battery · BMS & enclosure",
               "commodity": "plastics",
               "grade": "PC/ABS enclosure",
               "mass_pct": 1.125,
               "confidence": "medium"
             },
             {
-              "component": "BMS",
+              "component": "Battery · BMS",
               "commodity": "silicon",
               "grade": "BMS AFE & MOSFETs",
               "mass_pct": 0.094,
               "confidence": "low"
             },
             {
-              "component": "Tabs & fasteners",
+              "component": "Battery · Tabs & fasteners",
               "commodity": "nickel",
               "grade": "Nickel-plated steel tabs",
               "mass_pct": 0.469,
               "confidence": "low"
-            }
-          ]
-        },
-        {
-          "meshName": "compute_base",
-          "label": "Raspberry Pi 5–class computer",
-          "group": "base",
-          "materials": [
+            },
             {
-              "component": "Processor & memory",
+              "component": "Computer · Processor & memory",
               "commodity": "silicon",
               "grade": "Raspberry Pi 5–class SBC (16 nm SoC)",
               "mass_pct": 0.729,
               "confidence": "medium"
             },
             {
-              "component": "PCB",
+              "component": "Computer · PCB",
               "commodity": "copper",
               "grade": "Multilayer PCB copper planes",
               "mass_pct": 1.312,
               "confidence": "medium"
             },
             {
-              "component": "PCB laminate",
+              "component": "Computer · PCB laminate",
               "commodity": "plastics",
               "grade": "FR-4 glass-epoxy laminate",
               "mass_pct": 1.458,
               "confidence": "medium"
             },
             {
-              "component": "Heatsink & heat pipes",
+              "component": "Computer · Heatsink & heat pipes",
               "commodity": "aluminum",
               "grade": "6063-T5 extruded heatsink",
               "mass_pct": 2.479,
               "confidence": "high"
             },
             {
-              "component": "Heat pipes",
+              "component": "Computer · Heat pipes",
               "commodity": "copper",
               "grade": "C10200 copper heat pipes",
               "mass_pct": 0.729,
               "confidence": "medium"
             },
             {
-              "component": "Solder",
+              "component": "Computer · Solder",
               "commodity": "tin",
               "grade": "SAC305 lead-free solder (96.5% Sn)",
               "mass_pct": 0.146,
               "confidence": "low"
             },
             {
-              "component": "Connectors",
+              "component": "Computer · Connectors",
               "commodity": "copper",
               "grade": "Phosphor-bronze contacts (gold flash)",
               "mass_pct": 0.219,
               "confidence": "low"
             },
             {
-              "component": "Fan & shroud",
+              "component": "Computer · Fan & shroud",
               "commodity": "plastics",
               "grade": "PBT shroud",
               "mass_pct": 0.219,
+              "confidence": "low"
+            },
+            {
+              "component": "Wiring · Conductors",
+              "commodity": "copper",
+              "grade": "99.9% C11000 ETP stranded copper",
+              "mass_pct": 2.583,
+              "confidence": "high"
+            },
+            {
+              "component": "Wiring · Insulation & sleeving",
+              "commodity": "plastics",
+              "grade": "PTFE / silicone insulation, PET braid",
+              "mass_pct": 1.417,
+              "confidence": "medium"
+            },
+            {
+              "component": "Wiring · Connector shells",
+              "commodity": "aluminum",
+              "grade": "Anodized aluminum connector shells",
+              "mass_pct": 0.167,
               "confidence": "low"
             }
           ]
@@ -11224,34 +11231,6 @@
               "commodity": "plastics",
               "grade": "PVC-jacketed TTL cable",
               "mass_pct": 0.191,
-              "confidence": "low"
-            }
-          ]
-        },
-        {
-          "meshName": "wiring_harness",
-          "label": "Wiring harness",
-          "group": "base",
-          "materials": [
-            {
-              "component": "Conductors",
-              "commodity": "copper",
-              "grade": "99.9% C11000 ETP stranded copper",
-              "mass_pct": 2.583,
-              "confidence": "high"
-            },
-            {
-              "component": "Insulation & sleeving",
-              "commodity": "plastics",
-              "grade": "PTFE / silicone insulation, PET braid",
-              "mass_pct": 1.417,
-              "confidence": "medium"
-            },
-            {
-              "component": "Connector shells",
-              "commodity": "aluminum",
-              "grade": "Anodized aluminum connector shells",
-              "mass_pct": 0.167,
               "confidence": "low"
             }
           ]
