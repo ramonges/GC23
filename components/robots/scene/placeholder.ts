@@ -254,5 +254,7 @@ export function buildPlaceholder(archetype: Archetype, robotId: string, height: 
       return scaleSpecs(droid(), height / 0.66)
     case 'desktop':
       return scaleSpecs(desktop(), height / 0.28)
+    case 'quadruped':
+      throw new Error(`${robotId}: quadrupeds have no placeholder; set "model" to a GLB`)
   }
 }

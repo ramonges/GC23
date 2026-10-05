@@ -1,6 +1,6 @@
 export type Confidence = 'high' | 'medium' | 'low'
 
-export type Archetype = 'humanoid' | 'digitigrade' | 'droid' | 'desktop'
+export type Archetype = 'humanoid' | 'digitigrade' | 'droid' | 'desktop' | 'quadruped'
 
 export type PartMaterial = {
   /** Sub-component the material belongs to, e.g. "NdFeB magnets". */
@@ -28,6 +28,8 @@ export type Robot = {
   maker: string
   archetype: Archetype
   height_m: number
+  /** Overall length, for robots longer than they are tall (quadrupeds). Sizes the pedestal and camera framing. */
+  length_m?: number
   mass_kg: number
   battery_kwh: number
   dof: string
@@ -35,6 +37,8 @@ export type Robot = {
   palette: RobotPalette
   /** Path to a Draco-compressed .glb under /public, or null to use the procedural placeholder. */
   model: string | null
+  /** Attribution shown in the detail panel, required when the GLB is under a license such as CC BY. */
+  model_credit?: { text: string; url: string }
   parts: RobotPart[]
 }
 

@@ -15,7 +15,7 @@ Each robot is rendered from one of three sources. Every source produces meshes n
 
 | Source | When it's used | Example |
 | --- | --- | --- |
-| GLB (`robot.model`) | `model` is a path under `/public` | Microduck, Reachy 2, Unitree G1 |
+| GLB (`robot.model`) | `model` is a path under `/public` | Microduck, Reachy 2, Unitree G1, Spot |
 | Procedural reconstruction | A builder exists for the robot id in `scene/placeholder.ts` | Tesla Optimus (`scene/optimus.ts`) |
 | Placeholder | Fallback per `archetype` | Every other robot |
 
@@ -105,6 +105,25 @@ node scripts/robots/assemble-g1.mjs path/to/g1_description/g1_23dof.xml public/m
 ```
 
 Part masses follow the MJCF link inertials (34.1 kg in total). The `torso_link` body's 9.8 kg is split between the head, the waist actuator and the torso, which holds the battery and compute. Each link mesh holds its joint motor, so the split inside a part between motor and structure is estimated.
+
+## Spot
+
+`public/models/robots/spot.glb` comes from [“Spot (Boston Dynamic) High Poly”](https://sketchfab.com/3d-models/spotboston-dynamic-high-poly-058b16a8c88047e18b1f081e0d15f883) by Julliani on Sketchfab. It is licensed CC BY 4.0, so the robot's `model_credit` shows the attribution in the detail panel. Keep that credit whenever the model is used.
+
+`scripts/robots/export-spot.py` runs inside Blender on Sketchfab's glTF download (`scene.gltf`, `scene.bin`, `textures/`). It does the following:
+
+1. It maps the 24 source meshes to 17 parts by name and position. For example, `Cylinder.007` becomes `shin_FR`. Leg codes are F/R for front/rear, then L/R for left/right.
+2. It turns the robot to face +z, levels the feet, scales it to Spot's published 500 mm width and grounds it.
+3. It decimates each part to a budget (933k to 177k triangles), drops two duplicate UV sets, makes the material opaque, and gives the lower legs a matte black material.
+4. It shrinks the 4096² textures to 2048/1024 JPEGs and writes a Draco GLB of about 1.9 MB.
+
+```bash
+# Download the glTF from the model page (logged in), or with a Sketchfab API token:
+curl -H "Authorization: Token $SKETCHFAB_API_TOKEN" https://api.sketchfab.com/v3/models/058b16a8c88047e18b1f081e0d15f883/download
+blender -b --python scripts/robots/export-spot.py -- path/to/scene.gltf public/models/robots/spot.glb --preview
+```
+
+Spot is a `quadruped`, which has no placeholder. Its `length_m` sizes the pedestal and camera framing. Part masses are budgeted to the published 33.8 kg, including the 5.2 kg battery.
 
 ## Performance notes
 

@@ -12055,6 +12055,1333 @@
           ]
         }
       ]
+    },
+    {
+      "id": "spot",
+      "name": "Spot",
+      "maker": "Boston Dynamics",
+      "archetype": "quadruped",
+      "height_m": 0.65,
+      "length_m": 1.19,
+      "mass_kg": 33.8,
+      "battery_kwh": 0.56,
+      "dof": "12 joints · 3 per leg",
+      "blurb": "Four-legged industrial inspection robot with five stereo camera pairs, a swappable 564 Wh battery and payload rails on its back.",
+      "palette": {
+        "shell": "#F2B705",
+        "dark": "#1C1D1F",
+        "accent": "#3A3D40",
+        "frame": "#8E9399"
+      },
+      "model": "/models/robots/spot.glb",
+      "model_credit": {
+        "text": "“Spot (Boston Dynamic) High Poly” by Julliani, CC BY 4.0",
+        "url": "https://sketchfab.com/3d-models/spotboston-dynamic-high-poly-058b16a8c88047e18b1f081e0d15f883"
+      },
+      "parts": [
+        {
+          "meshName": "body",
+          "label": "Body: battery, compute & cameras",
+          "group": "torso",
+          "materials": [
+            {
+              "component": "Chassis",
+              "commodity": "aluminum",
+              "grade": "Machined and cast aluminium body frame and hip mounts",
+              "mass_pct": 17.609,
+              "confidence": "medium"
+            },
+            {
+              "component": "Body panels",
+              "commodity": "plastics",
+              "grade": "Yellow polycarbonate / PC-ABS panels",
+              "mass_pct": 5.917,
+              "confidence": "medium"
+            },
+            {
+              "component": "Battery (564 Wh)",
+              "commodity": "graphite",
+              "grade": "Graphite anode",
+              "mass_pct": 2.308,
+              "confidence": "medium"
+            },
+            {
+              "component": "Battery (564 Wh)",
+              "commodity": "nickel",
+              "grade": "NMC cathode active material (chemistry assumed)",
+              "mass_pct": 1.846,
+              "confidence": "low"
+            },
+            {
+              "component": "Battery (564 Wh)",
+              "commodity": "cobalt",
+              "grade": "NMC cathode active material",
+              "mass_pct": 0.462,
+              "confidence": "low"
+            },
+            {
+              "component": "Battery (564 Wh)",
+              "commodity": "manganese",
+              "grade": "NMC cathode active material",
+              "mass_pct": 0.385,
+              "confidence": "low"
+            },
+            {
+              "component": "Battery (564 Wh)",
+              "commodity": "lithium",
+              "grade": "Li in cathode and LiPF₆ electrolyte",
+              "mass_pct": 0.338,
+              "confidence": "low"
+            },
+            {
+              "component": "Battery (564 Wh)",
+              "commodity": "copper",
+              "grade": "Copper anode foil, busbars",
+              "mass_pct": 1.538,
+              "confidence": "medium"
+            },
+            {
+              "component": "Battery (564 Wh)",
+              "commodity": "aluminum",
+              "grade": "Cathode foil and rugged pack enclosure",
+              "mass_pct": 3.385,
+              "confidence": "medium"
+            },
+            {
+              "component": "Battery (564 Wh)",
+              "commodity": "iron",
+              "grade": "Nickel-plated steel cell cans",
+              "mass_pct": 2.462,
+              "confidence": "medium"
+            },
+            {
+              "component": "Battery (564 Wh)",
+              "commodity": "plastics",
+              "grade": "Separator, electrolyte solvents, pack housing",
+              "mass_pct": 2.508,
+              "confidence": "low"
+            },
+            {
+              "component": "Battery (564 Wh)",
+              "commodity": "silicon",
+              "grade": "BMS ICs and MOSFETs",
+              "mass_pct": 0.154,
+              "confidence": "low"
+            },
+            {
+              "component": "Compute",
+              "commodity": "aluminum",
+              "grade": "Heatsinks and enclosure",
+              "mass_pct": 1.775,
+              "confidence": "medium"
+            },
+            {
+              "component": "Compute",
+              "commodity": "plastics",
+              "grade": "FR-4 laminate, connectors",
+              "mass_pct": 0.71,
+              "confidence": "medium"
+            },
+            {
+              "component": "Compute",
+              "commodity": "copper",
+              "grade": "PCB copper, heat pipes",
+              "mass_pct": 0.71,
+              "confidence": "medium"
+            },
+            {
+              "component": "Compute",
+              "commodity": "silicon",
+              "grade": "CPU, DRAM and flash dies",
+              "mass_pct": 0.107,
+              "confidence": "medium"
+            },
+            {
+              "component": "Compute",
+              "commodity": "tin",
+              "grade": "SAC305 lead-free solder",
+              "mass_pct": 0.036,
+              "confidence": "medium"
+            },
+            {
+              "component": "Compute",
+              "commodity": "iron",
+              "grade": "Steel brackets",
+              "mass_pct": 0.213,
+              "confidence": "medium"
+            },
+            {
+              "component": "Stereo cameras ×5",
+              "commodity": "aluminum",
+              "grade": "Aluminium camera housings",
+              "mass_pct": 1.109,
+              "confidence": "medium"
+            },
+            {
+              "component": "Stereo cameras ×5",
+              "commodity": "silicon",
+              "grade": "Optical glass lenses, CMOS and depth sensors",
+              "mass_pct": 0.311,
+              "confidence": "low"
+            },
+            {
+              "component": "Stereo cameras ×5",
+              "commodity": "plastics",
+              "grade": "Lens holders, cover windows",
+              "mass_pct": 0.577,
+              "confidence": "low"
+            },
+            {
+              "component": "Stereo cameras ×5",
+              "commodity": "copper",
+              "grade": "PCB and flex copper",
+              "mass_pct": 0.222,
+              "confidence": "low"
+            },
+            {
+              "component": "Motor drivers & power",
+              "commodity": "copper",
+              "grade": "PCB copper, inductors, busbars",
+              "mass_pct": 0.828,
+              "confidence": "medium"
+            },
+            {
+              "component": "Motor drivers & power",
+              "commodity": "plastics",
+              "grade": "FR-4 laminate, connectors",
+              "mass_pct": 0.71,
+              "confidence": "medium"
+            },
+            {
+              "component": "Motor drivers & power",
+              "commodity": "aluminum",
+              "grade": "Driver heatsinks",
+              "mass_pct": 0.592,
+              "confidence": "medium"
+            },
+            {
+              "component": "Motor drivers & power",
+              "commodity": "silicon",
+              "grade": "Power MOSFETs and gate drivers",
+              "mass_pct": 0.166,
+              "confidence": "low"
+            },
+            {
+              "component": "Motor drivers & power",
+              "commodity": "tin",
+              "grade": "SAC305 lead-free solder",
+              "mass_pct": 0.071,
+              "confidence": "low"
+            },
+            {
+              "component": "Wiring harness",
+              "commodity": "copper",
+              "grade": "Power and data cabling",
+              "mass_pct": 1.775,
+              "confidence": "medium"
+            },
+            {
+              "component": "Wiring harness",
+              "commodity": "plastics",
+              "grade": "Cable jackets, connectors",
+              "mass_pct": 1.183,
+              "confidence": "medium"
+            },
+            {
+              "component": "Cooling",
+              "commodity": "aluminum",
+              "grade": "Heat spreaders and fan housings",
+              "mass_pct": 1.864,
+              "confidence": "medium"
+            },
+            {
+              "component": "Cooling",
+              "commodity": "copper",
+              "grade": "Fan motor windings, heat pipes",
+              "mass_pct": 0.399,
+              "confidence": "low"
+            },
+            {
+              "component": "Cooling",
+              "commodity": "plastics",
+              "grade": "Fan impellers, ducts",
+              "mass_pct": 0.399,
+              "confidence": "low"
+            },
+            {
+              "component": "Fasteners",
+              "commodity": "iron",
+              "grade": "Alloy-steel screws and inserts",
+              "mass_pct": 1.183,
+              "confidence": "medium"
+            }
+          ]
+        },
+        {
+          "meshName": "hip_FL",
+          "label": "Hip actuators ×2 (front left)",
+          "group": "legs",
+          "materials": [
+            {
+              "component": "Structure",
+              "commodity": "aluminum",
+              "grade": "Cast aluminium hip housing",
+              "mass_pct": 0.872,
+              "confidence": "medium"
+            },
+            {
+              "component": "Covers",
+              "commodity": "plastics",
+              "grade": "Polycarbonate / PC-ABS covers",
+              "mass_pct": 0.081,
+              "confidence": "medium"
+            },
+            {
+              "component": "Fasteners",
+              "commodity": "iron",
+              "grade": "Alloy-steel machine screws",
+              "mass_pct": 0.061,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "aluminum",
+              "grade": "Aluminium motor housings",
+              "mass_pct": 0.811,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "iron",
+              "grade": "Electrical-steel stator laminations",
+              "mass_pct": 1.095,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "copper",
+              "grade": "Enamelled copper windings",
+              "mass_pct": 0.608,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "neodymium",
+              "grade": "Sintered NdFeB rotor magnets",
+              "mass_pct": 0.284,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "dysprosium",
+              "grade": "Dy grain-boundary additive in NdFeB",
+              "mass_pct": 0.024,
+              "confidence": "low"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "boron",
+              "grade": "B in Nd₂Fe₁₄B",
+              "mass_pct": 0.008,
+              "confidence": "low"
+            },
+            {
+              "component": "Gear reduction & bearings",
+              "commodity": "iron",
+              "grade": "Hardened steel planetary gears, ball screws and bearings",
+              "mass_pct": 0.973,
+              "confidence": "medium"
+            },
+            {
+              "component": "Encoders & wiring",
+              "commodity": "copper",
+              "grade": "Encoder PCB copper, phase leads",
+              "mass_pct": 0.122,
+              "confidence": "low"
+            },
+            {
+              "component": "Encoders & wiring",
+              "commodity": "plastics",
+              "grade": "FR-4 laminate, cable jackets",
+              "mass_pct": 0.081,
+              "confidence": "low"
+            },
+            {
+              "component": "Encoders & wiring",
+              "commodity": "silicon",
+              "grade": "Absolute encoder ICs",
+              "mass_pct": 0.008,
+              "confidence": "low"
+            }
+          ]
+        },
+        {
+          "meshName": "thigh_FL",
+          "label": "Upper leg & knee drive (front left)",
+          "group": "legs",
+          "materials": [
+            {
+              "component": "Structure",
+              "commodity": "aluminum",
+              "grade": "Machined aluminium upper leg",
+              "mass_pct": 1.739,
+              "confidence": "medium"
+            },
+            {
+              "component": "Covers",
+              "commodity": "plastics",
+              "grade": "Polycarbonate / PC-ABS covers",
+              "mass_pct": 0.412,
+              "confidence": "medium"
+            },
+            {
+              "component": "Fasteners",
+              "commodity": "iron",
+              "grade": "Alloy-steel machine screws",
+              "mass_pct": 0.137,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "aluminum",
+              "grade": "Aluminium motor housings",
+              "mass_pct": 0.374,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "iron",
+              "grade": "Electrical-steel stator laminations",
+              "mass_pct": 0.506,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "copper",
+              "grade": "Enamelled copper windings",
+              "mass_pct": 0.281,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "neodymium",
+              "grade": "Sintered NdFeB rotor magnets",
+              "mass_pct": 0.131,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "dysprosium",
+              "grade": "Dy grain-boundary additive in NdFeB",
+              "mass_pct": 0.011,
+              "confidence": "low"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "boron",
+              "grade": "B in Nd₂Fe₁₄B",
+              "mass_pct": 0.004,
+              "confidence": "low"
+            },
+            {
+              "component": "Gear reduction & bearings",
+              "commodity": "iron",
+              "grade": "Hardened steel planetary gears, ball screws and bearings",
+              "mass_pct": 0.449,
+              "confidence": "medium"
+            },
+            {
+              "component": "Encoders & wiring",
+              "commodity": "copper",
+              "grade": "Encoder PCB copper, phase leads",
+              "mass_pct": 0.056,
+              "confidence": "low"
+            },
+            {
+              "component": "Encoders & wiring",
+              "commodity": "plastics",
+              "grade": "FR-4 laminate, cable jackets",
+              "mass_pct": 0.037,
+              "confidence": "low"
+            },
+            {
+              "component": "Encoders & wiring",
+              "commodity": "silicon",
+              "grade": "Absolute encoder ICs",
+              "mass_pct": 0.004,
+              "confidence": "low"
+            }
+          ]
+        },
+        {
+          "meshName": "knee_FL",
+          "label": "Knee joint (front left)",
+          "group": "legs",
+          "materials": [
+            {
+              "component": "Structure",
+              "commodity": "aluminum",
+              "grade": "Aluminium knee clevis",
+              "mass_pct": 0.261,
+              "confidence": "medium"
+            },
+            {
+              "component": "Covers",
+              "commodity": "plastics",
+              "grade": "Polycarbonate / PC-ABS covers",
+              "mass_pct": 0.031,
+              "confidence": "medium"
+            },
+            {
+              "component": "Fasteners",
+              "commodity": "iron",
+              "grade": "Alloy-steel machine screws",
+              "mass_pct": 0.019,
+              "confidence": "medium"
+            },
+            {
+              "component": "Bearings & pin",
+              "commodity": "iron",
+              "grade": "Steel bearings and knee pin",
+              "mass_pct": 0.133,
+              "confidence": "medium"
+            }
+          ]
+        },
+        {
+          "meshName": "shin_FL",
+          "label": "Lower leg & foot (front left)",
+          "group": "legs",
+          "materials": [
+            {
+              "component": "Structure",
+              "commodity": "aluminum",
+              "grade": "Aluminium lower-leg tube",
+              "mass_pct": 1.385,
+              "confidence": "medium"
+            },
+            {
+              "component": "Covers",
+              "commodity": "plastics",
+              "grade": "Polycarbonate / PC-ABS covers",
+              "mass_pct": 0.062,
+              "confidence": "medium"
+            },
+            {
+              "component": "Fasteners",
+              "commodity": "iron",
+              "grade": "Alloy-steel machine screws",
+              "mass_pct": 0.092,
+              "confidence": "medium"
+            },
+            {
+              "component": "Foot",
+              "commodity": "elastomers",
+              "grade": "Moulded rubber foot",
+              "mass_pct": 0.385,
+              "confidence": "medium"
+            }
+          ]
+        },
+        {
+          "meshName": "hip_FR",
+          "label": "Hip actuators ×2 (front right)",
+          "group": "legs",
+          "materials": [
+            {
+              "component": "Structure",
+              "commodity": "aluminum",
+              "grade": "Cast aluminium hip housing",
+              "mass_pct": 0.872,
+              "confidence": "medium"
+            },
+            {
+              "component": "Covers",
+              "commodity": "plastics",
+              "grade": "Polycarbonate / PC-ABS covers",
+              "mass_pct": 0.081,
+              "confidence": "medium"
+            },
+            {
+              "component": "Fasteners",
+              "commodity": "iron",
+              "grade": "Alloy-steel machine screws",
+              "mass_pct": 0.061,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "aluminum",
+              "grade": "Aluminium motor housings",
+              "mass_pct": 0.811,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "iron",
+              "grade": "Electrical-steel stator laminations",
+              "mass_pct": 1.095,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "copper",
+              "grade": "Enamelled copper windings",
+              "mass_pct": 0.608,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "neodymium",
+              "grade": "Sintered NdFeB rotor magnets",
+              "mass_pct": 0.284,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "dysprosium",
+              "grade": "Dy grain-boundary additive in NdFeB",
+              "mass_pct": 0.024,
+              "confidence": "low"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "boron",
+              "grade": "B in Nd₂Fe₁₄B",
+              "mass_pct": 0.008,
+              "confidence": "low"
+            },
+            {
+              "component": "Gear reduction & bearings",
+              "commodity": "iron",
+              "grade": "Hardened steel planetary gears, ball screws and bearings",
+              "mass_pct": 0.973,
+              "confidence": "medium"
+            },
+            {
+              "component": "Encoders & wiring",
+              "commodity": "copper",
+              "grade": "Encoder PCB copper, phase leads",
+              "mass_pct": 0.122,
+              "confidence": "low"
+            },
+            {
+              "component": "Encoders & wiring",
+              "commodity": "plastics",
+              "grade": "FR-4 laminate, cable jackets",
+              "mass_pct": 0.081,
+              "confidence": "low"
+            },
+            {
+              "component": "Encoders & wiring",
+              "commodity": "silicon",
+              "grade": "Absolute encoder ICs",
+              "mass_pct": 0.008,
+              "confidence": "low"
+            }
+          ]
+        },
+        {
+          "meshName": "thigh_FR",
+          "label": "Upper leg & knee drive (front right)",
+          "group": "legs",
+          "materials": [
+            {
+              "component": "Structure",
+              "commodity": "aluminum",
+              "grade": "Machined aluminium upper leg",
+              "mass_pct": 1.739,
+              "confidence": "medium"
+            },
+            {
+              "component": "Covers",
+              "commodity": "plastics",
+              "grade": "Polycarbonate / PC-ABS covers",
+              "mass_pct": 0.412,
+              "confidence": "medium"
+            },
+            {
+              "component": "Fasteners",
+              "commodity": "iron",
+              "grade": "Alloy-steel machine screws",
+              "mass_pct": 0.137,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "aluminum",
+              "grade": "Aluminium motor housings",
+              "mass_pct": 0.374,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "iron",
+              "grade": "Electrical-steel stator laminations",
+              "mass_pct": 0.506,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "copper",
+              "grade": "Enamelled copper windings",
+              "mass_pct": 0.281,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "neodymium",
+              "grade": "Sintered NdFeB rotor magnets",
+              "mass_pct": 0.131,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "dysprosium",
+              "grade": "Dy grain-boundary additive in NdFeB",
+              "mass_pct": 0.011,
+              "confidence": "low"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "boron",
+              "grade": "B in Nd₂Fe₁₄B",
+              "mass_pct": 0.004,
+              "confidence": "low"
+            },
+            {
+              "component": "Gear reduction & bearings",
+              "commodity": "iron",
+              "grade": "Hardened steel planetary gears, ball screws and bearings",
+              "mass_pct": 0.449,
+              "confidence": "medium"
+            },
+            {
+              "component": "Encoders & wiring",
+              "commodity": "copper",
+              "grade": "Encoder PCB copper, phase leads",
+              "mass_pct": 0.056,
+              "confidence": "low"
+            },
+            {
+              "component": "Encoders & wiring",
+              "commodity": "plastics",
+              "grade": "FR-4 laminate, cable jackets",
+              "mass_pct": 0.037,
+              "confidence": "low"
+            },
+            {
+              "component": "Encoders & wiring",
+              "commodity": "silicon",
+              "grade": "Absolute encoder ICs",
+              "mass_pct": 0.004,
+              "confidence": "low"
+            }
+          ]
+        },
+        {
+          "meshName": "knee_FR",
+          "label": "Knee joint (front right)",
+          "group": "legs",
+          "materials": [
+            {
+              "component": "Structure",
+              "commodity": "aluminum",
+              "grade": "Aluminium knee clevis",
+              "mass_pct": 0.261,
+              "confidence": "medium"
+            },
+            {
+              "component": "Covers",
+              "commodity": "plastics",
+              "grade": "Polycarbonate / PC-ABS covers",
+              "mass_pct": 0.031,
+              "confidence": "medium"
+            },
+            {
+              "component": "Fasteners",
+              "commodity": "iron",
+              "grade": "Alloy-steel machine screws",
+              "mass_pct": 0.019,
+              "confidence": "medium"
+            },
+            {
+              "component": "Bearings & pin",
+              "commodity": "iron",
+              "grade": "Steel bearings and knee pin",
+              "mass_pct": 0.133,
+              "confidence": "medium"
+            }
+          ]
+        },
+        {
+          "meshName": "shin_FR",
+          "label": "Lower leg & foot (front right)",
+          "group": "legs",
+          "materials": [
+            {
+              "component": "Structure",
+              "commodity": "aluminum",
+              "grade": "Aluminium lower-leg tube",
+              "mass_pct": 1.385,
+              "confidence": "medium"
+            },
+            {
+              "component": "Covers",
+              "commodity": "plastics",
+              "grade": "Polycarbonate / PC-ABS covers",
+              "mass_pct": 0.062,
+              "confidence": "medium"
+            },
+            {
+              "component": "Fasteners",
+              "commodity": "iron",
+              "grade": "Alloy-steel machine screws",
+              "mass_pct": 0.092,
+              "confidence": "medium"
+            },
+            {
+              "component": "Foot",
+              "commodity": "elastomers",
+              "grade": "Moulded rubber foot",
+              "mass_pct": 0.385,
+              "confidence": "medium"
+            }
+          ]
+        },
+        {
+          "meshName": "hip_RL",
+          "label": "Hip actuators ×2 (rear left)",
+          "group": "legs",
+          "materials": [
+            {
+              "component": "Structure",
+              "commodity": "aluminum",
+              "grade": "Cast aluminium hip housing",
+              "mass_pct": 0.872,
+              "confidence": "medium"
+            },
+            {
+              "component": "Covers",
+              "commodity": "plastics",
+              "grade": "Polycarbonate / PC-ABS covers",
+              "mass_pct": 0.081,
+              "confidence": "medium"
+            },
+            {
+              "component": "Fasteners",
+              "commodity": "iron",
+              "grade": "Alloy-steel machine screws",
+              "mass_pct": 0.061,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "aluminum",
+              "grade": "Aluminium motor housings",
+              "mass_pct": 0.811,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "iron",
+              "grade": "Electrical-steel stator laminations",
+              "mass_pct": 1.095,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "copper",
+              "grade": "Enamelled copper windings",
+              "mass_pct": 0.608,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "neodymium",
+              "grade": "Sintered NdFeB rotor magnets",
+              "mass_pct": 0.284,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "dysprosium",
+              "grade": "Dy grain-boundary additive in NdFeB",
+              "mass_pct": 0.024,
+              "confidence": "low"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "boron",
+              "grade": "B in Nd₂Fe₁₄B",
+              "mass_pct": 0.008,
+              "confidence": "low"
+            },
+            {
+              "component": "Gear reduction & bearings",
+              "commodity": "iron",
+              "grade": "Hardened steel planetary gears, ball screws and bearings",
+              "mass_pct": 0.973,
+              "confidence": "medium"
+            },
+            {
+              "component": "Encoders & wiring",
+              "commodity": "copper",
+              "grade": "Encoder PCB copper, phase leads",
+              "mass_pct": 0.122,
+              "confidence": "low"
+            },
+            {
+              "component": "Encoders & wiring",
+              "commodity": "plastics",
+              "grade": "FR-4 laminate, cable jackets",
+              "mass_pct": 0.081,
+              "confidence": "low"
+            },
+            {
+              "component": "Encoders & wiring",
+              "commodity": "silicon",
+              "grade": "Absolute encoder ICs",
+              "mass_pct": 0.008,
+              "confidence": "low"
+            }
+          ]
+        },
+        {
+          "meshName": "thigh_RL",
+          "label": "Upper leg & knee drive (rear left)",
+          "group": "legs",
+          "materials": [
+            {
+              "component": "Structure",
+              "commodity": "aluminum",
+              "grade": "Machined aluminium upper leg",
+              "mass_pct": 1.739,
+              "confidence": "medium"
+            },
+            {
+              "component": "Covers",
+              "commodity": "plastics",
+              "grade": "Polycarbonate / PC-ABS covers",
+              "mass_pct": 0.412,
+              "confidence": "medium"
+            },
+            {
+              "component": "Fasteners",
+              "commodity": "iron",
+              "grade": "Alloy-steel machine screws",
+              "mass_pct": 0.137,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "aluminum",
+              "grade": "Aluminium motor housings",
+              "mass_pct": 0.374,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "iron",
+              "grade": "Electrical-steel stator laminations",
+              "mass_pct": 0.506,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "copper",
+              "grade": "Enamelled copper windings",
+              "mass_pct": 0.281,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "neodymium",
+              "grade": "Sintered NdFeB rotor magnets",
+              "mass_pct": 0.131,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "dysprosium",
+              "grade": "Dy grain-boundary additive in NdFeB",
+              "mass_pct": 0.011,
+              "confidence": "low"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "boron",
+              "grade": "B in Nd₂Fe₁₄B",
+              "mass_pct": 0.004,
+              "confidence": "low"
+            },
+            {
+              "component": "Gear reduction & bearings",
+              "commodity": "iron",
+              "grade": "Hardened steel planetary gears, ball screws and bearings",
+              "mass_pct": 0.449,
+              "confidence": "medium"
+            },
+            {
+              "component": "Encoders & wiring",
+              "commodity": "copper",
+              "grade": "Encoder PCB copper, phase leads",
+              "mass_pct": 0.056,
+              "confidence": "low"
+            },
+            {
+              "component": "Encoders & wiring",
+              "commodity": "plastics",
+              "grade": "FR-4 laminate, cable jackets",
+              "mass_pct": 0.037,
+              "confidence": "low"
+            },
+            {
+              "component": "Encoders & wiring",
+              "commodity": "silicon",
+              "grade": "Absolute encoder ICs",
+              "mass_pct": 0.004,
+              "confidence": "low"
+            }
+          ]
+        },
+        {
+          "meshName": "knee_RL",
+          "label": "Knee joint (rear left)",
+          "group": "legs",
+          "materials": [
+            {
+              "component": "Structure",
+              "commodity": "aluminum",
+              "grade": "Aluminium knee clevis",
+              "mass_pct": 0.261,
+              "confidence": "medium"
+            },
+            {
+              "component": "Covers",
+              "commodity": "plastics",
+              "grade": "Polycarbonate / PC-ABS covers",
+              "mass_pct": 0.031,
+              "confidence": "medium"
+            },
+            {
+              "component": "Fasteners",
+              "commodity": "iron",
+              "grade": "Alloy-steel machine screws",
+              "mass_pct": 0.019,
+              "confidence": "medium"
+            },
+            {
+              "component": "Bearings & pin",
+              "commodity": "iron",
+              "grade": "Steel bearings and knee pin",
+              "mass_pct": 0.133,
+              "confidence": "medium"
+            }
+          ]
+        },
+        {
+          "meshName": "shin_RL",
+          "label": "Lower leg & foot (rear left)",
+          "group": "legs",
+          "materials": [
+            {
+              "component": "Structure",
+              "commodity": "aluminum",
+              "grade": "Aluminium lower-leg tube",
+              "mass_pct": 1.385,
+              "confidence": "medium"
+            },
+            {
+              "component": "Covers",
+              "commodity": "plastics",
+              "grade": "Polycarbonate / PC-ABS covers",
+              "mass_pct": 0.062,
+              "confidence": "medium"
+            },
+            {
+              "component": "Fasteners",
+              "commodity": "iron",
+              "grade": "Alloy-steel machine screws",
+              "mass_pct": 0.092,
+              "confidence": "medium"
+            },
+            {
+              "component": "Foot",
+              "commodity": "elastomers",
+              "grade": "Moulded rubber foot",
+              "mass_pct": 0.385,
+              "confidence": "medium"
+            }
+          ]
+        },
+        {
+          "meshName": "hip_RR",
+          "label": "Hip actuators ×2 (rear right)",
+          "group": "legs",
+          "materials": [
+            {
+              "component": "Structure",
+              "commodity": "aluminum",
+              "grade": "Cast aluminium hip housing",
+              "mass_pct": 0.872,
+              "confidence": "medium"
+            },
+            {
+              "component": "Covers",
+              "commodity": "plastics",
+              "grade": "Polycarbonate / PC-ABS covers",
+              "mass_pct": 0.081,
+              "confidence": "medium"
+            },
+            {
+              "component": "Fasteners",
+              "commodity": "iron",
+              "grade": "Alloy-steel machine screws",
+              "mass_pct": 0.061,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "aluminum",
+              "grade": "Aluminium motor housings",
+              "mass_pct": 0.811,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "iron",
+              "grade": "Electrical-steel stator laminations",
+              "mass_pct": 1.095,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "copper",
+              "grade": "Enamelled copper windings",
+              "mass_pct": 0.608,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "neodymium",
+              "grade": "Sintered NdFeB rotor magnets",
+              "mass_pct": 0.284,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "dysprosium",
+              "grade": "Dy grain-boundary additive in NdFeB",
+              "mass_pct": 0.024,
+              "confidence": "low"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "boron",
+              "grade": "B in Nd₂Fe₁₄B",
+              "mass_pct": 0.008,
+              "confidence": "low"
+            },
+            {
+              "component": "Gear reduction & bearings",
+              "commodity": "iron",
+              "grade": "Hardened steel planetary gears, ball screws and bearings",
+              "mass_pct": 0.973,
+              "confidence": "medium"
+            },
+            {
+              "component": "Encoders & wiring",
+              "commodity": "copper",
+              "grade": "Encoder PCB copper, phase leads",
+              "mass_pct": 0.122,
+              "confidence": "low"
+            },
+            {
+              "component": "Encoders & wiring",
+              "commodity": "plastics",
+              "grade": "FR-4 laminate, cable jackets",
+              "mass_pct": 0.081,
+              "confidence": "low"
+            },
+            {
+              "component": "Encoders & wiring",
+              "commodity": "silicon",
+              "grade": "Absolute encoder ICs",
+              "mass_pct": 0.008,
+              "confidence": "low"
+            }
+          ]
+        },
+        {
+          "meshName": "thigh_RR",
+          "label": "Upper leg & knee drive (rear right)",
+          "group": "legs",
+          "materials": [
+            {
+              "component": "Structure",
+              "commodity": "aluminum",
+              "grade": "Machined aluminium upper leg",
+              "mass_pct": 1.739,
+              "confidence": "medium"
+            },
+            {
+              "component": "Covers",
+              "commodity": "plastics",
+              "grade": "Polycarbonate / PC-ABS covers",
+              "mass_pct": 0.412,
+              "confidence": "medium"
+            },
+            {
+              "component": "Fasteners",
+              "commodity": "iron",
+              "grade": "Alloy-steel machine screws",
+              "mass_pct": 0.137,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "aluminum",
+              "grade": "Aluminium motor housings",
+              "mass_pct": 0.374,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "iron",
+              "grade": "Electrical-steel stator laminations",
+              "mass_pct": 0.506,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "copper",
+              "grade": "Enamelled copper windings",
+              "mass_pct": 0.281,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "neodymium",
+              "grade": "Sintered NdFeB rotor magnets",
+              "mass_pct": 0.131,
+              "confidence": "medium"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "dysprosium",
+              "grade": "Dy grain-boundary additive in NdFeB",
+              "mass_pct": 0.011,
+              "confidence": "low"
+            },
+            {
+              "component": "Brushless motors",
+              "commodity": "boron",
+              "grade": "B in Nd₂Fe₁₄B",
+              "mass_pct": 0.004,
+              "confidence": "low"
+            },
+            {
+              "component": "Gear reduction & bearings",
+              "commodity": "iron",
+              "grade": "Hardened steel planetary gears, ball screws and bearings",
+              "mass_pct": 0.449,
+              "confidence": "medium"
+            },
+            {
+              "component": "Encoders & wiring",
+              "commodity": "copper",
+              "grade": "Encoder PCB copper, phase leads",
+              "mass_pct": 0.056,
+              "confidence": "low"
+            },
+            {
+              "component": "Encoders & wiring",
+              "commodity": "plastics",
+              "grade": "FR-4 laminate, cable jackets",
+              "mass_pct": 0.037,
+              "confidence": "low"
+            },
+            {
+              "component": "Encoders & wiring",
+              "commodity": "silicon",
+              "grade": "Absolute encoder ICs",
+              "mass_pct": 0.004,
+              "confidence": "low"
+            }
+          ]
+        },
+        {
+          "meshName": "knee_RR",
+          "label": "Knee joint (rear right)",
+          "group": "legs",
+          "materials": [
+            {
+              "component": "Structure",
+              "commodity": "aluminum",
+              "grade": "Aluminium knee clevis",
+              "mass_pct": 0.261,
+              "confidence": "medium"
+            },
+            {
+              "component": "Covers",
+              "commodity": "plastics",
+              "grade": "Polycarbonate / PC-ABS covers",
+              "mass_pct": 0.031,
+              "confidence": "medium"
+            },
+            {
+              "component": "Fasteners",
+              "commodity": "iron",
+              "grade": "Alloy-steel machine screws",
+              "mass_pct": 0.019,
+              "confidence": "medium"
+            },
+            {
+              "component": "Bearings & pin",
+              "commodity": "iron",
+              "grade": "Steel bearings and knee pin",
+              "mass_pct": 0.133,
+              "confidence": "medium"
+            }
+          ]
+        },
+        {
+          "meshName": "shin_RR",
+          "label": "Lower leg & foot (rear right)",
+          "group": "legs",
+          "materials": [
+            {
+              "component": "Structure",
+              "commodity": "aluminum",
+              "grade": "Aluminium lower-leg tube",
+              "mass_pct": 1.385,
+              "confidence": "medium"
+            },
+            {
+              "component": "Covers",
+              "commodity": "plastics",
+              "grade": "Polycarbonate / PC-ABS covers",
+              "mass_pct": 0.062,
+              "confidence": "medium"
+            },
+            {
+              "component": "Fasteners",
+              "commodity": "iron",
+              "grade": "Alloy-steel machine screws",
+              "mass_pct": 0.092,
+              "confidence": "medium"
+            },
+            {
+              "component": "Foot",
+              "commodity": "elastomers",
+              "grade": "Moulded rubber foot",
+              "mass_pct": 0.385,
+              "confidence": "medium"
+            }
+          ]
+        }
+      ]
     }
   ]
 }

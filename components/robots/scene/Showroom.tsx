@@ -9,7 +9,7 @@ import type { Robot } from '@/lib/robots/types'
 import { ROBOTS } from '@/lib/robots/data'
 import { useExplorer } from '../store'
 import RobotModel from './RobotModel'
-import { ARC, FRONT, SHOWROOM_CAMERA, detailDistance, focusPoint, pedestalFor, slotFor } from './layout'
+import { ARC, FRONT, SHOWROOM_CAMERA, detailDistance, extent, focusPoint, pedestalFor, slotFor } from './layout'
 
 const INK = '#080909'
 const IDLE_STOP_MS = 30_000
@@ -260,7 +260,7 @@ function CameraRig({ layout }: { layout: SceneLayout }) {
       c.mouseButtons.wheel = CameraControlsImpl.ACTION.DOLLY
       c.mouseButtons.right = CameraControlsImpl.ACTION.TRUCK
       c.touches.two = CameraControlsImpl.ACTION.TOUCH_DOLLY_TRUCK
-      const half = robot.height_m * 0.45
+      const half = extent(robot) * 0.45
       c.setBoundary(new Box3(focus.clone().subScalar(half), focus.clone().addScalar(half)))
       c.setLookAt(focus.x, focus.y + robot.height_m * 0.12, focus.z + d, focus.x, focus.y, focus.z, true)
     } else {
@@ -278,7 +278,7 @@ function CameraRig({ layout }: { layout: SceneLayout }) {
         const base = slotFor(i, ROBOTS.length).position
         const focus = focusPoint(r, base)
         const toward = ARC.center.clone().sub(base).setY(0).normalize()
-        const d = Math.max(1.4, r.height_m * 2.5 + 0.8)
+        const d = Math.max(1.4, extent(r) * 2.5 + 0.8)
         const eye = focus.clone().add(toward.multiplyScalar(d)).add(new Vector3(0, r.height_m * 0.25, 0))
         const az = Math.atan2(eye.x - focus.x, eye.z - focus.z)
         c.minAzimuthAngle = az - 0.5

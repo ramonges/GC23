@@ -169,6 +169,14 @@ function DetailPanel({ robot, compact }: { robot: Robot; compact: boolean }) {
         <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-vulcan-muted">{robot.maker}</p>
         <h2 className="mt-1 text-[30px] font-light leading-tight tracking-[-0.02em]">{robot.name}</h2>
         <p className="mt-2 text-[13px] leading-relaxed text-vulcan-paper/65">{robot.blurb}</p>
+        {robot.model_credit && (
+          <p className="mt-2 text-[11px] leading-snug text-vulcan-muted">
+            3D model:{' '}
+            <a href={robot.model_credit.url} target="_blank" rel="noopener noreferrer" className="underline decoration-white/20 underline-offset-2 hover:text-vulcan-paper">
+              {robot.model_credit.text}
+            </a>
+          </p>
+        )}
         <dl className="mt-4 grid grid-cols-4 gap-px border border-white/10 bg-white/10">
           {[
             ['Height', `${robot.height_m} m`],
