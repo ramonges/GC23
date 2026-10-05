@@ -8,8 +8,8 @@ import { Document, NodeIO } from '@gltf-transform/core'
 import { ALL_EXTENSIONS, KHRDracoMeshCompression } from '@gltf-transform/extensions'
 import { draco, prune, dedup, weld } from '@gltf-transform/functions'
 import draco3d from 'draco3dgltf'
-import { MeshoptSimplifier } from 'meshoptimizer'
 import { XMLParser } from 'fast-xml-parser'
+import { MeshoptSimplifier, add, axisAngle, compose, creaseNormals, qmul, qnorm, readStl, rot, srgbToLinear as lin, vec, weldAndSimplify } from './mesh-utils.mjs'
 
 const MJCF = process.argv[2]
 const OUT = process.argv[3]
@@ -55,92 +55,8 @@ for (const [s, side] of [['L', 'left'], ['R', 'right']]) {
 // Triangle budget per source mesh; anything not listed keeps its full resolution.
 const BUDGET = { left_wrist_roll_rubber_hand: 9000, right_wrist_roll_rubber_hand: 9000, pelvis_contour_link: 12000, torso_link: 22000, pelvis: 10000, head_link: 12000, left_knee_link: 9000, right_knee_link: 9000, left_ankle_roll_link: 6000, right_ankle_roll_link: 6000 }
 
-const vec = (s, d) => (s ? String(s).split(/\s+/).map(Number) : d)
-const qmul = ([aw, ax, ay, az], [bw, bx, by, bz]) => [aw * bw - ax * bx - ay * by - az * bz, aw * bx + ax * bw + ay * bz - az * by, aw * by - ax * bz + ay * bw + az * bx, aw * bz + ax * by - ay * bx + az * bw]
-const qnorm = (q) => {
-  const l = Math.hypot(...q)
-  return q.map((v) => v / l)
-}
-const rot = (q, v) => {
-  const p = qmul(qmul(q, [0, ...v]), [q[0], -q[1], -q[2], -q[3]])
-  return [p[1], p[2], p[3]]
-}
-const add = (a, b) => a.map((v, i) => v + b[i])
-const compose = (T, pos, quat) => ({ p: add(T.p, rot(T.q, pos)), q: qnorm(qmul(T.q, quat)) })
-const axisAngle = (axis, a) => [Math.cos(a / 2), ...axis.map((v) => v * Math.sin(a / 2))]
 // MuJoCo is Z-up with the robot facing +X and its left on +Y; the explorer is Y-up, facing +Z, left on +X.
 const toThree = ([x, y, z]) => [y, z, x]
-
-function readStl(file) {
-  const buf = fs.readFileSync(file)
-  const n = buf.readUInt32LE(80)
-  if (84 + 50 * n !== buf.length) throw new Error(`${file} is not a binary STL`)
-  const pos = new Float32Array(n * 9)
-  for (let t = 0; t < n; t++) for (let k = 0; k < 9; k++) pos[t * 9 + k] = buf.readFloatLE(84 + t * 50 + 12 + k * 4)
-  return pos
-}
-
-/** Welds the triangle soup by position, simplifies it to `budget` triangles and returns indexed positions. */
-function weldAndSimplify(soup, budget) {
-  const map = new Map()
-  const verts = []
-  const idx = new Uint32Array(soup.length / 3)
-  for (let i = 0; i < soup.length; i += 3) {
-    const key = `${soup[i].toFixed(6)},${soup[i + 1].toFixed(6)},${soup[i + 2].toFixed(6)}`
-    let v = map.get(key)
-    if (v === undefined) {
-      v = verts.length / 3
-      map.set(key, v)
-      verts.push(soup[i], soup[i + 1], soup[i + 2])
-    }
-    idx[i / 3] = v
-  }
-  const positions = new Float32Array(verts)
-  if (!budget || idx.length / 3 <= budget) return { positions, indices: idx }
-  const [out] = MeshoptSimplifier.simplify(idx, positions, 3, budget * 3, 0.002, ['LockBorder'])
-  return { positions, indices: out }
-}
-
-/** Unwelds an indexed mesh and gives each corner the average normal of adjacent faces within the crease angle. */
-function creaseNormals({ positions, indices }, creaseDeg = 38) {
-  const cos = Math.cos((creaseDeg * Math.PI) / 180)
-  const triCount = indices.length / 3
-  const fn = new Float32Array(triCount * 3)
-  const area = new Float32Array(triCount)
-  const byVertex = new Map()
-  for (let t = 0; t < triCount; t++) {
-    const [a, b, c] = [indices[t * 3], indices[t * 3 + 1], indices[t * 3 + 2]]
-    const p = (i) => [positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]]
-    const [pa, pb, pc] = [p(a), p(b), p(c)]
-    const u = [pb[0] - pa[0], pb[1] - pa[1], pb[2] - pa[2]]
-    const w = [pc[0] - pa[0], pc[1] - pa[1], pc[2] - pa[2]]
-    const n = [u[1] * w[2] - u[2] * w[1], u[2] * w[0] - u[0] * w[2], u[0] * w[1] - u[1] * w[0]]
-    const l = Math.hypot(...n) || 1
-    fn.set([n[0] / l, n[1] / l, n[2] / l], t * 3)
-    area[t] = l
-    for (const v of [a, b, c]) (byVertex.get(v) ?? byVertex.set(v, []).get(v)).push(t)
-  }
-  const pos = new Float32Array(indices.length * 3)
-  const nrm = new Float32Array(indices.length * 3)
-  for (let t = 0; t < triCount; t++) {
-    for (let k = 0; k < 3; k++) {
-      const v = indices[t * 3 + k]
-      const o = (t * 3 + k) * 3
-      pos.set([positions[v * 3], positions[v * 3 + 1], positions[v * 3 + 2]], o)
-      let nx = 0, ny = 0, nz = 0
-      for (const f of byVertex.get(v)) {
-        const d = fn[f * 3] * fn[t * 3] + fn[f * 3 + 1] * fn[t * 3 + 1] + fn[f * 3 + 2] * fn[t * 3 + 2]
-        if (d < cos) continue
-        nx += fn[f * 3] * area[f]
-        ny += fn[f * 3 + 1] * area[f]
-        nz += fn[f * 3 + 2] * area[f]
-      }
-      const l = Math.hypot(nx, ny, nz) || 1
-      nrm.set([nx / l, ny / l, nz / l], o)
-    }
-  }
-  return { pos, nrm }
-}
 
 const placed = []
 function walk(body, parent) {
@@ -165,7 +81,6 @@ await MeshoptSimplifier.ready
 
 const doc = new Document()
 const buffer = doc.createBuffer()
-const lin = (c) => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)
 // The MJCF's two greys stand for the G1's satin silver shells and its dark grey joints, head and feet.
 const FINISH = { light: { color: [0.62, 0.64, 0.66], roughness: 0.42, metallic: 0.35 }, dark: { color: [0.13, 0.135, 0.14], roughness: 0.55, metallic: 0.15 } }
 const materials = {}
