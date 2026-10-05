@@ -16,10 +16,17 @@ export function slotFor(index: number, count: number) {
   return { position, facing: -a }
 }
 
+/** The robot's largest dimension: its height, or its length for robots longer than they are tall. */
+export function extent(robot: Robot) {
+  return Math.max(robot.height_m, robot.length_m ?? 0)
+}
+
 export function pedestalFor(robot: Robot) {
-  if (robot.height_m < 0.4) return { height: 0.78, radius: 0.24 }
-  if (robot.height_m < 1) return { height: 0.32, radius: 0.36 }
-  return { height: 0.12, radius: 0.46 }
+  const fit = (robot.length_m ?? 0) / 2 + 0.06
+  if (robot.length_m) return { height: 0.14, radius: Math.max(0.46, fit) }
+  if (robot.height_m < 0.4) return { height: 0.78, radius: Math.max(0.24, fit) }
+  if (robot.height_m < 1) return { height: 0.32, radius: Math.max(0.36, fit) }
+  return { height: 0.12, radius: Math.max(0.46, fit) }
 }
 
 /** Point the camera should look at for a robot standing at `base`. */
@@ -29,7 +36,7 @@ export function focusPoint(robot: Robot, base: Vector3) {
 }
 
 export function detailDistance(robot: Robot) {
-  return Math.max(0.75, robot.height_m * 1.9 + 0.5)
+  return Math.max(0.75, extent(robot) * 1.9 + 0.5)
 }
 
 export const SHOWROOM_CAMERA = { position: new Vector3(0, 2.15, 8.9), target: new Vector3(0, 1.3, -0.9) }
