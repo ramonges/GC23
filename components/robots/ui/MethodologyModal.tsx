@@ -23,7 +23,7 @@ const SECTIONS = [
   },
   {
     title: '3D models',
-    body: 'Microduck, Reachy 2, Reachy Mini and Unitree G1 are shown from their published CAD. Microduck, Reachy Mini and the G1 are assembled from their official MuJoCo models. Microduck\'s and the G1\'s part masses come from those models, and Reachy Mini adds the battery and computer of its wireless version. Reachy 2 is reduced from Pollen Robotics\' official Blender file, and its masses follow Pollen\'s datasheet. Spot and Tesla Optimus use community models, by Julliani and Mechamaner.V (both CC BY 4.0). Spot\'s masses are budgeted to Boston Dynamics\' published 33.8 kg and Optimus\'s to an estimated 57 kg. The other robots are stylised placeholders built from primitives. Every model uses one named mesh per part, so licensed GLB models can replace them without changing the data.',
+    body: 'Microduck, Reachy 2, Reachy Mini and Unitree G1 are shown from their published CAD. Microduck, Reachy Mini and the G1 are assembled from their official MuJoCo models. Microduck\'s and the G1\'s part masses come from those models, and Reachy Mini adds the battery and computer of its wireless version. Reachy 2 is reduced from Pollen Robotics\' official Blender file, and its masses follow Pollen\'s datasheet. Spot and Tesla Optimus use community models, by Julliani and Mechamaner.V (both CC BY 4.0). Spot\'s masses are budgeted to Boston Dynamics\' published 33.8 kg and Optimus\'s to an estimated 57 kg. Every model uses one named mesh per part, so a better model can replace one without changing the data.',
   },
 ]
 

@@ -11,12 +11,12 @@ Every figure is an estimate. Keep the "Estimated, not manufacturer-disclosed" ba
 
 ## How a robot is drawn
 
-Each robot is rendered from one of three sources. Every source produces meshes named after the `meshName` values in `robots.json`.
+Each robot is rendered from one of two sources. Every source produces meshes named after the `meshName` values in `robots.json`.
 
 | Source | When it's used | Example |
 | --- | --- | --- |
 | GLB (`robot.model`) | `model` is a path under `/public` | Tesla Optimus, Microduck, Reachy 2, Reachy Mini, Unitree G1, Spot |
-| Placeholder | Fallback per `archetype` | Every other robot |
+| Placeholder | Fallback per `archetype` when `model` is null | None at the moment |
 
 Hover, pin, explode and colour-by-commodity all work per **part name**. Several meshes can share a name; they then highlight, dim and explode as one part.
 
