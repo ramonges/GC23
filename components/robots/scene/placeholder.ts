@@ -1,7 +1,6 @@
 import { BoxGeometry, BufferGeometry, CatmullRomCurve3, CylinderGeometry, SphereGeometry, TubeGeometry, Vector3 } from 'three'
 import type { Archetype } from '@/lib/robots/types'
 import { capsule, drum, ellipsoid, merge, piece, rbox, type V3 } from './geometry'
-import { optimus } from './optimus'
 
 export type Finish =
   | 'shell'
@@ -246,7 +245,6 @@ function desktop(): PartSpec[] {
 export function buildPlaceholder(archetype: Archetype, robotId: string, height: number): PartSpec[] {
   switch (archetype) {
     case 'humanoid':
-      if (robotId === 'optimus') return scaleSpecs(optimus(), height / 1.73)
       return scaleSpecs(humanoid(robotId), height / 1.75)
     case 'digitigrade':
       return scaleSpecs(digitigrade(), height / 1.75)
