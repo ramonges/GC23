@@ -15,8 +15,7 @@ Each robot is rendered from one of three sources. Every source produces meshes n
 
 | Source | When it's used | Example |
 | --- | --- | --- |
-| GLB (`robot.model`) | `model` is a path under `/public` | Microduck, Reachy 2, Reachy Mini, Unitree G1, Spot |
-| Procedural reconstruction | A builder exists for the robot id in `scene/placeholder.ts` | Tesla Optimus (`scene/optimus.ts`) |
+| GLB (`robot.model`) | `model` is a path under `/public` | Tesla Optimus, Microduck, Reachy 2, Reachy Mini, Unitree G1, Spot |
 | Placeholder | Fallback per `archetype` | Every other robot |
 
 Hover, pin, explode and colour-by-commodity all work per **part name**. Several meshes can share a name; they then highlight, dim and explode as one part.
@@ -127,6 +126,24 @@ node scripts/robots/assemble-g1.mjs path/to/g1_description/g1_23dof.xml public/m
 ```
 
 Part masses follow the MJCF link inertials (34.1 kg in total). The `torso_link` body's 9.8 kg is split between the head, the waist actuator and the torso, which holds the battery and compute. Each link mesh holds its joint motor, so the split inside a part between motor and structure is estimated.
+
+## Tesla Optimus
+
+`public/models/robots/optimus.glb` comes from [“Tesla optimus”](https://sketchfab.com/3d-models/tesla-optimus-2fab5d31927f43729a99a6e8eaf1c7f5) by Mechamaner.V on Sketchfab. It is licensed CC BY 4.0, so the robot's `model_credit` shows the attribution in the detail panel. Keep that credit whenever the model is used.
+
+The source is a single object split only by its six materials. `scripts/robots/export-optimus.py` runs inside Blender on Sketchfab's glTF download (`scene.gltf`, `scene.bin`) and does the following:
+
+1. It finds every connected piece of mesh and assigns it to a part by where its centre sits. The cut heights and the arm offset at the top of the script were measured on the front view. The head and neck are one shell, so pieces in the Head material above the neck cut go to `skull_shell`.
+2. The robot faces -Y in Blender with its left on +X, which exports as +z forward with the left on +x. The script scales it to Tesla's stated 1.73 m and grounds it.
+3. It replaces the source's flat white and grey with an off-white shell over satin black, and writes a Draco GLB of about 500 KB with 122k triangles. `--preview` renders front and side views with each part in its own colour, for checking the split.
+
+```bash
+# Download the glTF from the model page (logged in), or with a Sketchfab API token:
+curl -H "Authorization: Token $SKETCHFAB_API_TOKEN" https://api.sketchfab.com/v3/models/2fab5d31927f43729a99a6e8eaf1c7f5/download
+blender -b --python scripts/robots/export-optimus.py -- path/to/scene.gltf public/models/robots/optimus.glb --preview
+```
+
+The battery, computer, frame and wiring have no separate meshes, so they sit inside the torso part. Part masses are budgeted to 57 kg, as before.
 
 ## Spot
 

@@ -18,7 +18,7 @@
         "accent": "#1B1D1F",
         "frame": "#9DA3A8"
       },
-      "model": null,
+      "model": "/models/robots/optimus.glb",
       "parts": [
         {
           "meshName": "skull_shell",
@@ -197,7 +197,7 @@
         },
         {
           "meshName": "torso_shell",
-          "label": "Torso shell",
+          "label": "Torso: shell, frame, battery & computer",
           "group": "torso",
           "materials": [
             {
@@ -220,219 +220,191 @@
               "grade": "A2 stainless fasteners, brass-free inserts",
               "mass_pct": 0.203,
               "confidence": "medium"
-            }
-          ]
-        },
-        {
-          "meshName": "torso_frame",
-          "label": "Torso frame",
-          "group": "torso",
-          "materials": [
+            },
             {
-              "component": "Structural frame",
+              "component": "Frame · Structural frame",
               "commodity": "aluminum",
               "grade": "7075-T6 machined aluminum",
               "mass_pct": 6.567,
               "confidence": "high"
             },
             {
-              "component": "Fasteners & brackets",
+              "component": "Frame · Fasteners & brackets",
               "commodity": "iron",
               "grade": "12.9 alloy-steel bolts, 17-4PH brackets",
               "mass_pct": 1.095,
               "confidence": "medium"
             },
             {
-              "component": "Wiring clips",
+              "component": "Frame · Wiring clips",
               "commodity": "plastics",
               "grade": "PA66 clips",
               "mass_pct": 0.156,
               "confidence": "low"
-            }
-          ]
-        },
-        {
-          "meshName": "battery_torso",
-          "label": "Battery pack (NMC, 2.3 kWh)",
-          "group": "torso",
-          "materials": [
+            },
             {
-              "component": "Cathode",
+              "component": "Battery · Cathode",
               "commodity": "nickel",
               "grade": "Class-1 nickel sulfate → NMC811 cathode",
               "mass_pct": 2.002,
               "confidence": "medium"
             },
             {
-              "component": "Cathode",
+              "component": "Battery · Cathode",
               "commodity": "cobalt",
               "grade": "Cobalt sulfate → NMC811 cathode",
               "mass_pct": 0.25,
               "confidence": "medium"
             },
             {
-              "component": "Cathode",
+              "component": "Battery · Cathode",
               "commodity": "manganese",
               "grade": "High-purity manganese sulfate (HPMSM)",
               "mass_pct": 0.234,
               "confidence": "medium"
             },
             {
-              "component": "Cathode",
+              "component": "Battery · Cathode",
               "commodity": "lithium",
               "grade": "Battery-grade LiOH·H₂O (Li ≈ 7% of cathode)",
               "mass_pct": 0.334,
               "confidence": "medium"
             },
             {
-              "component": "Anode",
+              "component": "Battery · Anode",
               "commodity": "graphite",
               "grade": "Spherical natural / synthetic graphite blend",
               "mass_pct": 2.503,
               "confidence": "medium"
             },
             {
-              "component": "Current collectors",
+              "component": "Battery · Current collectors",
               "commodity": "copper",
               "grade": "6–8 µm electrodeposited copper foil",
               "mass_pct": 1.835,
               "confidence": "medium"
             },
             {
-              "component": "Current collectors & cans",
+              "component": "Battery · Current collectors & cans",
               "commodity": "aluminum",
               "grade": "1235 Al foil + 3003 cell cans",
               "mass_pct": 2.002,
               "confidence": "medium"
             },
             {
-              "component": "Pack enclosure",
+              "component": "Battery · Pack enclosure",
               "commodity": "aluminum",
               "grade": "6061-T6 / die-cast A380 pack housing",
               "mass_pct": 2.169,
               "confidence": "high"
             },
             {
-              "component": "Electrolyte & separator",
+              "component": "Battery · Electrolyte & separator",
               "commodity": "plastics",
               "grade": "PE/PP separator, carbonate solvents, LiPF₆",
               "mass_pct": 3.337,
               "confidence": "low"
             },
             {
-              "component": "Busbars & BMS",
+              "component": "Battery · Busbars & BMS",
               "commodity": "copper",
               "grade": "C11000 ETP busbars",
               "mass_pct": 0.667,
               "confidence": "medium"
             },
             {
-              "component": "BMS",
+              "component": "Battery · BMS",
               "commodity": "silicon",
               "grade": "Cell-monitoring AFEs & MOSFETs",
               "mass_pct": 0.1,
               "confidence": "low"
             },
             {
-              "component": "Fasteners & brackets",
+              "component": "Battery · Fasteners & brackets",
               "commodity": "iron",
               "grade": "AISI 304 stainless",
               "mass_pct": 0.751,
               "confidence": "medium"
             },
             {
-              "component": "Thermal pads & potting",
+              "component": "Battery · Thermal pads & potting",
               "commodity": "plastics",
               "grade": "Silicone thermal pads, PU potting",
               "mass_pct": 0.501,
               "confidence": "low"
-            }
-          ]
-        },
-        {
-          "meshName": "compute_torso",
-          "label": "Onboard computer (FSD-class SoC)",
-          "group": "torso",
-          "materials": [
+            },
             {
-              "component": "Processor & memory",
+              "component": "Computer · Processor & memory",
               "commodity": "silicon",
               "grade": "Custom 5–7 nm SoC on 99.9999999% (9N) polysilicon wafer",
               "mass_pct": 0.271,
               "confidence": "medium"
             },
             {
-              "component": "PCB",
+              "component": "Computer · PCB",
               "commodity": "copper",
               "grade": "Multilayer PCB copper planes",
               "mass_pct": 0.488,
               "confidence": "medium"
             },
             {
-              "component": "PCB laminate",
+              "component": "Computer · PCB laminate",
               "commodity": "plastics",
               "grade": "FR-4 glass-epoxy laminate",
               "mass_pct": 0.542,
               "confidence": "medium"
             },
             {
-              "component": "Heatsink & heat pipes",
+              "component": "Computer · Heatsink & heat pipes",
               "commodity": "aluminum",
               "grade": "6063-T5 extruded heatsink",
               "mass_pct": 0.922,
               "confidence": "high"
             },
             {
-              "component": "Heat pipes",
+              "component": "Computer · Heat pipes",
               "commodity": "copper",
               "grade": "C10200 copper heat pipes",
               "mass_pct": 0.271,
               "confidence": "medium"
             },
             {
-              "component": "Solder",
+              "component": "Computer · Solder",
               "commodity": "tin",
               "grade": "SAC305 lead-free solder (96.5% Sn)",
               "mass_pct": 0.054,
               "confidence": "low"
             },
             {
-              "component": "Connectors",
+              "component": "Computer · Connectors",
               "commodity": "copper",
               "grade": "Phosphor-bronze contacts (gold flash)",
               "mass_pct": 0.081,
               "confidence": "low"
             },
             {
-              "component": "Fan & shroud",
+              "component": "Computer · Fan & shroud",
               "commodity": "plastics",
               "grade": "PBT shroud",
               "mass_pct": 0.081,
               "confidence": "low"
-            }
-          ]
-        },
-        {
-          "meshName": "wiring_harness",
-          "label": "Wiring harness",
-          "group": "torso",
-          "materials": [
+            },
             {
-              "component": "Conductors",
+              "component": "Wiring · Conductors",
               "commodity": "copper",
               "grade": "99.9% C11000 ETP stranded copper",
               "mass_pct": 2.069,
               "confidence": "high"
             },
             {
-              "component": "Insulation & sleeving",
+              "component": "Wiring · Insulation & sleeving",
               "commodity": "plastics",
               "grade": "PTFE / silicone insulation, PET braid",
               "mass_pct": 1.135,
               "confidence": "medium"
             },
             {
-              "component": "Connector shells",
+              "component": "Wiring · Connector shells",
               "commodity": "aluminum",
               "grade": "Anodized aluminum connector shells",
               "mass_pct": 0.133,
@@ -1924,7 +1896,11 @@
             }
           ]
         }
-      ]
+      ],
+      "model_credit": {
+        "text": "“Tesla optimus” by Mechamaner.V, CC BY 4.0",
+        "url": "https://sketchfab.com/3d-models/tesla-optimus-2fab5d31927f43729a99a6e8eaf1c7f5"
+      }
     },
     {
       "id": "neo",
