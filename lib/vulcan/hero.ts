@@ -1,6 +1,19 @@
 /** Hero timeline content. Times are seconds on the autoplay timeline. */
 
-export const HERO_DURATION = 38.5
+export const HERO_DURATION = 43.5
+
+/** When the six /robots models start rising at the end of the factory. */
+export const LINEUP_AT = 38.6
+
+/** Same robots and order as the /robots showroom (data/robots/robots.json). */
+export const HERO_LINEUP = [
+  { id: 'optimus', name: 'Tesla Optimus', model: '/models/robots/optimus.glb' },
+  { id: 'reachy2', name: 'Reachy 2', model: '/models/robots/reachy2.glb' },
+  { id: 'g1', name: 'Unitree G1', model: '/models/robots/g1.glb' },
+  { id: 'microduck', name: 'Microduck', model: '/models/robots/microduck.glb' },
+  { id: 'reachy_mini', name: 'Reachy Mini', model: '/models/robots/reachy_mini.glb' },
+  { id: 'spot', name: 'Spot', model: '/models/robots/spot.glb' },
+]
 
 export type HeroLabel = { anchor: string; text: string; from: number; to: number; tone?: 'signal' | 'muted'; lines?: string[] }
 export type DataRow = [string, string]
@@ -110,8 +123,8 @@ export const HERO_LABELS: HeroLabel[] = [
 ]
 
 export const HERO_FINAL = {
-  headline: ['Every robot', 'begins with a', 'material decision.'],
-  copy: 'Vulcan Trade makes the invisible supply chain visible — from origin to production.',
+  headline: ['Here is what', 'can be built.'],
+  copy: 'Six robots, each traced part by part to the materials and countries behind it.',
 }
 
 export const HERO_OPENING = {

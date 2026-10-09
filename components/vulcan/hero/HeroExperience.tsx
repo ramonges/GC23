@@ -18,7 +18,7 @@ const SMOOTHING = 4.2
 const LABEL_FADE = 0.45
 const SITES_WAIT_T = 4.3
 const OPENING_END = 4.4
-const FINAL_AT = 36.4
+const FINAL_AT = 39.4
 
 const STILL_STAGES = HERO_STAGES.map((s) => s.id)
 

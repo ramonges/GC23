@@ -162,8 +162,8 @@ export default function HeroOverlay({ stage, showOpening, showFinal, flowRef }: 
             </h2>
             <p className="mt-8 max-w-[30rem] text-[clamp(1.1rem,1.4vw,1.4rem)] font-light leading-snug text-vulcan-paper/80">{HERO_FINAL.copy}</p>
             <div className="mt-10 flex flex-col gap-3 sm:flex-row">
-              <a href="/platform" className="group inline-flex items-center justify-between gap-10 bg-vulcan-paper px-6 py-4 font-mono text-[12px] uppercase tracking-[0.2em] text-vulcan-ink transition-colors duration-500 hover:bg-white">
-                Explore Vulcan Trade
+              <a href="/robots" className="group inline-flex items-center justify-between gap-10 bg-vulcan-paper px-6 py-4 font-mono text-[12px] uppercase tracking-[0.2em] text-vulcan-ink transition-colors duration-500 hover:bg-white">
+                Explore the robots
                 <span aria-hidden className="text-vulcan-signal transition-transform duration-500 group-hover:translate-x-1">→</span>
               </a>
               <a href={CONTACT_HREF} className="group inline-flex items-center justify-between gap-10 border border-white/25 px-6 py-4 font-mono text-[12px] uppercase tracking-[0.2em] text-vulcan-paper transition-colors duration-500 hover:border-white/60">
