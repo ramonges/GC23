@@ -16,6 +16,8 @@ export function buildCameraKeys(p: {
   flatbed: () => Vector3
   component: () => Vector3
   robot: Vector3
+  lineup: Vector3
+  lineupHeading: number
   inboundMid: Vector3
   railMid: Vector3
   quay: Vector3
@@ -58,6 +60,8 @@ export function buildCameraKeys(p: {
     { t: 35.8, focus: { point: () => p.robot }, dist: 0.36, pitch: 16, heading: 160, shift: 0.1 },
     { t: 37.0, focus: { point: () => p.robot }, dist: 0.42, pitch: 14, heading: 132, shift: 0.12 },
     { t: 38.5, focus: { point: () => p.robot }, dist: 0.7, pitch: 15, heading: 108, shift: 0.16 },
+    { t: 40.4, focus: { point: () => p.lineup }, dist: 1.55, pitch: 12, heading: p.lineupHeading + 4, shift: 0.22 },
+    { t: 43.5, focus: { point: () => p.lineup }, dist: 1.5, pitch: 11, heading: p.lineupHeading + 1.5, shift: 0.22 },
   ]
 }
 

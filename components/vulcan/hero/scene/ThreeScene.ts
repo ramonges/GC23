@@ -40,6 +40,7 @@ import { PATCHES, SITES, SUN_DIR } from './sites'
 import { buildSmelter } from './SmelterScene'
 import { resolveAnchor, type Anchor, type FrameCtx, type StageScene } from './stage'
 import { applyCamera, buildCameraKeys, sampleCamera, type CameraKey } from './timeline'
+import { buildLineup } from './LineupScene'
 import { buildInland } from './TruckScene'
 
 const GrainShader = {
@@ -157,8 +158,9 @@ export async function createHeroScene(canvas: HTMLCanvasElement, options: { qual
     const smelter = buildSmelter(materials)
     const factory = buildManufacturing(materials)
     const inbound = buildInbound(materials, flatten, factory.entry)
+    const lineup = buildLineup(factory.frame, envMap)
     footprintOwners.push(mine, port)
-    for (const s of [mine, inland, port, ship, refinery, smelter, inbound, factory]) {
+    for (const s of [mine, inland, port, ship, refinery, smelter, inbound, factory, lineup]) {
       scenes.push(s)
       scene.add(s.group)
       Object.assign(anchors, s.anchors)
@@ -170,12 +172,15 @@ export async function createHeroScene(canvas: HTMLCanvasElement, options: { qual
       flatbed: () => inbound.truckPos,
       component: () => factory.heroPos,
       robot: factory.robotWorld,
+      lineup: lineup.focus,
+      lineupHeading: lineup.heading,
       inboundMid: inbound.roadMid,
       railMid: resolveAnchor(inland.anchors.railConnection),
       quay: port.quayPoint,
     })
     renderer.compile(scene, camera)
     sitesReady = true
+    lineup.load()
     options.onProgress?.(1)
   }
   const sitesPromise = buildSites()
