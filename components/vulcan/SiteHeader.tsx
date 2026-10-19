@@ -90,7 +90,7 @@ export default function SiteHeader() {
               Get in touch <span className="text-vulcan-signal">↗</span>
             </a>
           </nav>
-          <div className={`flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] ${light ? 'text-vulcan-ink/55' : 'text-vulcan-aluminum/75'}`}>
+          <div className={`flex items-center gap-2 whitespace-nowrap font-mono text-[9px] uppercase tracking-[0.04em] sm:text-[10px] sm:tracking-[0.18em] ${light ? 'text-vulcan-ink/55' : 'text-vulcan-aluminum/75'}`}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/brand/baltic-exchange.png" alt="" width={16} height={16} className="h-4 w-4 rounded-[2px]" />
             <span>Endorsed by Baltic Exchange</span>
