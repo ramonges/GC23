@@ -10,10 +10,31 @@ const SATELLITE_EARTH = '//unpkg.com/three-globe/example/img/earth-blue-marble.j
 const TOPOLOGY = '//unpkg.com/three-globe/example/img/earth-topology.png'
 const ATMOSPHERE = '#8FA6B2'
 const BORDER = 'rgba(241, 240, 232, 0.16)'
-const pointRadius = (d: { type?: string }) => (d.type === 'refinery' ? 0.22 : 0.13)
-/** Markers are sized in degrees, so they are shrunk in steps as the camera closes in to stay pin-sized. */
-const markerScale = (altitude: number) =>
-  altitude >= 1.0 ? 1 : altitude >= 0.5 ? 0.6 : altitude >= 0.25 ? 0.35 : altitude >= 0.12 ? 0.2 : 0.12
+const pointRadius = (d: { type?: string }) => (d.type === 'refinery' ? 0.7 : 0.45)
+const POINT_ALTITUDE = 0.0015
+const FOCUS_COLOR = 'rgba(241, 240, 232, 0.85)'
+/** Markers are sized in degrees, so they scale with camera altitude to stay dot-sized on screen; stepped so 13k points are not rebuilt on every zoom event. */
+const markerScale = (altitude: number) => {
+  const step = Math.round(Math.log(Math.min(3, Math.max(0.02, altitude)) / 2.5) / Math.log(1.4))
+  return Math.pow(1.4, step)
+}
+/** Faded copy of a #rrggbb colour for sites outside the focus. */
+const faded = (hex: string) => (hex.length === 7 ? `${hex}4d` : hex)
+
+/** Points on a circle of `radius` degrees around a site, following the globe's curvature. */
+const geoCircle = (lat: number, lng: number, radius: number, from = 0, to = 360, steps = 72) => {
+  const φ1 = (lat * Math.PI) / 180
+  const λ1 = (lng * Math.PI) / 180
+  const δ = (radius * Math.PI) / 180
+  return Array.from({ length: steps + 1 }, (_, i) => {
+    const θ = ((from + ((to - from) * i) / steps) * Math.PI) / 180
+    const φ2 = Math.asin(Math.sin(φ1) * Math.cos(δ) + Math.cos(φ1) * Math.sin(δ) * Math.cos(θ))
+    const λ2 = λ1 + Math.atan2(Math.sin(θ) * Math.sin(δ) * Math.cos(φ1), Math.cos(δ) - Math.sin(φ1) * Math.sin(φ2))
+    return [(φ2 * 180) / Math.PI, (λ2 * 180) / Math.PI]
+  })
+}
+const geoTick = (lat: number, lng: number, bearing: number, r0: number, r1: number) =>
+  [r0, r1].map((r) => geoCircle(lat, lng, r, bearing, bearing, 1)[0])
 const MONO = "var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace"
 
 /** Below this camera altitude (in Earth radii) the single world texture turns blurry, so the globe streams map tiles instead. */
@@ -36,10 +57,12 @@ interface Globe3DClientProps {
   onPointSelect?: (point: CommodityData | RefineryData | null, type: 'commodity' | 'refinery') => void
   onVesselClick?: (vessel: VesselData) => void
   onRouteClick?: (route: ShippingRoute) => void
+  /** The site whose info panel is open; the globe flies to it and draws a focus area around it. */
+  selected?: CommodityData | RefineryData | null
 }
 
 
-function Globe3DClient({ markers, showCities = true, routes = [], refineries = [], vessels = [], satelliteMode = false, onPointSelect, onVesselClick, onRouteClick }: Globe3DClientProps) {
+function Globe3DClient({ markers, showCities = true, routes = [], refineries = [], vessels = [], satelliteMode = false, selected = null, onPointSelect, onVesselClick, onRouteClick }: Globe3DClientProps) {
   const globeEl = useRef<HTMLDivElement>(null)
   const globeRef = useRef<any>(null)
   const currentAltitudeRef = useRef<number>(2.5)
@@ -52,7 +75,11 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
   const tilesOnRef = useRef(false)
   const [tilesOn, setTilesOn] = useState(false)
   const markerScaleRef = useRef(1)
-  const radiusOf = (d: { type?: string }) => pointRadius(d) * markerScaleRef.current
+  const selectedRef = useRef<CommodityData | RefineryData | null>(null)
+  const radiusOf = (d: { type?: string; data?: unknown }) =>
+    pointRadius(d) * markerScaleRef.current * (selectedRef.current && d.data === selectedRef.current ? 2 : 1)
+  const colorOf = (d: any) =>
+    selectedRef.current && d.data !== selectedRef.current ? faded(d.color) : d.color
 
   const applyTiles = (altitude: number) => {
     const globe = globeRef.current
@@ -117,7 +144,7 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
       const scale = markerScale(coords.altitude)
       if (scale !== markerScaleRef.current) {
         markerScaleRef.current = scale
-        globe.pointAltitude((d: any) => d.size * scale).pointRadius(radiusOf)
+        globe.pointRadius(radiusOf)
       }
       globeRef.current?.updateCityDisplay?.(coords.altitude)
     })
@@ -280,10 +307,10 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
     // Configure points layer with empty initial data - will be updated by separate effect
     globe
       .pointsData([])
-      .pointAltitude((d: any) => d.size * markerScaleRef.current)
-      .pointColor('color')
+      .pointAltitude(POINT_ALTITUDE)
+      .pointColor(colorOf)
       .pointRadius(radiusOf)
-      .pointResolution(6)
+      .pointResolution(16)
       .pointsMerge(false)
       .pointsTransitionDuration(400) // Smooth transition when points change
       .pointLabel((d: any) => {
@@ -315,19 +342,28 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
           </div>`
       })
       .onPointClick((point: any) => {
-        // Show info panel without changing zoom
-        if (onPointSelectRef.current) {
-          onPointSelectRef.current(point.data, point.type as 'commodity' | 'refinery')
-        }
-
-        // Highlight effect - briefly make the point larger
-        globe.pointRadius((d: any) => (d === point ? radiusOf(d) * 2.5 : radiusOf(d)))
-        setTimeout(() => {
-          globe.pointRadius(radiusOf)
-        }, 1500)
+        onPointSelectRef.current?.(point.data, point.type as 'commodity' | 'refinery')
       })
 
-    // Click on globe (not on a point) - find nearest point and show info
+    globe
+      .ringsData([])
+      .ringAltitude(POINT_ALTITUDE + 0.0005)
+      .ringColor((d: any) => (t: number) => `${d.color}${Math.round((1 - t) * 200).toString(16).padStart(2, '0')}`)
+      .ringMaxRadius((d: any) => d.maxRadius)
+      .ringPropagationSpeed((d: any) => d.speed)
+      .ringRepeatPeriod(1400)
+
+    globe
+      .pathsData([])
+      .pathPoints((d: any) => d.points)
+      .pathPointAlt(POINT_ALTITUDE + 0.001)
+      .pathColor(() => FOCUS_COLOR)
+      .pathStroke((d: any) => d.stroke)
+      .pathDashLength((d: any) => d.dash)
+      .pathDashGap((d: any) => d.gap)
+      .pathTransitionDuration(0)
+
+    // Clicks that miss a dot pick the nearest site within ~15px; clicking open ground clears the selection.
     globe.onGlobeClick(({ lat, lng }: { lat: number, lng: number }) => {
       const currentPoints = (globe.pointsData() || []) as Array<{ lat: number; lng: number; data: any; type: string }>
       if (currentPoints.length === 0) return
@@ -356,18 +392,11 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
         }
       }
 
-      // Show info panel for the closest point without changing zoom
-      if (onPointSelectRef.current) {
-        onPointSelectRef.current(closestPoint.data, closestPoint.type as 'commodity' | 'refinery')
+      if (closestDistance > currentAltitudeRef.current * 150) {
+        onPointSelectRef.current?.(null, 'commodity')
+        return
       }
-
-      // Highlight the point with a pulse effect
-      globe.pointRadius((d: any) => (d === closestPoint ? radiusOf(d) * 2.5 : radiusOf(d)))
-
-      // Reset after animation
-      setTimeout(() => {
-        globe.pointRadius(radiusOf)
-      }, 1500)
+      onPointSelectRef.current?.(closestPoint.data, closestPoint.type as 'commodity' | 'refinery')
     })
 
     // Configure arcs layer with empty initial data - will be updated by separate effect
@@ -419,7 +448,6 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
     const points = validMarkers.map(marker => ({
       lat: marker.latitude,
       lng: marker.longitude,
-      size: 0.018,
       color: getCommodityColor(marker.commodity_type),
       label: marker.title,
       data: marker,
@@ -434,7 +462,6 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
       return {
         lat: refinery.latitude,
         lng: refinery.longitude,
-        size: 0.03,
         color,
         label: refinery.name,
         data: refinery,
@@ -483,6 +510,34 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
     globe.pointsData(allPoints)
     globe.arcsData(arcs)
   }, [markers, routes, refineries])
+
+  // Fly to the selected site and draw its focus area
+  useEffect(() => {
+    const globe = globeRef.current
+    if (!globe) return
+    selectedRef.current = selected
+    globe.pointRadius(radiusOf).pointColor(colorOf)
+
+    const lat = selected?.latitude
+    const lng = selected?.longitude
+    if (selected == null || lat == null || lng == null) {
+      globe.ringsData([]).pathsData([])
+      return
+    }
+
+    const current = currentAltitudeRef.current
+    const altitude = current > 0.8 ? 0.8 : Math.max(0.1, current * 0.8)
+    globe.pointOfView({ lat, lng, altitude }, 1100)
+
+    const r = altitude * 4
+    const point = (globe.pointsData() as any[]).find((d) => d.data === selected)
+    const color = point?.color && point.color.length === 7 ? point.color : '#F36B21'
+    globe.ringsData([{ lat, lng, color, maxRadius: r * 0.9, speed: r * 0.9 }])
+    globe.pathsData([
+      { points: geoCircle(lat, lng, r), stroke: 1.2, dash: 0.02, gap: 0.012 },
+      ...[0, 90, 180, 270].map((b) => ({ points: geoTick(lat, lng, b, r * 1.12, r * 1.4), stroke: 1.6, dash: 1, gap: 0 })),
+    ])
+  }, [selected])
 
   // Handle showCities toggle
   useEffect(() => {
@@ -588,6 +643,7 @@ export default memo(Globe3DClient, (prevProps, nextProps) => {
     prevProps.routes === nextProps.routes &&
     prevProps.refineries === nextProps.refineries &&
     prevProps.vessels === nextProps.vessels &&
-    prevProps.satelliteMode === nextProps.satelliteMode
+    prevProps.satelliteMode === nextProps.satelliteMode &&
+    prevProps.selected === nextProps.selected
   )
 })

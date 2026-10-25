@@ -1765,6 +1765,7 @@ export default function EarthMap() {
           refineries={displayedRefineries}
           vessels={showVessels ? vessels : []}
           satelliteMode={satelliteMode}
+          selected={selectedPoint.data}
           onPointSelect={handlePointSelect}
           onVesselClick={(vessel) => {
             setSelectedVessel(vessel)
