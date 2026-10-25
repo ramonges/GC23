@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, memo } from 'react'
+import { useEffect, useRef, useState, memo } from 'react'
 import Globe from 'globe.gl'
 import { CommodityData, RefineryData, ShippingRoute, VesselData } from '@/lib/types'
 import { COMMODITY_COLORS, COMMODITY_FALLBACK, VESSEL_COLORS } from '@/lib/map-theme'
@@ -11,7 +11,20 @@ const TOPOLOGY = '//unpkg.com/three-globe/example/img/earth-topology.png'
 const ATMOSPHERE = '#8FA6B2'
 const BORDER = 'rgba(241, 240, 232, 0.16)'
 const pointRadius = (d: { type?: string }) => (d.type === 'refinery' ? 0.22 : 0.13)
+/** Markers are sized in degrees, so they are shrunk in steps as the camera closes in to stay pin-sized. */
+const markerScale = (altitude: number) =>
+  altitude >= 1.0 ? 1 : altitude >= 0.5 ? 0.6 : altitude >= 0.25 ? 0.35 : altitude >= 0.12 ? 0.2 : 0.12
 const MONO = "var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace"
+
+/** Below this camera altitude (in Earth radii) the single world texture turns blurry, so the globe streams map tiles instead. */
+const TILES_ON_ALTITUDE = 1.0
+const TILES_OFF_ALTITUDE = 1.2
+const SATELLITE_TILES = (x: number, y: number, l: number) => `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${l}/${y}/${x}`
+const STYLED_TILES = (x: number, y: number, l: number) => `https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/${l}/${y}/${x}`
+const TILE_CREDIT = {
+  satellite: 'Imagery © Esri, Maxar, Earthstar Geographics',
+  styled: 'Basemap © Esri, HERE, Garmin, © OpenStreetMap contributors',
+}
 
 interface Globe3DClientProps {
   markers: CommodityData[]
@@ -35,6 +48,25 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
   const onRouteClickRef = useRef(onRouteClick)
   const showCitiesRef = useRef(showCities)
   const vesselsRef = useRef<VesselData[]>([])
+  const satelliteModeRef = useRef(satelliteMode)
+  const tilesOnRef = useRef(false)
+  const [tilesOn, setTilesOn] = useState(false)
+  const markerScaleRef = useRef(1)
+  const radiusOf = (d: { type?: string }) => pointRadius(d) * markerScaleRef.current
+
+  const applyTiles = (altitude: number) => {
+    const globe = globeRef.current
+    if (!globe) return
+    const on = tilesOnRef.current ? altitude < TILES_OFF_ALTITUDE : altitude < TILES_ON_ALTITUDE
+    if (on === tilesOnRef.current) return
+    // Esri's dark canvas stops at level 16; its imagery goes deeper.
+    globe.globeTileEngineMaxLevel(satelliteModeRef.current ? 18 : 16)
+    globe.globeTileEngineUrl(on ? (satelliteModeRef.current ? SATELLITE_TILES : STYLED_TILES) : null)
+    tilesOnRef.current = on
+    setTilesOn(on)
+  }
+  const applyTilesRef = useRef(applyTiles)
+  applyTilesRef.current = applyTiles
 
   useEffect(() => {
     onPointSelectRef.current = onPointSelect
@@ -79,6 +111,16 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
 
     // Point of view
     globe.pointOfView({ altitude: 2.5 })
+    globe.onZoom((coords: any) => {
+      currentAltitudeRef.current = coords.altitude
+      applyTilesRef.current(coords.altitude)
+      const scale = markerScale(coords.altitude)
+      if (scale !== markerScaleRef.current) {
+        markerScaleRef.current = scale
+        globe.pointAltitude((d: any) => d.size * scale).pointRadius(radiusOf)
+      }
+      globeRef.current?.updateCityDisplay?.(coords.altitude)
+    })
 
     // Load country boundaries and labels (using 50m for better detail)
     fetch('https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_admin_0_countries.geojson')
@@ -231,12 +273,6 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
             .htmlAltitude((d: any) => d.altitude || 0.01)
         }
 
-        // Update cities visibility based on zoom level
-        globe.onZoom((coords: any) => {
-          currentAltitudeRef.current = coords.altitude
-          updateCityDisplay(coords.altitude)
-        })
-
         // Store update function on globe for external access
         globeRef.current.updateCityDisplay = updateCityDisplay
       })
@@ -244,9 +280,9 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
     // Configure points layer with empty initial data - will be updated by separate effect
     globe
       .pointsData([])
-      .pointAltitude('size')
+      .pointAltitude((d: any) => d.size * markerScaleRef.current)
       .pointColor('color')
-      .pointRadius(pointRadius)
+      .pointRadius(radiusOf)
       .pointResolution(6)
       .pointsMerge(false)
       .pointsTransitionDuration(400) // Smooth transition when points change
@@ -285,12 +321,9 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
         }
 
         // Highlight effect - briefly make the point larger
-        globe.pointRadius((d: any) => {
-          if (d === point) return pointRadius(d) * 2.5
-          return pointRadius(d)
-        })
+        globe.pointRadius((d: any) => (d === point ? radiusOf(d) * 2.5 : radiusOf(d)))
         setTimeout(() => {
-          globe.pointRadius(pointRadius)
+          globe.pointRadius(radiusOf)
         }, 1500)
       })
 
@@ -329,14 +362,11 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
       }
 
       // Highlight the point with a pulse effect
-      globe.pointRadius((d: any) => {
-        if (d === closestPoint) return pointRadius(d) * 2.5
-        return pointRadius(d)
-      })
+      globe.pointRadius((d: any) => (d === closestPoint ? radiusOf(d) * 2.5 : radiusOf(d)))
 
       // Reset after animation
       setTimeout(() => {
-        globe.pointRadius((d: any) => pointRadius(d))
+        globe.pointRadius(radiusOf)
       }, 1500)
     })
 
@@ -474,7 +504,15 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
     const globe = globeRef.current
     if (!globe) return
 
+    satelliteModeRef.current = satelliteMode
     globe.globeImageUrl(satelliteMode ? SATELLITE_EARTH : STYLED_EARTH)
+    if (tilesOnRef.current) {
+      globe.globeTileEngineUrl(null)
+      globe.globeTileEngineClearCache()
+      tilesOnRef.current = false
+      setTilesOn(false)
+    }
+    applyTilesRef.current(currentAltitudeRef.current)
     globe.bumpImageUrl(TOPOLOGY)
     globe.atmosphereColor(ATMOSPHERE)
     globe.atmosphereAltitude(satelliteMode ? 0.12 : 0.13)
@@ -531,7 +569,14 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
   }
 
   return (
-    <div ref={globeEl} style={{ width: '100%', height: '100%' }} className="bg-vulcan-ink" />
+    <div className="relative h-full w-full">
+      <div ref={globeEl} style={{ width: '100%', height: '100%' }} className="bg-vulcan-ink" />
+      {tilesOn && (
+        <div className="pointer-events-none absolute bottom-2 right-2 bg-vulcan-ink/70 px-2 py-1 font-mono text-[9px] tracking-[0.08em] text-vulcan-paper/60">
+          {satelliteMode ? TILE_CREDIT.satellite : TILE_CREDIT.styled}
+        </div>
+      )}
+    </div>
   )
 }
 
