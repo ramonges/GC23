@@ -13,8 +13,8 @@ import {
   haversineDistanceKm,
   CharterType,
   Port,
-  balticRoutes,
 } from '@/lib/shippingConfig'
+import { dryBasket, formatBalticAsOf, formatBalticAverage, formatBalticRate, quoteDryFreight } from '@/lib/balticDry'
 import {
   fetchCommodityQuote,
   volumeToSpecUnits,
@@ -350,6 +350,9 @@ function computeModeledCost(params: {
   dischargeUnloadGrab: number
   dischargeCustomsClearance: number
   canalToll: 'suez' | 'panama' | 'none'
+  charterType?: CharterType
+  freightMode?: 'market' | 'custom'
+  customRate?: number
   commodityPrice?: number | null
   commodityPriceUnit?: PriceUnit | null
   commodityPriceLabel?: string
@@ -423,17 +426,40 @@ function computeModeledCost(params: {
   const dischargeDays = Math.max(0.5, parcelMt / dischRate) + 0.5
   const totalDays = inlandDays + 1 + loadingDays + sailingDays + 1.5 + dischargeDays
 
-  const hireCost = vessel.tceRate * totalDays
   const bunkerSea = vessel.fuelAtSea * sailingDays * VLSFO_USD
   const bunkerPort = vessel.fuelInPort * (loadingDays + dischargeDays + 2.5) * VLSFO_USD
   const bunkerCost = bunkerSea + bunkerPort
+  const userPortSpecified = Boolean(params.portDuesPerMt || params.stevedoringPerMt || params.wharfagePerMt)
   let portCost = vessel.portCostPerCall * 2
-  if (params.portDuesPerMt || params.stevedoringPerMt || params.wharfagePerMt) {
+  if (userPortSpecified) {
     portCost = parcelMt * (params.portDuesPerMt + params.stevedoringPerMt + params.wharfagePerMt)
     if (params.surveyorFee) portCost += 5000
     if (params.inspectionFee) portCost += 3000
     if (params.fumigationFee) portCost += 8000
   }
+
+  const charter = params.charterType || 'voyage'
+  const baltic = quoteDryFreight(params.nearestPort.port, params.destinationPort, params.vesselClass, charter)
+  const custom = params.freightMode === 'custom' && (params.customRate || 0) > 0
+  // A Baltic voyage assessment is the freight the charterer pays. Bunker and the owner's port call sit inside that rate.
+  const voyageFreight = custom ? charter === 'voyage' : baltic?.unit === 'usd_per_mt'
+  let hireCost = vessel.tceRate * totalDays
+  let freightBasis: 'baltic_voyage' | 'baltic_tce' | 'custom' | 'model' = 'model'
+  if (custom && charter === 'voyage') {
+    hireCost = (params.customRate || 0) * parcelMt
+    freightBasis = 'custom'
+  } else if (custom) {
+    hireCost = (params.customRate || 0) * totalDays
+    freightBasis = 'custom'
+  } else if (baltic?.unit === 'usd_per_mt') {
+    hireCost = baltic.latest * parcelMt
+    freightBasis = 'baltic_voyage'
+  } else if (baltic?.unit === 'usd_per_day') {
+    hireCost = baltic.latest * totalDays
+    freightBasis = 'baltic_tce'
+  }
+  const bunkerInTotal = voyageFreight ? 0 : bunkerCost
+  const portInTotal = voyageFreight && !userPortSpecified ? 0 : portCost
 
   let canalCost = 0
   const oReg = params.nearestPort.port.region
@@ -449,12 +475,14 @@ function computeModeledCost(params: {
   const needsPanama = vessel.canalPanama && ((oReg === 'US Gulf' && dReg === 'East Asia') || (oReg === 'East Asia' && dReg === 'US Gulf'))
   if (params.canalToll === 'suez' || (params.canalToll === 'none' && needsSuez)) canalCost += 550000
   if (params.canalToll === 'panama' || (params.canalToll === 'none' && needsPanama)) canalCost += 450000
+  // A published $/mt voyage rate already prices that route, so canal dues are not added again.
+  const canalInTotal = voyageFreight ? 0 : canalCost
 
   const dischargePortCost = parcelMt * (params.dischargePortDues + params.dischargeUnloadGrab + params.dischargeCustomsClearance)
-  const marineIns = (inlandCost + hireCost + bunkerCost + portCost + canalCost + commodityCost) * (params.marineInsurancePct / 100)
+  const marineIns = (inlandCost + hireCost + bunkerInTotal + portInTotal + canalInTotal + commodityCost) * (params.marineInsurancePct / 100)
   const lateRisk = params.expectedDelayDays > 0 && params.latePenaltyPerDay > 0 ? Math.min(params.expectedDelayDays, 7) * params.latePenaltyPerDay : 0
   const blendingTotal = params.blendingMode !== 'none' ? params.stockpileCost + params.blendingFee + (params.maxStorageDays > 0 ? params.maxStorageDays * 500 : 0) : 0
-  const freightTotal = hireCost + bunkerCost + portCost + canalCost
+  const freightTotal = hireCost + bunkerInTotal + portInTotal + canalInTotal
   const subtotal = inlandCost + freightTotal + dischargePortCost + marineIns + lateRisk + blendingTotal
   const contingency = subtotal * (params.contingencyPct / 100)
   const totalCost = commodityCost + subtotal + contingency
@@ -466,7 +494,8 @@ function computeModeledCost(params: {
     parcelMt, volume: params.volume,
     sailingDays, loadingDays, dischargeDays, totalDays,
     seaDistNm,
-    freight: hireCost, bunker: bunkerCost, port: portCost, canal: canalCost,
+    freight: hireCost, bunker: bunkerInTotal, port: portInTotal, canal: canalInTotal,
+    freightBasis, baltic,
     dischargePortCost, marineIns, lateRisk, blendingTotal,
     contingency,
     commodityCost, commodityQty,
@@ -478,7 +507,7 @@ function computeModeledCost(params: {
     originPort: params.nearestPort.port, destinationPort: params.destinationPort,
     vessel, commodity, inlandOnly: false,
     inlandCostPerMt: inlandCost * perMt,
-    freightCostPerMt: (hireCost + bunkerCost + canalCost) * perMt,
+    freightCostPerMt: (hireCost + bunkerInTotal + canalInTotal) * perMt,
   }
 }
 
@@ -976,11 +1005,14 @@ export default function ShippingDeliveryWizard() {
       dischargeUnloadGrab,
       dischargeCustomsClearance,
       canalToll,
+      charterType,
+      freightMode: freightRate,
+      customRate,
       ...marketCostParams(marketQuote, quantityUnit, volume),
     })
     if (!modeled) return
     setCostBreakdown(modeled)
-  }, [selectedAsset, nearestPort, destinationPort, vesselClass, volume, quantityUnit, inlandMode, loadingRateMtDay, dischargeRateMtDay, portDuesPerMt, stevedoringPerMt, wharfagePerMt, surveyorFee, inspectionFee, fumigationFee, marineInsurancePct, contingencyPct, latePenaltyPerDay, expectedDelayDays, blendingMode, stockpileCost, blendingFee, maxStorageDays, dischargePortDues, dischargeUnloadGrab, dischargeCustomsClearance, canalToll, selectedCommodity, marketQuote])
+  }, [selectedAsset, nearestPort, destinationPort, vesselClass, volume, quantityUnit, inlandMode, loadingRateMtDay, dischargeRateMtDay, portDuesPerMt, stevedoringPerMt, wharfagePerMt, surveyorFee, inspectionFee, fumigationFee, marineInsurancePct, contingencyPct, latePenaltyPerDay, expectedDelayDays, blendingMode, stockpileCost, blendingFee, maxStorageDays, dischargePortDues, dischargeUnloadGrab, dischargeCustomsClearance, canalToll, charterType, freightRate, customRate, selectedCommodity, marketQuote])
 
   // Automatic source ranking against the selected destination
   useEffect(() => {
@@ -1206,7 +1238,14 @@ export default function ShippingDeliveryWizard() {
     ...(!costBreakdown.inlandOnly ? [
       { label: 'Port', value: costBreakdown.port, always: false },
       { label: 'Bunker', value: costBreakdown.bunker, always: false },
-      { label: 'Freight', value: costBreakdown.freight, always: false },
+      {
+        label: 'Freight',
+        value: costBreakdown.freight,
+        always: false,
+        detail: costBreakdown.baltic
+          ? `${costBreakdown.baltic.name} · ${formatBalticRate(costBreakdown.baltic)} · 30-session avg ${formatBalticAverage(costBreakdown.baltic)} · ${formatBalticAsOf(costBreakdown.baltic.asOf)}${costBreakdown.freightBasis === 'baltic_voyage' ? ' · bunker and port are in this rate' : ''}`
+          : costBreakdown.freightBasis === 'custom' ? 'Negotiated rate' : undefined,
+      },
       { label: 'Discharge', value: costBreakdown.dischargePortCost ?? 0, always: false },
       { label: 'Canal', value: costBreakdown.canal, always: false },
     ] : []),
@@ -1850,7 +1889,7 @@ export default function ShippingDeliveryWizard() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {availableVessels.map((v) => {
                       const vc = vesselClasses[v]
-                      const baltic = balticRoutes.find(b => b.vesselClass === v)
+                      const basket = dryBasket(v)
                       return (
                         <button
                           key={v}
@@ -1860,7 +1899,7 @@ export default function ShippingDeliveryWizard() {
                         >
                           <div className="font-medium text-black">{v}</div>
                           <div className="text-sm text-gray-500">{vc.dwtMin.toLocaleString()}-{vc.dwtMax.toLocaleString()} DWT</div>
-                          {baltic && <div className="text-xs text-gray-500 mt-1">~${baltic.avg30dUsdPerMt}/MT (30d avg)</div>}
+                          {basket && <div className="text-xs text-gray-500 mt-1">Baltic {basket.id} {formatBalticRate(basket)} · {formatBalticAsOf(basket.asOf)}</div>}
                         </button>
                       )
                     })}
@@ -1928,20 +1967,34 @@ export default function ShippingDeliveryWizard() {
                   <span className="text-sm text-black">Enter negotiated rate</span>
                 </label>
               </div>
-              {freightRate === 'market' && vesselClass && (
-                <div className="mb-4 bg-gray-50 rounded-xl border border-gray-200 p-4">
-                  <div className="text-xs text-gray-500 mb-2 uppercase tracking-wide font-semibold">Baltic benchmarks (30d avg)</div>
-                  {balticRoutes.filter(b => b.vesselClass === vesselClass).map((r) => (
-                    <div key={r.id} className="flex justify-between text-sm py-1">
-                      <span className="text-gray-500">{r.name}</span>
-                      <span className="text-black font-medium">${r.avg30dUsdPerMt}/MT</span>
+              {freightRate === 'market' && vesselClass && nearestPort && destinationPort && (() => {
+                const quote = quoteDryFreight(nearestPort.port, destinationPort, vesselClass, charterType)
+                if (!quote) return null
+                const sameLane = quote.fit === 'exact' || quote.fit === 'region'
+                return (
+                  <div className="mb-4 bg-gray-50 rounded-xl border border-gray-200 p-4">
+                    <div className="text-xs text-gray-500 mb-2 uppercase tracking-wide font-semibold">Baltic rate for this voyage</div>
+                    <div className="flex justify-between gap-4 text-sm">
+                      <span className="text-gray-600">{quote.name}</span>
+                      <span className="text-black font-medium whitespace-nowrap">{formatBalticRate(quote)}</span>
                     </div>
-                  ))}
-                </div>
-              )}
+                    <p className="text-xs text-gray-500 mt-2">
+                      {formatBalticAsOf(quote.asOf)} print · 30-session average {formatBalticAverage(quote)}.
+                      {quote.fit === 'exact' && ' This is the published route for these ports.'}
+                      {quote.fit === 'region' && ' No assessment is published for this exact port pair, so the closest Baltic voyage is used.'}
+                      {quote.fit === 'timecharter' && ' No voyage rate is published for this lane, so the matching time-charter route is used.'}
+                      {quote.fit === 'average' && ' No Baltic route matches this lane, so the vessel-size average is used.'}
+                      {sameLane && quote.unit === 'usd_per_mt' && ' Bunker, port, and canal dues are included in the rate and are not added again.'}
+                      {quote.unit === 'usd_per_day' && ' Bunker and port costs are added on top of the daily hire.'}
+                      {quote.proxyNote ? ` ${quote.proxyNote}` : ''}
+                    </p>
+                  </div>
+                )
+              })()}
               {freightRate === 'custom' && (
                 <div className="mb-4">
-                  <input type="number" value={customRate || ''} onChange={(e) => setCustomRate(Number(e.target.value))} placeholder="$/MT or lumpsum" className={inputClass} />
+                  <label className={labelClass}>{charterType === 'voyage' ? 'Negotiated freight ($/mt)' : 'Negotiated hire ($/day)'}</label>
+                  <input type="number" value={customRate || ''} onChange={(e) => setCustomRate(Number(e.target.value))} placeholder={charterType === 'voyage' ? '$/mt' : '$/day'} className={inputClass} />
                 </div>
               )}
               <div className="mt-6 flex justify-between">
