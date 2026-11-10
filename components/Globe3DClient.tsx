@@ -16,15 +16,12 @@ const markerScale = (altitude: number) =>
   altitude >= 1.0 ? 1 : altitude >= 0.5 ? 0.6 : altitude >= 0.25 ? 0.35 : altitude >= 0.12 ? 0.2 : 0.12
 const MONO = "var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace"
 
-/** Below this camera altitude (in Earth radii) the single world texture turns blurry, so the globe streams map tiles instead. */
+/** Below this camera altitude (in Earth radii) the single world texture turns blurry, so the globe streams satellite imagery. */
 const TILES_ON_ALTITUDE = 1.0
 const TILES_OFF_ALTITUDE = 1.2
-const SATELLITE_TILES = (x: number, y: number, l: number) => `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${l}/${y}/${x}`
-const STYLED_TILES = (x: number, y: number, l: number) => `https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/${l}/${y}/${x}`
-const TILE_CREDIT = {
-  satellite: 'Imagery © Esri, Maxar, Earthstar Geographics',
-  styled: 'Basemap © Esri, HERE, Garmin, © OpenStreetMap contributors',
-}
+const EARTH_IMAGERY_MAX_LEVEL = 18
+const EARTH_IMAGERY = (x: number, y: number, l: number) => `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${l}/${y}/${x}`
+const EARTH_IMAGERY_CREDIT = 'Imagery © Esri, Maxar, Earthstar Geographics'
 
 interface Globe3DClientProps {
   markers: CommodityData[]
@@ -48,7 +45,6 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
   const onRouteClickRef = useRef(onRouteClick)
   const showCitiesRef = useRef(showCities)
   const vesselsRef = useRef<VesselData[]>([])
-  const satelliteModeRef = useRef(satelliteMode)
   const tilesOnRef = useRef(false)
   const [tilesOn, setTilesOn] = useState(false)
   const markerScaleRef = useRef(1)
@@ -59,9 +55,8 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
     if (!globe) return
     const on = tilesOnRef.current ? altitude < TILES_OFF_ALTITUDE : altitude < TILES_ON_ALTITUDE
     if (on === tilesOnRef.current) return
-    // Esri's dark canvas stops at level 16; its imagery goes deeper.
-    globe.globeTileEngineMaxLevel(satelliteModeRef.current ? 18 : 16)
-    globe.globeTileEngineUrl(on ? (satelliteModeRef.current ? SATELLITE_TILES : STYLED_TILES) : null)
+    globe.globeTileEngineMaxLevel(EARTH_IMAGERY_MAX_LEVEL)
+    globe.globeTileEngineUrl(on ? EARTH_IMAGERY : null)
     tilesOnRef.current = on
     setTilesOn(on)
   }
@@ -504,15 +499,7 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
     const globe = globeRef.current
     if (!globe) return
 
-    satelliteModeRef.current = satelliteMode
     globe.globeImageUrl(satelliteMode ? SATELLITE_EARTH : STYLED_EARTH)
-    if (tilesOnRef.current) {
-      globe.globeTileEngineUrl(null)
-      globe.globeTileEngineClearCache()
-      tilesOnRef.current = false
-      setTilesOn(false)
-    }
-    applyTilesRef.current(currentAltitudeRef.current)
     globe.bumpImageUrl(TOPOLOGY)
     globe.atmosphereColor(ATMOSPHERE)
     globe.atmosphereAltitude(satelliteMode ? 0.12 : 0.13)
@@ -573,7 +560,7 @@ function Globe3DClient({ markers, showCities = true, routes = [], refineries = [
       <div ref={globeEl} style={{ width: '100%', height: '100%' }} className="bg-vulcan-ink" />
       {tilesOn && (
         <div className="pointer-events-none absolute bottom-2 right-2 bg-vulcan-ink/70 px-2 py-1 font-mono text-[9px] tracking-[0.08em] text-vulcan-paper/60">
-          {satelliteMode ? TILE_CREDIT.satellite : TILE_CREDIT.styled}
+          {EARTH_IMAGERY_CREDIT}
         </div>
       )}
     </div>
