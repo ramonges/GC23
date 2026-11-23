@@ -179,11 +179,12 @@ export const vesselClasses: Record<string, VesselConfig> = {
   'Suezmax': { dwtMin: 120000, dwtMax: 200000, speed: 14, fuelAtSea: 62, fuelInPort: 6, tceRate: 28000, portCostPerCall: 80000, demurrageRate: 47500, canalPanama: false, canalSuez: true, commodities: ['Crude Oil'] },
   'Aframax': { dwtMin: 80000, dwtMax: 120000, speed: 14, fuelAtSea: 47, fuelInPort: 5, tceRate: 22000, portCostPerCall: 62500, demurrageRate: 35000, canalPanama: false, canalSuez: true, commodities: ['Crude Oil'] },
   'LNG Carrier': { dwtMin: 145000, dwtMax: 217000, speed: 19, fuelAtSea: 145, fuelInPort: 12, tceRate: 75000, portCostPerCall: 120000, demurrageRate: 95000, canalPanama: false, canalSuez: true, commodities: ['Natural Gas'] },
-  'Capesize': { dwtMin: 100000, dwtMax: 400000, speed: 14, fuelAtSea: 60, fuelInPort: 5, tceRate: 18000, portCostPerCall: 70000, demurrageRate: 30000, canalPanama: false, canalSuez: true, commodities: ['Iron Ore', 'Coal'] },
-  'Panamax': { dwtMin: 65000, dwtMax: 90000, speed: 13.5, fuelAtSea: 35, fuelInPort: 4, tceRate: 12000, portCostPerCall: 45000, demurrageRate: 18500, canalPanama: true, canalSuez: true, commodities: ['Iron Ore', 'Coal', 'Grain', 'Sugar'] },
-  'Supramax': { dwtMin: 50000, dwtMax: 65000, speed: 13, fuelAtSea: 26, fuelInPort: 3, tceRate: 10000, portCostPerCall: 32500, demurrageRate: 13000, canalPanama: true, canalSuez: true, commodities: ['Iron Ore', 'Coal', 'Grain', 'Sugar', 'Copper', 'Uranium', 'Gold'] },
-  'Handymax': { dwtMin: 35000, dwtMax: 50000, speed: 12.5, fuelAtSea: 21, fuelInPort: 2.5, tceRate: 8500, portCostPerCall: 25000, demurrageRate: 9500, canalPanama: true, canalSuez: true, commodities: ['Coal', 'Grain', 'Sugar', 'Copper', 'Gold'] },
-  'Handysize': { dwtMin: 25000, dwtMax: 50000, speed: 12, fuelAtSea: 21, fuelInPort: 2.5, tceRate: 8000, portCostPerCall: 25000, demurrageRate: 9000, canalPanama: true, canalSuez: true, commodities: ['Grain', 'Sugar', 'Copper', 'Gold'] },
+  // Dry-bulk tceRate is the 4 Nov 2026 Baltic size average (C5TC 182, P5TC, S11TC, HS7TC). Lane pricing replaces it.
+  'Capesize': { dwtMin: 100000, dwtMax: 400000, speed: 14, fuelAtSea: 60, fuelInPort: 5, tceRate: 37162, portCostPerCall: 70000, demurrageRate: 30000, canalPanama: false, canalSuez: true, commodities: ['Iron Ore', 'Coal'] },
+  'Panamax': { dwtMin: 65000, dwtMax: 90000, speed: 13.5, fuelAtSea: 35, fuelInPort: 4, tceRate: 17049, portCostPerCall: 45000, demurrageRate: 18500, canalPanama: true, canalSuez: true, commodities: ['Iron Ore', 'Coal', 'Grain', 'Sugar'] },
+  'Supramax': { dwtMin: 50000, dwtMax: 65000, speed: 13, fuelAtSea: 26, fuelInPort: 3, tceRate: 23193, portCostPerCall: 32500, demurrageRate: 13000, canalPanama: true, canalSuez: true, commodities: ['Iron Ore', 'Coal', 'Grain', 'Sugar', 'Copper', 'Uranium', 'Gold'] },
+  'Handymax': { dwtMin: 35000, dwtMax: 50000, speed: 12.5, fuelAtSea: 21, fuelInPort: 2.5, tceRate: 18296, portCostPerCall: 25000, demurrageRate: 9500, canalPanama: true, canalSuez: true, commodities: ['Coal', 'Grain', 'Sugar', 'Copper', 'Gold'] },
+  'Handysize': { dwtMin: 25000, dwtMax: 50000, speed: 12, fuelAtSea: 21, fuelInPort: 2.5, tceRate: 18296, portCostPerCall: 25000, demurrageRate: 9000, canalPanama: true, canalSuez: true, commodities: ['Grain', 'Sugar', 'Copper', 'Gold'] },
 }
 
 export function haversineDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
@@ -253,25 +254,6 @@ export function generateRoutedSeaWaypoints(origin: Port, dest: Port): Array<{ la
   }
   return out
 }
-
-// Baltic dry index route benchmarks (mock 30-day avg rates — replace with live API if available)
-export interface BalticRoute {
-  id: string
-  name: string
-  origin: string
-  destination: string
-  vesselClass: string
-  rateUsdPerMt: number
-  avg30dUsdPerMt: number
-}
-
-export const balticRoutes: BalticRoute[] = [
-  { id: 'C5', name: 'C5 Newcastle → Qingdao', origin: 'Newcastle', destination: 'Qingdao', vesselClass: 'Capesize', rateUsdPerMt: 12.85, avg30dUsdPerMt: 12.2 },
-  { id: 'C10', name: 'C10 Aus → Rotterdam', origin: 'Australia', destination: 'Rotterdam', vesselClass: 'Capesize', rateUsdPerMt: 18.4, avg30dUsdPerMt: 17.8 },
-  { id: 'C3', name: 'C3 Tubarao → Qingdao', origin: 'Tubarao', destination: 'Qingdao', vesselClass: 'Capesize', rateUsdPerMt: 24.1, avg30dUsdPerMt: 23.5 },
-  { id: 'P1A', name: 'P1A US Gulf → Rotterdam', origin: 'Houston', destination: 'Rotterdam', vesselClass: 'Panamax', rateUsdPerMt: 28.5, avg30dUsdPerMt: 27.2 },
-  { id: 'S5', name: 'S5 W. Australia → China', origin: 'Dampier', destination: 'Ningbo', vesselClass: 'Supramax', rateUsdPerMt: 14.2, avg30dUsdPerMt: 13.8 },
-]
 
 export function generateSeaWaypoints(lat1: number, lng1: number, lat2: number, lng2: number): Array<{ lat: number; lng: number }> {
   const toRad = (x: number) => x * Math.PI / 180

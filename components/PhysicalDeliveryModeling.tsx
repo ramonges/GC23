@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import dynamic from 'next/dynamic'
 import { ShippingRoute } from '@/lib/types'
+import { formatBalticAsOf, formatBalticAverage, formatBalticRate, quoteDryFreight } from '@/lib/balticDry'
 
 const Globe3D = dynamic(() => import('./Globe3DClient'), {
   ssr: false,
@@ -173,11 +174,11 @@ const vesselClasses: Record<string, VesselConfig> = {
   'Aframax': { dwtMin: 80000, dwtMax: 120000, speed: 14, fuelAtSea: 47, fuelInPort: 5, tceRate: 22000, portCostPerCall: 62500, demurrageRate: 35000, canalPanama: false, canalSuez: true, commodities: ['Crude Oil'] },
   'MR Tanker': { dwtMin: 25000, dwtMax: 55000, speed: 13.5, fuelAtSea: 28, fuelInPort: 3, tceRate: 15000, portCostPerCall: 35000, demurrageRate: 18000, canalPanama: true, canalSuez: true, commodities: ['Crude Oil'] },
   'LNG Carrier': { dwtMin: 145000, dwtMax: 217000, speed: 19, fuelAtSea: 145, fuelInPort: 12, tceRate: 75000, portCostPerCall: 120000, demurrageRate: 95000, canalPanama: false, canalSuez: true, commodities: ['LNG'] },
-  'Capesize': { dwtMin: 100000, dwtMax: 400000, speed: 14, fuelAtSea: 60, fuelInPort: 5, tceRate: 18000, portCostPerCall: 70000, demurrageRate: 30000, canalPanama: false, canalSuez: true, commodities: ['Iron Ore', 'Coal', 'Bauxite'] },
-  'Panamax': { dwtMin: 65000, dwtMax: 90000, speed: 13.5, fuelAtSea: 35, fuelInPort: 4, tceRate: 12000, portCostPerCall: 45000, demurrageRate: 18500, canalPanama: true, canalSuez: true, commodities: ['Iron Ore', 'Coal', 'Grain', 'Bauxite'] },
-  'Supramax': { dwtMin: 50000, dwtMax: 65000, speed: 13, fuelAtSea: 26, fuelInPort: 3, tceRate: 10000, portCostPerCall: 32500, demurrageRate: 13000, canalPanama: true, canalSuez: true, commodities: ['Iron Ore', 'Coal', 'Grain', 'Copper', 'Bauxite'] },
-  'Handymax': { dwtMin: 35000, dwtMax: 50000, speed: 12.5, fuelAtSea: 21, fuelInPort: 2.5, tceRate: 8500, portCostPerCall: 25000, demurrageRate: 9500, canalPanama: true, canalSuez: true, commodities: ['Coal', 'Grain', 'Copper'] },
-  'Handysize': { dwtMin: 25000, dwtMax: 50000, speed: 12, fuelAtSea: 21, fuelInPort: 2.5, tceRate: 8000, portCostPerCall: 25000, demurrageRate: 9000, canalPanama: true, canalSuez: true, commodities: ['Grain', 'Copper'] },
+  'Capesize': { dwtMin: 100000, dwtMax: 400000, speed: 14, fuelAtSea: 60, fuelInPort: 5, tceRate: 37162, portCostPerCall: 70000, demurrageRate: 30000, canalPanama: false, canalSuez: true, commodities: ['Iron Ore', 'Coal', 'Bauxite'] },
+  'Panamax': { dwtMin: 65000, dwtMax: 90000, speed: 13.5, fuelAtSea: 35, fuelInPort: 4, tceRate: 17049, portCostPerCall: 45000, demurrageRate: 18500, canalPanama: true, canalSuez: true, commodities: ['Iron Ore', 'Coal', 'Grain', 'Bauxite'] },
+  'Supramax': { dwtMin: 50000, dwtMax: 65000, speed: 13, fuelAtSea: 26, fuelInPort: 3, tceRate: 23193, portCostPerCall: 32500, demurrageRate: 13000, canalPanama: true, canalSuez: true, commodities: ['Iron Ore', 'Coal', 'Grain', 'Copper', 'Bauxite'] },
+  'Handymax': { dwtMin: 35000, dwtMax: 50000, speed: 12.5, fuelAtSea: 21, fuelInPort: 2.5, tceRate: 18296, portCostPerCall: 25000, demurrageRate: 9500, canalPanama: true, canalSuez: true, commodities: ['Coal', 'Grain', 'Copper'] },
+  'Handysize': { dwtMin: 25000, dwtMax: 50000, speed: 12, fuelAtSea: 21, fuelInPort: 2.5, tceRate: 18296, portCostPerCall: 25000, demurrageRate: 9000, canalPanama: true, canalSuez: true, commodities: ['Grain', 'Copper'] },
 }
 
 // Baltic Exchange benchmark routes — EXACT origin port + destination port + commodity
@@ -193,14 +194,13 @@ type BenchmarkDef = {
 }
 
 const benchmarkRoutes: BenchmarkDef[] = [
-  { name: 'C2 — Tubarao → Rotterdam', originPorts: ['Tubarao'], destPorts: ['Rotterdam'], commodities: ['Iron Ore'], distanceNm: 5800, viaSuez: false },
-  { name: 'C3 — Tubarao → Beilun/Baoshan (China)', originPorts: ['Tubarao'], destPorts: ['Beilun/Baoshan'], commodities: ['Iron Ore'], distanceNm: 11000, viaSuez: true },
-  { name: 'C4 — Richards Bay → Rotterdam', originPorts: ['Richards Bay'], destPorts: ['Rotterdam'], commodities: ['Coal'], distanceNm: 7200 },
-  { name: 'C5 — Port Hedland/Dampier → Qingdao (China)', originPorts: ['Port Hedland', 'Dampier'], destPorts: ['Qingdao'], commodities: ['Iron Ore', 'Coal'], distanceNm: 3700 },
-  { name: 'C7 — Bolivar → Rotterdam', originPorts: ['Bolivar'], destPorts: ['Rotterdam'], commodities: ['Coal'], distanceNm: 4700, viaPanama: true },
-  { name: 'P2 — US Gulf/East Coast → Japan/Korea (grain)', originPorts: ['Houston', 'New Orleans', 'New York'], destPorts: ['Busan'], commodities: ['Grain'], distanceNm: 10500, viaPanama: true },
-  { name: 'P6 — US Gulf → Continent (grain)', originPorts: ['Houston', 'New Orleans'], destPorts: ['Rotterdam', 'Antwerp', 'Hamburg'], commodities: ['Grain'], distanceNm: 4500 },
-  { name: 'S1 — US Gulf → Skaw/Passero', originPorts: ['Houston', 'New Orleans'], destPorts: ['Rotterdam', 'Antwerp', 'Hamburg'], commodities: ['Grain', 'Coal'], distanceNm: 4200 },
+  { name: 'C2 — Tubarao → Rotterdam', originPorts: ['Tubarao'], destPorts: ['Rotterdam', 'Antwerp', 'Hamburg'], commodities: ['Iron Ore'], distanceNm: 5800, viaSuez: false },
+  { name: 'C3 — Tubarao → Qingdao', originPorts: ['Tubarao'], destPorts: ['Qingdao', 'Shanghai', 'Ningbo', 'Beilun/Baoshan', 'Busan'], commodities: ['Iron Ore'], distanceNm: 11000 },
+  { name: 'C5 — West Australia → Qingdao', originPorts: ['Port Hedland', 'Dampier'], destPorts: ['Qingdao', 'Shanghai', 'Ningbo', 'Beilun/Baoshan', 'Busan'], commodities: ['Iron Ore', 'Coal'], distanceNm: 3700 },
+  { name: 'C7 — Bolivar → Rotterdam', originPorts: ['Bolivar'], destPorts: ['Rotterdam', 'Antwerp', 'Hamburg'], commodities: ['Coal'], distanceNm: 4700 },
+  { name: 'C17 — Richards Bay → Qingdao', originPorts: ['Richards Bay'], destPorts: ['Qingdao', 'Shanghai', 'Ningbo', 'Beilun/Baoshan', 'Busan'], commodities: ['Iron Ore', 'Coal'], distanceNm: 7800 },
+  { name: 'P7 — US Gulf → Qingdao', originPorts: ['Houston', 'New Orleans'], destPorts: ['Qingdao', 'Shanghai', 'Ningbo', 'Beilun/Baoshan', 'Busan'], commodities: ['Grain'], distanceNm: 10500, viaPanama: true },
+  { name: 'P8 — Santos → Qingdao', originPorts: ['Santos'], destPorts: ['Qingdao', 'Shanghai', 'Ningbo', 'Beilun/Baoshan', 'Busan'], commodities: ['Grain'], distanceNm: 11000 },
   { name: 'TD1 — Middle East Gulf → US Gulf (VLCC)', originPorts: ['Ras Tanura', 'Jubail', 'Fujairah'], destPorts: ['Houston', 'New Orleans'], commodities: ['Crude Oil'], distanceNm: 8500, viaSuez: true },
   { name: 'TD2 — Middle East Gulf → Singapore', originPorts: ['Ras Tanura', 'Jubail', 'Fujairah'], destPorts: ['Singapore'], commodities: ['Crude Oil'], distanceNm: 3500 },
   { name: 'TD3C — Middle East Gulf → China (VLCC crude)', originPorts: ['Ras Tanura', 'Jubail', 'Fujairah'], destPorts: ['Qingdao', 'Shanghai', 'Ningbo'], commodities: ['Crude Oil'], distanceNm: 6500, viaSuez: true },
@@ -385,9 +385,13 @@ export default function PhysicalDeliveryModeling() {
     const waitingDest = 1.5
     const totalDays = waitingOrigin + loadingDays + sailingDays + waitingDest + dischargeDays
 
-    // Costs (2025 realistic)
+    // Costs. Dry-bulk hire comes from the latest Baltic print for this lane.
     const VLSFO = 550
-    const hireCost = vessel.tceRate * totalDays
+    const baltic = quoteDryFreight(origin, dest, vesselClass, 'voyage')
+    const voyageRate = baltic?.unit === 'usd_per_mt'
+    const hireCost = baltic
+      ? (voyageRate ? baltic.latest * parcelMt : baltic.latest * totalDays)
+      : vessel.tceRate * totalDays
     const bunkerSea = vessel.fuelAtSea * fuelMult * sailingDays * VLSFO
     const bunkerPort = vessel.fuelInPort * fuelMult * (loadingDays + dischargeDays + waitingOrigin + waitingDest) * VLSFO
     const bunkerCost = bunkerSea + bunkerPort
@@ -399,7 +403,11 @@ export default function PhysicalDeliveryModeling() {
     const demurrageExpected = 0
     const demurrageRisk = 1 * vessel.demurrageRate // 1 day risk scenario
 
-    const totalCost = hireCost + bunkerCost + portCost + canalCost + agencyCost + demurrageExpected
+    const bunkerInTotal = voyageRate ? 0 : bunkerCost
+    const portInTotal = voyageRate ? 0 : portCost
+    // A published $/mt voyage rate is the freight for that route, so canal dues are not added again.
+    const canalInTotal = voyageRate ? 0 : canalCost
+    const totalCost = hireCost + bunkerInTotal + portInTotal + canalInTotal + agencyCost + demurrageExpected
 
     // $/unit
     let costPerUnit = 0
@@ -425,11 +433,13 @@ export default function PhysicalDeliveryModeling() {
       waitingOrigin,
       waitingDest,
       totalDays,
+      baltic,
+      voyageRate,
       costs: {
         freight: hireCost,
-        bunker: bunkerCost,
-        port: portCost,
-        canal: canalCost,
+        bunker: bunkerInTotal,
+        port: portInTotal,
+        canal: canalInTotal,
         agency: agencyCost,
         demurrage: demurrageExpected,
         total: totalCost,
@@ -452,12 +462,22 @@ export default function PhysicalDeliveryModeling() {
 
   // Benchmarks for context
   const getBenchmark = () => {
-    if (!selectedCommodity || !calculatedData) return null
-    if (selectedCommodity === 'Crude Oil') return { range: '$0.80–$4.50/bbl', route: 'TD3C VLCC' }
-    if (selectedCommodity === 'Iron Ore') return { range: '$6–$25/MT', route: 'C3/C5 Capesize' }
-    if (selectedCommodity === 'Grain') return { range: '$25–$55/MT', route: 'P2 Panamax' }
-    if (selectedCommodity === 'Coal') return { range: '$8–$30/MT', route: 'C4/C5 Capesize' }
-    return null
+    if (!calculatedData?.baltic) {
+      if (selectedCommodity === 'Crude Oil') return { route: 'TD3C VLCC', range: 'Tanker assessments are not in the dry-bulk file' }
+      return null
+    }
+    const quote = calculatedData.baltic
+    const fit = quote.fit === 'exact'
+      ? 'published route'
+      : quote.fit === 'region'
+        ? 'closest voyage assessment'
+        : quote.fit === 'timecharter'
+          ? 'time-charter route'
+          : 'vessel-size average'
+    return {
+      route: quote.id,
+      range: `${formatBalticRate(quote)} · 30-session avg ${formatBalticAverage(quote)} · ${formatBalticAsOf(quote.asOf)} · ${fit}${quote.unit === 'usd_per_mt' ? ' · bunker, port, and canal included in the rate' : ' · bunker, port, and canal added on top'}`,
+    }
   }
 
   const benchmark = getBenchmark()
@@ -579,7 +599,11 @@ export default function PhysicalDeliveryModeling() {
                         {allVessels.map((v) => {
                           const vc = vesselClasses[v]
                           const isTypical = vc.commodities.includes(selectedCommodity)
-                          return <option key={v} value={v}>{v} — {vc.dwtMin.toLocaleString()}-{vc.dwtMax.toLocaleString()} DWT, {vc.speed} kn, TCE ~${(vc.tceRate/1000).toFixed(0)}k/day{!isTypical ? ' (unusual for this commodity)' : ''}</option>
+                          const origin = majorPorts.find((p) => p.name === originPort)
+                          const destination = majorPorts.find((p) => p.name === destinationPort)
+                          const quoted = origin && destination ? quoteDryFreight(origin, destination, v, 'voyage') : null
+                          const hire = quoted ? formatBalticRate(quoted) : `~$${(vc.tceRate / 1000).toFixed(0)}k/day`
+                          return <option key={v} value={v}>{v} — {vc.dwtMin.toLocaleString()}-{vc.dwtMax.toLocaleString()} DWT, {vc.speed} kn, {hire}{!isTypical ? ' (unusual for this commodity)' : ''}</option>
                         })}
                       </select>
                       <p className="mt-1 text-xs text-gray-500">Typical for {selectedCommodity}: {availableVessels.join(', ')}</p>
@@ -628,7 +652,7 @@ export default function PhysicalDeliveryModeling() {
                     <div className="bg-gray-50 rounded-lg p-3">
                       <div className="text-xs text-gray-600 mb-1">Vessel</div>
                       <div className="font-semibold">{vesselClass}</div>
-                      <div className="text-xs text-gray-600">TCE ~${(calculatedData.vessel.tceRate/1000).toFixed(0)}k/day</div>
+                      <div className="text-xs text-gray-600">{calculatedData.baltic ? formatBalticRate(calculatedData.baltic) : `TCE ~$${(calculatedData.vessel.tceRate/1000).toFixed(0)}k/day`}</div>
                     </div>
                     <div className="bg-gray-50 rounded-lg p-3">
                       <div className="text-xs text-gray-600 mb-1">Total Cost</div>
@@ -651,7 +675,7 @@ export default function PhysicalDeliveryModeling() {
                       <div className="bg-green-50 rounded p-2 text-center"><div className="text-xs text-gray-600">At Sea</div><div className="font-bold">{calculatedData.sailingDays.toFixed(1)}d</div></div>
                       <div className="bg-orange-50 rounded p-2 text-center"><div className="text-xs text-gray-600">Discharge</div><div className="font-bold">{(calculatedData.dischargeDays + calculatedData.waitingDest).toFixed(1)}d</div></div>
                       <div className="bg-black text-white rounded p-2 text-center"><div className="text-xs text-gray-300">Total</div><div className="font-bold">{calculatedData.totalDays.toFixed(1)}d</div></div>
-                      <div className="bg-gray-100 rounded p-2 text-center"><div className="text-xs text-gray-600">TCE equiv</div><div className="font-bold">${(calculatedData.tceEquivalent/1000).toFixed(0)}k/d</div></div>
+                      <div className="bg-gray-100 rounded p-2 text-center"><div className="text-xs text-gray-600">Cost/day</div><div className="font-bold">${(calculatedData.tceEquivalent/1000).toFixed(0)}k/d</div></div>
                     </div>
                   </div>
 
@@ -659,12 +683,11 @@ export default function PhysicalDeliveryModeling() {
                     <h3 className="font-semibold text-sm mb-3">Cost Breakdown</h3>
                     <div className="space-y-1.5">
                       {[
-                        ['Freight (hire)', calculatedData.costs.freight],
-                        ['Bunker', calculatedData.costs.bunker],
-                        ['Port costs', calculatedData.costs.port],
+                        [calculatedData.voyageRate ? 'Freight (Baltic $/mt)' : 'Freight (hire)', calculatedData.costs.freight],
+                        ...(calculatedData.voyageRate ? [] : [['Bunker', calculatedData.costs.bunker], ['Port costs', calculatedData.costs.port]]),
                         ['Canal', calculatedData.costs.canal],
                         ['Agency', calculatedData.costs.agency],
-                      ].map(([label, val]) => (
+                      ].filter(([, val]) => Number(val) > 0).map(([label, val]) => (
                         <div key={label} className="flex justify-between py-1 text-sm"><span className="text-gray-600">{label}</span><span className="font-medium">${((val as number)/1000).toFixed(0)}k</span></div>
                       ))}
                       <div className="flex justify-between py-2 font-bold border-t mt-2"><span>Total</span><span>${(calculatedData.costs.total/1e6).toFixed(2)}M</span></div>
@@ -718,7 +741,7 @@ export default function PhysicalDeliveryModeling() {
                     <div className="bg-gray-50 rounded-lg p-2">
                       <div className="text-xs text-gray-600">Vessel</div>
                       <div className="font-semibold text-sm">{vesselClass}</div>
-                      <div className="text-xs text-gray-500">TCE ~${(calculatedData.vessel.tceRate/1000).toFixed(0)}k/day</div>
+                      <div className="text-xs text-gray-500">{calculatedData.baltic ? formatBalticRate(calculatedData.baltic) : `TCE ~$${(calculatedData.vessel.tceRate/1000).toFixed(0)}k/day`}</div>
                     </div>
                     <div className="bg-gray-50 rounded-lg p-2">
                       <div className="text-xs text-gray-600">Total Cost</div>
@@ -738,7 +761,12 @@ export default function PhysicalDeliveryModeling() {
                   <div>
                     <h4 className="text-xs font-semibold text-gray-600 mb-2">Cost Breakdown</h4>
                     <div className="space-y-1 text-sm">
-                      {[['Freight', calculatedData.costs.freight], ['Bunker', calculatedData.costs.bunker], ['Port', calculatedData.costs.port], ['Canal', calculatedData.costs.canal], ['Agency', calculatedData.costs.agency]].map(([l, v]) => (
+                      {[
+                        ['Freight', calculatedData.costs.freight],
+                        ...(calculatedData.voyageRate ? [] : [['Bunker', calculatedData.costs.bunker], ['Port', calculatedData.costs.port]]),
+                        ['Canal', calculatedData.costs.canal],
+                        ['Agency', calculatedData.costs.agency],
+                      ].filter(([, v]) => Number(v) > 0).map(([l, v]) => (
                         <div key={l} className="flex justify-between"><span className="text-gray-600">{l}</span><span>${((v as number)/1000).toFixed(0)}k</span></div>
                       ))}
                       <div className="flex justify-between font-bold pt-1 border-t"><span>Total</span><span>${(calculatedData.costs.total/1e6).toFixed(2)}M</span></div>

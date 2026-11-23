@@ -1,0 +1,434 @@
+{
+  "asOf": "2026-11-04",
+  "sessions": 255,
+  "source": "Baltic Exchange historic dry-bulk assessments (Columbia University extract)",
+  "series": {
+    "BCI": {
+      "latest": 4097,
+      "avg30": 4272,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "BHSI": {
+      "latest": 1016,
+      "avg30": 1010,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "BPI": {
+      "latest": 1894,
+      "avg30": 2237,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "BSI": {
+      "latest": 1835,
+      "avg30": 1836,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "C10_182": {
+      "latest": 35527,
+      "avg30": 36121,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "C14_182": {
+      "latest": 38082,
+      "avg30": 36849,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "C16_182": {
+      "latest": 8111,
+      "avg30": 9985,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "C17": {
+      "latest": 27.606,
+      "avg30": 26.634,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "C17-TCE": {
+      "latest": 34140,
+      "avg30": 32704,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "C19": {
+      "latest": 42.042,
+      "avg30": 44.243,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "C19-TCE": {
+      "latest": 81125,
+      "avg30": 88963,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "C2": {
+      "latest": 15.269,
+      "avg30": 15.022,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "C2-TCE": {
+      "latest": 26216,
+      "avg30": 25753,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "C3": {
+      "latest": 36.955,
+      "avg30": 35.407,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "C3-TCE": {
+      "latest": 33108,
+      "avg30": 31229,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "C5": {
+      "latest": 13.69,
+      "avg30": 13.855,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "C5-TCE": {
+      "latest": 27962,
+      "avg30": 29830,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "C5TC": {
+      "latest": 33659,
+      "avg30": 35238,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "C5TC (182)": {
+      "latest": 37162,
+      "avg30": 38741,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "C7": {
+      "latest": 18.113,
+      "avg30": 19.569,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "C7-TCE": {
+      "latest": 40374,
+      "avg30": 46857,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "C8_14": {
+      "latest": 24690,
+      "avg30": 39487,
+      "asOf": "2026-01-30",
+      "sessions": 39,
+      "stale": true
+    },
+    "C8_182": {
+      "latest": 37375,
+      "avg30": 41611,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "C9_182": {
+      "latest": 68694,
+      "avg30": 75175,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "HS1_38": {
+      "latest": 10836,
+      "avg30": 10623,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "HS2_38": {
+      "latest": 15036,
+      "avg30": 14616,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "HS3_38": {
+      "latest": 29206,
+      "avg30": 27837,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "HS4_38": {
+      "latest": 18693,
+      "avg30": 21392,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "HS5_38": {
+      "latest": 17881,
+      "avg30": 17690,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "HS6_38": {
+      "latest": 18050,
+      "avg30": 17570,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "HS7TC": {
+      "latest": 18296,
+      "avg30": 18188,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "HS7_38": {
+      "latest": 18881,
+      "avg30": 18278,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "HSATC": {
+      "latest": 18443,
+      "avg30": 18617,
+      "asOf": "2026-11-04",
+      "sessions": 249,
+      "stale": false
+    },
+    "HSPTC": {
+      "latest": 18149,
+      "avg30": 17760,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "P12": {
+      "latest": 24317,
+      "avg30": 29598,
+      "asOf": "2026-11-04",
+      "sessions": 124,
+      "stale": false
+    },
+    "P13": {
+      "latest": 19750,
+      "avg30": 21158,
+      "asOf": "2026-11-04",
+      "sessions": 18,
+      "stale": false
+    },
+    "P1A_82": {
+      "latest": 14014,
+      "avg30": 19472,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "P2A_82": {
+      "latest": 22780,
+      "avg30": 28191,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "P3A_82": {
+      "latest": 19632,
+      "avg30": 20957,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "P4_82": {
+      "latest": 13425,
+      "avg30": 13371,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "P5TC": {
+      "latest": 17049,
+      "avg30": 20132,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "P5_82": {
+      "latest": 18194,
+      "avg30": 19782,
+      "asOf": "2026-11-04",
+      "sessions": 249,
+      "stale": false
+    },
+    "P6_82": {
+      "latest": 16724,
+      "avg30": 19562,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "P7": {
+      "latest": 67.179,
+      "avg30": 74.315,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "P7-TCE": {
+      "latest": 29654,
+      "avg30": 35661,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "P8": {
+      "latest": 52.686,
+      "avg30": 55.626,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "P8-TCE": {
+      "latest": 17077,
+      "avg30": 19585,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "S10": {
+      "latest": 17841,
+      "avg30": 17322,
+      "asOf": "2026-11-04",
+      "sessions": 255,
+      "stale": false
+    },
+    "S10TC": {
+      "latest": 21159,
+      "avg30": 21168,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "S11TC": {
+      "latest": 23193,
+      "avg30": 23202,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "S15": {
+      "latest": 18439,
+      "avg30": 19809,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "S1B": {
+      "latest": 25107,
+      "avg30": 25873,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "S1C": {
+      "latest": 29094,
+      "avg30": 31138,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "S2": {
+      "latest": 24375,
+      "avg30": 23218,
+      "asOf": "2026-11-04",
+      "sessions": 255,
+      "stale": false
+    },
+    "S3": {
+      "latest": 24208,
+      "avg30": 22433,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "S3TC_63": {
+      "latest": 23410,
+      "avg30": 22533,
+      "asOf": "2026-11-04",
+      "sessions": 249,
+      "stale": false
+    },
+    "S4A": {
+      "latest": 29300,
+      "avg30": 31386,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "S4B": {
+      "latest": 16063,
+      "avg30": 16059,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "S5": {
+      "latest": 25666,
+      "avg30": 27442,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    },
+    "S8": {
+      "latest": 27582,
+      "avg30": 26751,
+      "asOf": "2026-11-04",
+      "sessions": 255,
+      "stale": false
+    },
+    "S9": {
+      "latest": 22969,
+      "avg30": 23781,
+      "asOf": "2026-11-04",
+      "sessions": 251,
+      "stale": false
+    }
+  }
+}
