@@ -73,7 +73,6 @@ export const FOUNDERS: Founder[] = [
     photo: '/team/raphael-monges.webp',
     bio: 'Raphael brings experience in the freight and commodity industry from Navios Maritime. He holds a Master in Business Analytics from Columbia Engineering, a Master in Artificial Intelligence from Centrale Paris, and an MIM from ESCP.',
   },
-  { name: 'Wiam Homir', role: 'CTO' },
 ]
 
 export const TEAM = {
