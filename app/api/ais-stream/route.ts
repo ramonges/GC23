@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import WebSocket from 'ws'
-import { supabase } from '@/lib/supabase'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 const AIS_STREAM_URL = 'wss://stream.aisstream.io/v0/stream'
 
@@ -26,6 +26,9 @@ async function flushToSupabase() {
   if (upsertQueue.size === 0) return
   const rows = Array.from(upsertQueue.values())
   upsertQueue.clear()
+
+  const supabase = getSupabaseAdmin()
+  if (!supabase) return
 
   try {
     await supabase.from('vessels').upsert(rows, {

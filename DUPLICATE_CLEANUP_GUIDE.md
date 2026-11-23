@@ -49,7 +49,7 @@ By the final run, we had approximately **1,531 entries** but many are duplicates
 ## How to Fix It
 
 ### Step 1: Go to Supabase Dashboard
-1. Open your Supabase project: https://kimrrkqodnbfyzbzemhf.supabase.co
+1. Open your Supabase project: https://app.supabase.com
 2. Go to **SQL Editor** in the left sidebar
 
 ### Step 2: Check for Duplicates
