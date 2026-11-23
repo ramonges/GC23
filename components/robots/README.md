@@ -15,7 +15,7 @@ Each robot is rendered from one of three sources. Every source produces meshes n
 
 | Source | When it's used | Example |
 | --- | --- | --- |
-| GLB (`robot.model`) | `model` is a path under `/public` | Microduck, Reachy 2 |
+| GLB (`robot.model`) | `model` is a path under `/public` | Microduck, Reachy 2, Unitree G1 |
 | Procedural reconstruction | A builder exists for the robot id in `scene/placeholder.ts` | Tesla Optimus (`scene/optimus.ts`) |
 | Placeholder | Fallback per `archetype` | Every other robot |
 
@@ -85,6 +85,26 @@ blender -b reachy2.blend --python /path/to/scripts/robots/export-reachy2.py -- a
 ```
 
 Part masses follow Pollen's datasheet: 50 kg in total, including the 25 kg mobile base and its 6.5 kg LiFePO₄ battery. The split inside each part is estimated.
+
+## Unitree G1
+
+`public/models/robots/g1.glb` comes from Unitree's `g1_23dof.xml` and its STL meshes in [unitreerobotics/unitree_ros](https://github.com/unitreerobotics/unitree_ros/tree/master/robots/g1_description) (BSD-3-Clause).
+
+`scripts/robots/assemble-g1.mjs` works like the Microduck script:
+
+1. It walks the MJCF body tree and places every visual mesh. The MJCF has no keyframe, so the script relaxes the elbows and shoulders from the zero pose (`pose` in the script).
+2. It maps each link mesh to an explorer part (`PART`). For example, `left_hip_yaw_link` becomes `thigh_L`.
+3. It simplifies the densest meshes with meshoptimizer (`BUDGET`), from 401k to 185k triangles.
+4. It computes crease-angle normals and gives the MJCF's two greys a satin silver and a graphite finish.
+5. It writes a Draco GLB of about 700 KB, 1.32 m tall.
+
+```bash
+npm i --no-save @gltf-transform/core@4 @gltf-transform/extensions@4 @gltf-transform/functions@4 draco3dgltf fast-xml-parser meshoptimizer
+# g1_23dof.xml next to a meshes/ folder holding the STLs it references
+node scripts/robots/assemble-g1.mjs path/to/g1_description/g1_23dof.xml public/models/robots/g1.glb
+```
+
+Part masses follow the MJCF link inertials (34.1 kg in total). The `torso_link` body's 9.8 kg is split between the head, the waist actuator and the torso, which holds the battery and compute. Each link mesh holds its joint motor, so the split inside a part between motor and structure is estimated.
 
 ## Performance notes
 
